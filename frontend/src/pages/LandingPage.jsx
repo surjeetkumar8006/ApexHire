@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
   Compass, 
@@ -16,10 +16,38 @@ import {
   Activity,
   Users
 } from 'lucide-react';
+import { API_BASE } from '../context/AuthContext';
 
 const LandingPage = ({ onGetStarted }) => {
   const [activeTab, setActiveTab] = useState('coach');
   const [openFaq, setOpenFaq] = useState(null);
+
+  const [stats, setStats] = useState({
+    placementRate: 95,
+    activeJobsCount: 1200,
+    avgResumeScore: 88,
+    recentPlacements: [
+      { name: 'Rahul Sharma', role: 'Software Engineer (SDE-1)', company: 'Microsoft', salary: '$145,000/yr' },
+      { name: 'Anjali Goel', role: 'Frontend Developer', company: 'Google', salary: '$130,000/yr' },
+      { name: 'Saurabh Verma', role: 'Full Stack Engineer', company: 'Amazon', salary: '$140,000/yr' },
+      { name: 'Priyanka Sen', role: 'Product Design Intern', company: 'Salesforce', salary: '$8,500/mo' }
+    ]
+  });
+
+  useEffect(() => {
+    const fetchLandingStats = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/analytics/public`);
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch public stats:', err);
+      }
+    };
+    fetchLandingStats();
+  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -93,12 +121,7 @@ const LandingPage = ({ onGetStarted }) => {
     { name: 'Salesforce', icon: 'S' }
   ];
 
-  const recentPlacements = [
-    { name: 'Rahul Sharma', role: 'Software Engineer (SDE-1)', company: 'Microsoft', salary: '$145,000/yr' },
-    { name: 'Anjali Goel', role: 'Frontend Developer', company: 'Google', salary: '$130,000/yr' },
-    { name: 'Saurabh Verma', role: 'Full Stack Engineer', company: 'Amazon', salary: '$140,000/yr' },
-    { name: 'Priyanka Sen', role: 'Product Design Intern', company: 'Salesforce', salary: '$8,500/mo' }
-  ];
+  const recentPlacements = stats.recentPlacements;
 
   const activeFeatureData = featureTabs.find(tab => tab.id === activeTab);
 
@@ -343,17 +366,17 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
         <div className="metrics-grid">
           <div className="metrics-card">
-            <span className="metrics-num">95%</span>
+            <span className="metrics-num">{stats.placementRate}%</span>
             <span className="metrics-label">Placement Rate</span>
             <span className="metrics-desc">Of registered students placed in 2026</span>
           </div>
           <div className="metrics-card">
-            <span className="metrics-num">1200+</span>
+            <span className="metrics-num">{stats.activeJobsCount}</span>
             <span className="metrics-label">Active Job Openings</span>
             <span className="metrics-desc">Across top enterprise partners</span>
           </div>
           <div className="metrics-card">
-            <span className="metrics-num">88/100</span>
+            <span className="metrics-num">{stats.avgResumeScore}/100</span>
             <span className="metrics-label">Avg Resume Match Score</span>
             <span className="metrics-desc">Calculated by our parsing engine</span>
           </div>

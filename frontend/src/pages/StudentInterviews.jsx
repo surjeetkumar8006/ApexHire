@@ -1,42 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Video, FileText, CheckCircle, ExternalLink } from 'lucide-react';
+import { useAuth, API_BASE } from '../context/AuthContext';
 
 const StudentInterviews = () => {
-  const upcomingInterviews = [
-    {
-      id: 1,
-      company: 'Google',
-      role: 'Frontend Engineer',
-      date: '2026-06-20',
-      time: '10:00 AM',
-      type: 'Technical Round 1',
-      link: 'https://zoom.us/j/123456789',
-      status: 'upcoming'
-    },
-    {
-      id: 2,
-      company: 'Amazon',
-      role: 'Backend SDE',
-      date: '2026-06-25',
-      time: '02:30 PM',
-      type: 'System Design Round',
-      link: 'https://zoom.us/j/987654321',
-      status: 'upcoming'
-    }
-  ];
+  const { authHeader } = useAuth();
+  const [interviews, setInterviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const pastInterviews = [
-    {
-      id: 3,
-      company: 'Microsoft',
-      role: 'Full Stack Developer',
-      date: '2026-05-15',
-      time: '11:00 AM',
-      type: 'HR Round',
-      status: 'completed',
-      result: 'Offered'
+  const fetchMyInterviews = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/interviews/my`, {
+        headers: authHeader(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setInterviews(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchMyInterviews();
+  }, []);
+
+  const upcomingInterviews = interviews.filter(i => i.status !== 'Completed');
+  const pastInterviews = interviews.filter(i => i.status === 'Completed');
+
+  if (loading) {
+    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Retrieving scheduled interviews...</div>;
+  }
 
   return (
     <div style={styles.container} className="animate-fade-in">
@@ -55,7 +51,7 @@ const StudentInterviews = () => {
           ) : (
             <div style={styles.cardsGrid}>
               {upcomingInterviews.map((interview) => (
-                <div key={interview.id} className="glass-card" style={styles.interviewCard}>
+                <div key={interview._id} className="glass-card" style={styles.interviewCard}>
                   <div style={styles.cardHeader}>
                     <div style={styles.companyBadge}>
                       {interview.company.charAt(0)}
@@ -81,15 +77,21 @@ const StudentInterviews = () => {
                     </div>
                   </div>
 
-                  <a 
-                    href={interview.link} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="btn btn-primary" 
-                    style={styles.joinBtn}
-                  >
-                    <Video size={16} /> Join Interview Room
-                  </a>
+                  {interview.link ? (
+                    <a 
+                      href={interview.link} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="btn btn-primary" 
+                      style={styles.joinBtn}
+                    >
+                      <Video size={16} /> Join Interview Room
+                    </a>
+                  ) : (
+                    <button className="btn btn-secondary" style={styles.joinBtn} disabled>
+                      Link Not Available
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -98,36 +100,40 @@ const StudentInterviews = () => {
 
         <div style={styles.pastSection}>
           <h2 style={styles.sectionTitle}>Past Interviews</h2>
-          <div className="glass-card" style={styles.tableCard}>
-            <div className="table-responsive">
-              <table style={styles.table}>
-                <thead>
-                  <tr>
-                    <th style={styles.th}>Company</th>
-                    <th style={styles.th}>Role</th>
-                    <th style={styles.th}>Date</th>
-                    <th style={styles.th}>Type</th>
-                    <th style={styles.th}>Result</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pastInterviews.map((item) => (
-                    <tr key={item.id} style={styles.tr}>
-                      <td style={styles.td}><strong>{item.company}</strong></td>
-                      <td style={styles.td}>{item.role}</td>
-                      <td style={styles.td}>{item.date}</td>
-                      <td style={styles.td}>{item.type}</td>
-                      <td style={styles.td}>
-                        <span style={styles.resultBadge}>
-                          <CheckCircle size={14} /> {item.result}
-                        </span>
-                      </td>
+          {pastInterviews.length === 0 ? (
+            <div style={styles.emptyState}>No completed interviews found.</div>
+          ) : (
+            <div className="glass-card" style={styles.tableCard}>
+              <div className="table-responsive">
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.th}>Company</th>
+                      <th style={styles.th}>Role</th>
+                      <th style={styles.th}>Date</th>
+                      <th style={styles.th}>Type</th>
+                      <th style={styles.th}>Result</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {pastInterviews.map((item) => (
+                      <tr key={item._id} style={styles.tr}>
+                        <td style={styles.td}><strong>{item.company}</strong></td>
+                        <td style={styles.td}>{item.role}</td>
+                        <td style={styles.td}>{item.date}</td>
+                        <td style={styles.td}>{item.type}</td>
+                        <td style={styles.td}>
+                          <span style={styles.resultBadge}>
+                            <CheckCircle size={14} /> Completed
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

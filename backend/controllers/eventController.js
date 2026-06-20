@@ -1,4 +1,6 @@
 import Event from '../models/Event.js';
+import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 
 // @desc    Get all events
 // @route   GET /api/events
@@ -65,6 +67,21 @@ export const createEvent = async (req, res) => {
       description,
       status: status || 'Upcoming',
     });
+
+    // Notify all students about the new event
+    try {
+      const students = await User.find({ role: 'student' });
+      const notificationsArray = students.map((student) => ({
+        recipient: student._id,
+        title: 'New Career Event Scheduled 🗓',
+        message: `A new placement preparation event "${title}" has been scheduled for ${date} at ${location}.`,
+      }));
+      if (notificationsArray.length > 0) {
+        await Notification.insertMany(notificationsArray);
+      }
+    } catch (notifErr) {
+      console.error('Failed to dispatch bulk event notifications:', notifErr);
+    }
 
     res.status(201).json(event);
   } catch (error) {

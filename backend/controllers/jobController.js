@@ -1,4 +1,5 @@
 import Job from '../models/Job.js';
+import Profile from '../models/Profile.js';
 
 // @desc    Get all active jobs
 // @route   GET /api/jobs
@@ -116,6 +117,66 @@ export const deleteJob = async (req, res) => {
     } else {
       res.status(404).json({ message: 'Job not found' });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get job recommendations based on user skills
+// @route   GET /api/jobs/recommendations
+// @access  Private (Student)
+export const getRecommendedJobs = async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ user: req.user._id });
+    if (!profile) {
+      return res.status(404).json({ message: 'Student profile not found' });
+    }
+
+    const userSkills = profile.skills || [];
+    const jobs = await Job.find({ status: 'active' }).populate('postedBy', 'name email');
+
+    const recommendedJobs = jobs.map((job) => {
+      const requirements = job.requirements || [];
+      if (requirements.length === 0) {
+        return {
+          ...job.toObject(),
+          matchPercentage: 0,
+          matchingSkills: [],
+          missingSkills: [],
+        };
+      }
+
+      const matchingSkills = requirements.filter((reqSkill) =>
+        userSkills.some(
+          (userSkill) =>
+            userSkill.toLowerCase().includes(reqSkill.toLowerCase()) ||
+            reqSkill.toLowerCase().includes(userSkill.toLowerCase())
+        )
+      );
+
+      const missingSkills = requirements.filter(
+        (reqSkill) =>
+          !userSkills.some(
+            (userSkill) =>
+              userSkill.toLowerCase().includes(reqSkill.toLowerCase()) ||
+              reqSkill.toLowerCase().includes(userSkill.toLowerCase())
+          )
+      );
+
+      const matchPercentage = Math.round((matchingSkills.length / requirements.length) * 100);
+
+      return {
+        ...job.toObject(),
+        matchPercentage,
+        matchingSkills,
+        missingSkills,
+      };
+    });
+
+    // Sort by match score descending
+    recommendedJobs.sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+    res.json(recommendedJobs);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -54,6 +54,32 @@ const StudentDashboard = () => {
     Promise.all([fetchProfile(), fetchApplications()]).finally(() => setLoading(false));
   }, []);
 
+  const handleOfferResponse = async (appId, response) => {
+    try {
+      const res = await fetch(`${API_BASE}/applications/${appId}/offer`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        body: JSON.stringify({ offerStatus: response }),
+      });
+
+      if (res.ok) {
+        addToast(`Offer successfully ${response.toLowerCase()}ed!`, 'success');
+        // Refresh profile and applications list
+        fetchApplications();
+        fetchProfile();
+      } else {
+        const data = await res.json();
+        addToast(data.message || 'Failed to submit response', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('Error responding to offer', 'error');
+    }
+  };
+
   const handleResumeUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -222,7 +248,7 @@ const StudentDashboard = () => {
             backgroundColor: profile.isVerified ? 'rgba(16, 185, 129, 0.03)' : 'rgba(245, 158, 11, 0.03)',
             borderColor: profile.isVerified ? 'var(--success)' : 'var(--warning)',
             boxShadow: profile.isVerified ? '0 0 10px rgba(16, 185, 129, 0.05)' : '0 0 10px rgba(245, 158, 11, 0.05)',
-            marginBottom: '1rem'
+            marginBottom: '1.5rem'
           }}
         >
           <div style={styles.verificationBannerContent}>
@@ -243,6 +269,55 @@ const StudentDashboard = () => {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Offers Section */}
+      {applications.filter((app) => app.status === 'Offered' && app.offerStatus === 'Pending').length > 0 && (
+        <div className="glass-card animate-fade-in shadow-glow-primary" style={styles.offersCard}>
+          <div style={styles.offersHeader}>
+            <Sparkles size={20} color="var(--accent)" />
+            <h3 style={{ ...styles.cardTitle, margin: 0, color: 'var(--text-primary)' }}>Pending Job Offers! 🎉</h3>
+          </div>
+          <div style={styles.offersList}>
+            {applications
+              .filter((app) => app.status === 'Offered' && app.offerStatus === 'Pending')
+              .map((app) => (
+                <div key={app._id} style={styles.offerItem}>
+                  <div style={styles.offerInfo}>
+                    <h4 style={styles.offerTitle}>{app.job.title}</h4>
+                    <p style={styles.offerCompany}>{app.job.company} • {app.job.location}</p>
+                    {app.feedback && <p style={styles.offerFeedback}><strong>Feedback Note:</strong> {app.feedback}</p>}
+                    {app.offerLetterUrl && (
+                      <a
+                        href={app.offerLetterUrl.startsWith('http') ? app.offerLetterUrl : `http://localhost:5000${app.offerLetterUrl}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={styles.downloadLink}
+                      >
+                        <FileText size={14} /> Open Offer Letter Document
+                      </a>
+                    )}
+                  </div>
+                  <div style={styles.offerActions}>
+                    <button
+                      onClick={() => handleOfferResponse(app._id, 'Accepted')}
+                      className="btn btn-primary"
+                      style={styles.acceptBtn}
+                    >
+                      Accept Offer
+                    </button>
+                    <button
+                      onClick={() => handleOfferResponse(app._id, 'Rejected')}
+                      className="btn btn-secondary"
+                      style={styles.declineBtn}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
           </div>
         </div>
       )}
@@ -416,9 +491,12 @@ const StudentDashboard = () => {
             </div>
           ) : (
             <div className="glass-card" style={styles.aiPlaceholder}>
-              <Sparkles size={36} color="var(--text-muted)" />
-              <h3>AI Feedback Unavailable</h3>
-              <p>Upload your resume PDF to unlock AI-powered career matching.</p>
+              <Sparkles size={32} color="var(--accent)" />
+              <h3 style={{ margin: '0.5rem 0 0.25rem 0', color: 'var(--text-primary)', fontSize: '1rem', fontWeight: '600' }}>AI Coach & Resume Feedback</h3>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '1.25rem', lineHeight: '1.5' }}>Upload your resume PDF in the panel to the left to get a comprehensive resume score, keywords feedback, and target job roles instantly.</p>
+              <a href="/student/ai-coach" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '0.5rem 1.25rem', width: '100%', display: 'flex', justifyContent: 'center' }}>
+                Open AI Career Coach
+              </a>
             </div>
           )}
 
@@ -823,7 +901,86 @@ const styles = {
     background: 'var(--danger)',
     borderColor: 'var(--danger)',
     boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)',
-  }
+  },
+  offersCard: {
+    border: '1px solid rgba(16, 185, 129, 0.25)',
+    background: 'linear-gradient(145deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0) 100%)',
+    padding: '1.5rem',
+    marginBottom: '1.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+  },
+  offersHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    borderBottom: '1px solid var(--border-color)',
+    paddingBottom: '0.75rem',
+  },
+  offersList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+  },
+  offerItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '1rem',
+    background: 'rgba(255, 255, 255, 0.01)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '8px',
+    padding: '1rem',
+  },
+  offerInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  },
+  offerTitle: {
+    fontSize: '1rem',
+    fontWeight: '700',
+    color: 'var(--text-primary)',
+    margin: 0,
+  },
+  offerCompany: {
+    fontSize: '0.85rem',
+    color: 'var(--accent)',
+    margin: 0,
+  },
+  offerFeedback: {
+    fontSize: '0.82rem',
+    color: 'var(--text-secondary)',
+    background: 'rgba(15, 23, 42, 0.2)',
+    padding: '0.4rem 0.6rem',
+    borderRadius: '6px',
+    margin: '0.25rem 0',
+  },
+  downloadLink: {
+    fontSize: '0.82rem',
+    color: 'var(--primary)',
+    textDecoration: 'none',
+    fontWeight: '600',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.25rem',
+  },
+  offerActions: {
+    display: 'flex',
+    gap: '0.75rem',
+  },
+  acceptBtn: {
+    background: 'var(--success)',
+    color: '#fff',
+    border: 'none',
+    boxShadow: '0 0 10px rgba(16, 185, 129, 0.2)',
+  },
+  declineBtn: {
+    borderColor: 'var(--danger)',
+    color: 'var(--danger)',
+  },
 };
 
 export default StudentDashboard;

@@ -197,7 +197,11 @@ const Navbar = ({ onMenuClick }) => {
           {/* User Profile Info */}
           <div style={styles.userCard}>
             <div style={styles.avatar}>
-              <User size={18} />
+              {user.avatar ? (
+                <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+              ) : (
+                <User size={18} />
+              )}
             </div>
             <div className="nav-hide-mobile" style={styles.userInfo}>
               <span style={styles.userName}>{user.name}</span>

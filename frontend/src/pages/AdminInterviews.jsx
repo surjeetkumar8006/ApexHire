@@ -1,50 +1,180 @@
-import React, { useState } from 'react';
-import { Calendar, Clock, Video, User, CheckCircle, Plus, MoreVertical, X, ExternalLink } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Clock, Video, User, CheckCircle, Plus, MoreVertical, X, ExternalLink, Trash, Pencil } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../context/AuthContext';
 
 const AdminInterviews = () => {
+  const { authHeader } = useAuth();
   const { addToast } = useNotification();
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [interviews, setInterviews] = useState([
-    {
-      id: 1,
-      studentName: 'Aravind Sharma',
-      company: 'Google',
-      role: 'Frontend Engineer',
-      date: '2026-06-20',
-      time: '10:00 AM',
-      type: 'Technical Round 1',
-      status: 'Scheduled',
-      link: 'https://zoom.us/j/123456789',
-    },
-    {
-      id: 2,
-      studentName: 'Surjeet Kumar',
-      company: 'Amazon',
-      role: 'Backend SDE',
-      date: '2026-06-21',
-      time: '02:30 PM',
-      type: 'HR Round',
-      status: 'Requested',
-      link: '',
-    },
-    {
-      id: 3,
-      studentName: 'Priya Singh',
-      company: 'Microsoft',
-      role: 'Full Stack Developer',
-      date: '2026-06-18',
-      time: '11:00 AM',
-      type: 'System Design',
-      status: 'Completed',
-      link: 'https://zoom.us/j/987654321',
-    }
-  ]);
+  const [interviews, setInterviews] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [selectedAppId, setSelectedAppId] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const handleSchedule = (e) => {
+  // Form States
+  const [studentId, setStudentId] = useState('');
+  const [company, setCompany] = useState('');
+  const [role, setRole] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [type, setType] = useState('Technical Round 1');
+  const [link, setLink] = useState('');
+  const [status, setStatus] = useState('Scheduled');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+
+  const fetchInterviews = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/interviews`, {
+        headers: authHeader(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setInterviews(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStudents = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/profile/all`, {
+        headers: authHeader(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStudents(data);
+        if (data.length > 0) {
+          setStudentId(data[0].user?._id || '');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchApplications = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/applications/all`, {
+        headers: authHeader(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setApplications(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchInterviews();
+    fetchStudents();
+    fetchApplications();
+  }, []);
+
+  // Auto-fill form values when selected student or applications list changes
+  useEffect(() => {
+    if (studentId && applications.length > 0) {
+      const studentApps = applications.filter(app => app.student?._id === studentId);
+      if (studentApps.length > 0) {
+        setCompany(studentApps[0].job?.company || '');
+        setRole(studentApps[0].job?.title || '');
+        setSelectedAppId(studentApps[0]._id);
+      } else {
+        setCompany('');
+        setRole('');
+        setSelectedAppId('');
+      }
+    }
+  }, [studentId, applications]);
+
+  const handleSchedule = async (e) => {
     e.preventDefault();
-    addToast('Interview successfully scheduled and invite sent!', 'success');
-    setIsModalOpen(false);
+    if (!studentId) {
+      addToast('Please select a student', 'warning');
+      return;
+    }
+
+    try {
+      const url = isEditing ? `${API_BASE}/interviews/${editId}` : `${API_BASE}/interviews`;
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        body: JSON.stringify({
+          studentId,
+          company,
+          role,
+          date,
+          time,
+          type,
+          link,
+          status,
+        }),
+      });
+
+      if (res.ok) {
+        addToast(isEditing ? 'Interview details updated successfully!' : 'Interview successfully scheduled and invite sent!', 'success');
+        setIsModalOpen(false);
+        setIsEditing(false);
+        setEditId(null);
+        setCompany('');
+        setRole('');
+        setDate('');
+        setTime('');
+        setLink('');
+        setStatus('Scheduled');
+        fetchInterviews();
+      } else {
+        const errData = await res.json();
+        addToast(errData.message || 'Action failed', 'error');
+      }
+    } catch (err) {
+      addToast(isEditing ? 'Failed to update interview details' : 'Failed to schedule interview', 'error');
+    }
+  };
+
+  const handleEditClick = (interview) => {
+    setIsEditing(true);
+    setEditId(interview._id);
+    setStudentId(interview.student?._id || '');
+    setCompany(interview.company || '');
+    setRole(interview.role || '');
+    setDate(interview.date || '');
+    setTime(interview.time || '');
+    setType(interview.type || 'Technical Round 1');
+    setLink(interview.link || '');
+    setStatus(interview.status || 'Scheduled');
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to cancel this interview?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/interviews/${id}`, {
+        method: 'DELETE',
+        headers: authHeader(),
+      });
+      if (res.ok) {
+        addToast('Interview cancelled successfully', 'success');
+        fetchInterviews();
+      } else {
+        addToast('Failed to cancel interview', 'error');
+      }
+    } catch (err) {
+      addToast('Error canceling interview', 'error');
+    }
   };
 
   const getStatusColor = (status) => {
@@ -55,6 +185,12 @@ const AdminInterviews = () => {
       default: return 'var(--text-muted)';
     }
   };
+
+  if (loading) {
+    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading interview schedules...</div>;
+  }
+
+  const studentApps = applications.filter(app => app.student?._id === studentId);
 
   return (
     <div className="interviews-container animate-fade-in">
@@ -211,7 +347,7 @@ const AdminInterviews = () => {
           border: none;
           color: var(--text-muted);
           cursor: pointer;
-          padding: 2px;
+          padding: 4px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -220,7 +356,7 @@ const AdminInterviews = () => {
         }
         .more-btn:hover {
           background: var(--bg-surface-elevated);
-          color: var(--text-primary);
+          color: var(--danger);
         }
         .card-details {
           display: flex;
@@ -299,11 +435,14 @@ const AdminInterviews = () => {
         .modal-content {
           width: 100%;
           max-width: 480px;
+          max-height: 90vh;
           background: var(--bg-surface);
           border: 1px solid var(--glass-border);
           border-radius: 16px;
           overflow: hidden;
           box-shadow: var(--shadow-lg);
+          display: flex;
+          flex-direction: column;
           animation: modalFadeIn 0.3s ease;
         }
         @keyframes modalFadeIn {
@@ -317,6 +456,7 @@ const AdminInterviews = () => {
           justify-content: space-between;
           align-items: center;
           background: linear-gradient(135deg, var(--primary-glow), transparent);
+          flex-shrink: 0;
         }
         .modal-title {
           font-size: 1.15rem;
@@ -345,7 +485,22 @@ const AdminInterviews = () => {
           padding: 1.5rem;
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 1.25rem;
+          overflow-y: auto;
+          flex-grow: 1;
+        }
+        .modal-form::-webkit-scrollbar {
+          width: 6px;
+        }
+        .modal-form::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .modal-form::-webkit-scrollbar-thumb {
+          background: var(--border-color);
+          border-radius: 3px;
+        }
+        .modal-form::-webkit-scrollbar-thumb:hover {
+          background: var(--text-muted);
         }
       `}</style>
 
@@ -354,7 +509,19 @@ const AdminInterviews = () => {
           <h1 className="interviews-title">Interview Scheduler</h1>
           <p className="interviews-subtitle">Organize and manage interview pipelines between students and employers.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-primary" onClick={() => {
+          setIsEditing(false);
+          setEditId(null);
+          setStudentId(students.length > 0 ? (students[0].user?._id || '') : '');
+          setCompany('');
+          setRole('');
+          setDate('');
+          setTime('');
+          setType('Technical Round 1');
+          setLink('');
+          setStatus('Scheduled');
+          setIsModalOpen(true);
+        }}>
           <Plus size={16} /> Schedule New
         </button>
       </header>
@@ -374,16 +541,23 @@ const AdminInterviews = () => {
 
             <div className="cards-list">
               {interviews.filter(i => i.status === statusGroup).map(interview => (
-                <div key={interview.id} className={`interview-card ${statusGroup.toLowerCase()}`}>
+                <div key={interview._id} className={`interview-card ${statusGroup.toLowerCase()}`}>
                   <div className="card-top">
                     <div className="avatar-wrap">
                       <User size={16} />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <h4 className="card-name">{interview.studentName}</h4>
+                      <h4 className="card-name">{interview.student?.name || 'Unknown Student'}</h4>
                       <p className="card-role">{interview.role} @ {interview.company}</p>
                     </div>
-                    <button className="more-btn"><MoreVertical size={16} /></button>
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                      <button onClick={() => handleEditClick(interview)} className="more-btn" title="Edit Interview" style={{ color: 'var(--text-muted)' }}>
+                        <Pencil size={14} />
+                      </button>
+                      <button onClick={() => handleDelete(interview._id)} className="more-btn" title="Cancel Interview">
+                        <Trash size={14} />
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="card-details">
@@ -423,7 +597,7 @@ const AdminInterviews = () => {
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-banner">
-              <h2 className="modal-title">Schedule Interview</h2>
+              <h2 className="modal-title">{isEditing ? 'Edit Interview Details' : 'Schedule Interview'}</h2>
               <button onClick={() => setIsModalOpen(false)} className="close-btn"><X size={15} /></button>
             </div>
             <form onSubmit={handleSchedule} className="modal-form">
@@ -431,42 +605,122 @@ const AdminInterviews = () => {
                 <label className="form-label">Select Student</label>
                 <div style={{ position: 'relative' }}>
                   <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
-                  <select className="form-select" style={{ paddingLeft: '2.5rem' }}>
-                    <option>Surjeet Kumar</option>
-                    <option>Aravind Sharma</option>
+                  <select
+                    className="form-select"
+                    style={{ paddingLeft: '2.5rem' }}
+                    value={studentId}
+                    onChange={e => setStudentId(e.target.value)}
+                  >
+                    {students.map(std => (
+                      <option key={std.user?._id} value={std.user?._id}>
+                        {std.user?.name} ({std.user?.email})
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Company & Role</label>
-                <div style={{ position: 'relative' }}>
-                  <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 600 }}>@</div>
-                  <input type="text" className="form-input" placeholder="e.g. Google - Frontend Engineer" style={{ paddingLeft: '2.5rem' }} />
+
+              {/* Optional Job Applications Dropdown */}
+              {studentApps.length > 0 && (
+                <div className="form-group">
+                  <label className="form-label">Select Applied Position (Auto-fills Details)</label>
+                  <select
+                    className="form-select"
+                    value={selectedAppId}
+                    onChange={e => {
+                      const appId = e.target.value;
+                      setSelectedAppId(appId);
+                      const selectedApp = applications.find(app => app._id === appId);
+                      if (selectedApp) {
+                        setCompany(selectedApp.job?.company || '');
+                        setRole(selectedApp.job?.title || '');
+                      }
+                    }}
+                  >
+                    {studentApps.map(app => (
+                      <option key={app._id} value={app._id}>
+                        {app.job?.title} at {app.job?.company} ({app.status})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label className="form-label">Company Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. Google"
+                    value={company}
+                    onChange={e => setCompany(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label className="form-label">Role Title</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. SDE Intern"
+                    value={role}
+                    onChange={e => setRole(e.target.value)}
+                    required
+                  />
                 </div>
               </div>
+
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label className="form-label">Date</label>
                   <div style={{ position: 'relative' }}>
-                    <Calendar size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input type="date" className="form-input" style={{ paddingLeft: '2.5rem' }} />
+                    <Calendar size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                    <input type="date" className="form-input" style={{ paddingLeft: '2.5rem' }} value={date} onChange={e => setDate(e.target.value)} required />
                   </div>
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label className="form-label">Time</label>
                   <div style={{ position: 'relative' }}>
-                    <Clock size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input type="time" className="form-input" style={{ paddingLeft: '2.5rem' }} />
+                    <Clock size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                    <input type="text" className="form-input" placeholder="e.g. 02:00 PM" style={{ paddingLeft: '2.5rem' }} value={time} onChange={e => setTime(e.target.value)} required />
                   </div>
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Meeting Link (Zoom/Meet)</label>
-                <div style={{ position: 'relative' }}>
-                  <Video size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input type="url" className="form-input" placeholder="https://zoom.us/j/..." style={{ paddingLeft: '2.5rem' }} />
+
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label className="form-label">Round Type</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. Technical Round 1"
+                    value={type}
+                    onChange={e => setType(e.target.value)}
+                  />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label className="form-label">Status</label>
+                  <select
+                    className="form-select"
+                    value={status}
+                    onChange={e => setStatus(e.target.value)}
+                  >
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Requested">Requested</option>
+                    <option value="Completed">Completed</option>
+                  </select>
                 </div>
               </div>
+
+              <div className="form-group">
+                <label className="form-label">Meeting URL</label>
+                <div style={{ position: 'relative' }}>
+                  <Video size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                  <input type="url" className="form-input" placeholder="https://zoom.us/..." style={{ paddingLeft: '2.5rem' }} value={link} onChange={e => setLink(e.target.value)} />
+                </div>
+              </div>
+
               <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', padding: '0.75rem 1rem', fontSize: '0.95rem', boxShadow: 'var(--shadow-md)' }}>
                 Confirm Schedule & Send Invite
               </button>

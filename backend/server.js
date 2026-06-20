@@ -15,6 +15,9 @@ import aiRoutes from './routes/aiRoutes.js';
 import companyRoutes from './routes/companyRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
+import assessmentRoutes from './routes/assessmentRoutes.js';
+import interviewRoutes from './routes/interviewRoutes.js';
+import platformConfigRoutes from './routes/platformConfigRoutes.js';
 
 // Load Env variables
 dotenv.config();
@@ -47,6 +50,9 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/assessments', assessmentRoutes);
+app.use('/api/interviews', interviewRoutes);
+app.use('/api/platform-config', platformConfigRoutes);
 
 // Base route for API check
 app.get('/', (req, res) => {

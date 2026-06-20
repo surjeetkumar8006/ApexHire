@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Eye, CheckCircle2, User, Sparkles, AlertTriangle, Send, Search, Filter } from 'lucide-react';
+import { FileText, Eye, CheckCircle2, User, Sparkles, AlertTriangle, Send, Search, Filter, Kanban, Table } from 'lucide-react';
 import { useAuth, API_BASE } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 
@@ -14,6 +14,7 @@ const AdminApplications = () => {
   // Update Application Status States
   const [status, setStatus] = useState('Applied');
   const [feedback, setFeedback] = useState('');
+  const [offerLetterUrl, setOfferLetterUrl] = useState('');
   const [updating, setUpdating] = useState(false);
   const [studentProfile, setStudentProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -22,6 +23,9 @@ const AdminApplications = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [jobFilter, setJobFilter] = useState('All');
+  const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'table'
+
+  const stages = ['Applied', 'Reviewing', 'Shortlisted', 'Interviewing', 'Offered', 'Rejected'];
 
   const fetchApplications = async () => {
     try {
@@ -68,6 +72,7 @@ const AdminApplications = () => {
     setSelectedApp(app);
     setStatus(app.status);
     setFeedback(app.feedback || '');
+    setOfferLetterUrl(app.offerLetterUrl || '');
     fetchStudentProfile(app.student._id);
   };
 
@@ -84,18 +89,18 @@ const AdminApplications = () => {
           'Content-Type': 'application/json',
           ...authHeader(),
         },
-        body: JSON.stringify({ status, feedback }),
+        body: JSON.stringify({ status, feedback, offerLetterUrl }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        addToast('Application status and feedback updated successfully!', 'success');
+        addToast('Application status updated successfully!', 'success');
         setApplications((prev) =>
-          prev.map((app) => (app._id === selectedApp._id ? { ...app, status, feedback } : app))
+          prev.map((app) => (app._id === selectedApp._id ? { ...app, status, feedback, offerLetterUrl } : app))
         );
         // Sync selected app state
-        setSelectedApp((prev) => ({ ...prev, status, feedback }));
+        setSelectedApp((prev) => ({ ...prev, status, feedback, offerLetterUrl }));
       } else {
         throw new Error(data.message || 'Status update failed');
       }
@@ -103,6 +108,60 @@ const AdminApplications = () => {
       addToast(err.message, 'error');
     } finally {
       setUpdating(false);
+    }
+  };
+
+  // Drag and Drop Handlers
+  const handleDragStart = (e, appId) => {
+    e.dataTransfer.setData('text/plain', appId);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (e, targetStatus) => {
+    e.preventDefault();
+    const appId = e.dataTransfer.getData('text/plain');
+    if (!appId) return;
+
+    const app = applications.find((a) => a._id === appId);
+    if (!app || app.status === targetStatus) return;
+
+    try {
+      let offerUrlInput = '';
+      if (targetStatus === 'Offered') {
+        const url = prompt('Enter Offer Letter URL / File Link (optional):', app.offerLetterUrl || '');
+        if (url === null) return; // User cancelled
+        offerUrlInput = url;
+      }
+
+      const res = await fetch(`${API_BASE}/applications/${appId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        body: JSON.stringify({ status: targetStatus, offerLetterUrl: offerUrlInput }),
+      });
+
+      if (res.ok) {
+        addToast(`Candidate moved to ${targetStatus}`, 'success');
+        setApplications((prev) =>
+          prev.map((a) => (a._id === appId ? { ...a, status: targetStatus, offerLetterUrl: offerUrlInput } : a))
+        );
+        if (selectedApp && selectedApp._id === appId) {
+          setSelectedApp((prev) => ({ ...prev, status: targetStatus, offerLetterUrl: offerUrlInput }));
+          setStatus(targetStatus);
+          setOfferLetterUrl(offerUrlInput);
+        }
+      } else {
+        const errData = await res.json();
+        addToast(errData.message || 'Failed to update stage', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('Error performing drag action', 'error');
     }
   };
 
@@ -131,11 +190,342 @@ const AdminApplications = () => {
     return matchesSearch && matchesStatus && matchesJob;
   });
 
+  const renderKanbanBoard = () => {
+    return (
+      <div className="kanban-board-container">
+        {stages.map((stage) => {
+          const stageApps = filteredApplications.filter((app) => app.status === stage);
+          return (
+            <div
+              key={stage}
+              className="kanban-stage-col"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, stage)}
+            >
+              <div className="kanban-col-header">
+                <div className="kanban-col-title">
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background:
+                        stage === 'Offered'
+                          ? 'var(--success)'
+                          : stage === 'Rejected'
+                          ? 'var(--danger)'
+                          : stage === 'Interviewing'
+                          ? 'var(--accent)'
+                          : 'var(--primary)',
+                      boxShadow: `0 0 8px ${
+                        stage === 'Offered'
+                          ? 'var(--success)'
+                          : stage === 'Rejected'
+                          ? 'var(--danger)'
+                          : 'var(--primary)'
+                      }`,
+                    }}
+                  ></span>
+                  {stage}
+                </div>
+                <span className="kanban-col-badge">{stageApps.length}</span>
+              </div>
+
+              <div className="kanban-cards-list">
+                {stageApps.length === 0 ? (
+                  <div className="kanban-empty-dropzone">Drop here</div>
+                ) : (
+                  stageApps.map((app) => (
+                    <div
+                      key={app._id}
+                      className={`kanban-candidate-card stage-${stage.toLowerCase()} animate-fade-in ${
+                        selectedApp?._id === app._id ? 'active' : ''
+                      }`}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, app._id)}
+                      onClick={() => handleSelectApp(app)}
+                    >
+                      <h4 className="kanban-card-student-name">{app.student?.name}</h4>
+                      <div className="kanban-job-box">
+                        <h5 className="kanban-card-job-title">{app.job?.title}</h5>
+                        <p className="kanban-card-job-company">{app.job?.company}</p>
+                      </div>
+                      {app.offerStatus && app.status === 'Offered' && (
+                        <span className={`badge badge-${app.offerStatus.toLowerCase()}`} style={{ alignSelf: 'flex-start', fontSize: '0.68rem', marginTop: '0.2rem' }}>
+                          Offer: {app.offerStatus}
+                        </span>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderTableView = () => {
+    return (
+      <div className="glass-card" style={{ padding: 0, overflow: 'hidden', width: '100%' }}>
+        <div className="table-responsive">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-surface-elevated)' }}>
+                <th style={styles.th}>Candidate</th>
+                <th style={styles.th}>Applied Position</th>
+                <th style={styles.th}>Date Applied</th>
+                <th style={styles.th}>Stage</th>
+                <th style={styles.th}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredApplications.map((app) => (
+                <tr
+                  key={app._id}
+                  style={{
+                    borderBottom: '1px solid var(--border-color)',
+                    background: selectedApp?._id === app._id ? 'rgba(99, 102, 241, 0.04)' : 'transparent',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => handleSelectApp(app)}
+                  className="table-row-hover"
+                >
+                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.9rem' }}>
+                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{app.student?.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{app.student?.email}</div>
+                  </td>
+                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.9rem' }}>
+                    <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{app.job?.title}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--accent)' }}>{app.job?.company}</div>
+                  </td>
+                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    {new Date(app.createdAt).toLocaleDateString()}
+                  </td>
+                  <td style={{ padding: '1rem 1.5rem' }}>
+                    <span className={`badge badge-${app.status.toLowerCase()}`}>
+                      {app.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: '1rem 1.5rem' }}>
+                    <button
+                      className="btn"
+                      style={{
+                        padding: '0.35rem 0.8rem',
+                        fontSize: '0.75rem',
+                        background: 'var(--primary-glow)',
+                        color: 'var(--primary)',
+                        border: '1px solid rgba(99, 102, 241, 0.2)',
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectApp(app);
+                      }}
+                    >
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={styles.container} className="animate-fade-in">
-      <header>
-        <h1 style={styles.title}>Candidate Applications</h1>
-        <p style={styles.subtitle}>Review resumes, inspect automated match ratings, and update selection phases.</p>
+      <style>{`
+        .kanban-board-container {
+          display: flex;
+          gap: 1.25rem;
+          overflow-x: auto;
+          padding-bottom: 1.5rem;
+          align-items: flex-start;
+          width: 100%;
+        }
+        .kanban-board-container::-webkit-scrollbar {
+          height: 10px;
+        }
+        .kanban-board-container::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.03);
+          border-radius: 6px;
+        }
+        .kanban-board-container::-webkit-scrollbar-thumb {
+          background: rgba(99, 102, 241, 0.25);
+          border-radius: 6px;
+          border: 2px solid transparent;
+          background-clip: padding-box;
+        }
+        .kanban-board-container::-webkit-scrollbar-thumb:hover {
+          background: rgba(99, 102, 241, 0.5);
+          border: 2px solid transparent;
+          background-clip: padding-box;
+        }
+        .kanban-stage-col {
+          flex: 1;
+          min-width: 260px;
+          background: var(--bg-surface);
+          border: 1px solid var(--border-color);
+          border-radius: 16px;
+          padding: 1.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+          min-height: 600px;
+          box-shadow: var(--shadow-sm);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+        }
+        body.dark-theme .kanban-stage-col {
+          background: rgba(30, 41, 59, 0.4);
+          border-color: rgba(255, 255, 255, 0.05);
+        }
+        .kanban-stage-col:hover {
+          border-color: rgba(99, 102, 241, 0.2);
+          box-shadow: var(--shadow-md);
+        }
+        .kanban-col-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid var(--border-color);
+        }
+        .kanban-col-title {
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+        }
+        .kanban-col-badge {
+          background: var(--primary-glow);
+          border: 1px solid hsla(250, 84%, 58%, 0.15);
+          font-size: 0.75rem;
+          padding: 0.2rem 0.6rem;
+          border-radius: 12px;
+          color: var(--primary);
+          font-weight: 700;
+        }
+        .kanban-cards-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.85rem;
+          flex: 1;
+          min-height: 480px;
+        }
+        .kanban-candidate-card {
+          padding: 1.25rem;
+          cursor: grab;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          background-color: var(--bg-surface-elevated);
+          box-shadow: var(--shadow-sm);
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+          border-left: 4px solid var(--primary);
+        }
+        .kanban-candidate-card:hover {
+          transform: translateY(-3px);
+          box-shadow: var(--shadow-md);
+          border-color: rgba(99, 102, 241, 0.3);
+        }
+        .kanban-candidate-card.active {
+          border-color: var(--primary);
+          box-shadow: 0 0 15px var(--primary-glow);
+          background: var(--bg-surface-elevated);
+        }
+        .kanban-candidate-card.stage-applied { border-left-color: var(--primary); }
+        .kanban-candidate-card.stage-reviewing { border-left-color: var(--warning); }
+        .kanban-candidate-card.stage-shortlisted { border-left-color: var(--accent); }
+        .kanban-candidate-card.stage-interviewing { border-left-color: #06b6d4; }
+        .kanban-candidate-card.stage-offered { border-left-color: var(--success); }
+        .kanban-candidate-card.stage-rejected { border-left-color: var(--danger); }
+        .kanban-job-box {
+          background: var(--bg-base);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          padding: 0.5rem 0.75rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+        }
+        .kanban-card-student-name {
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin: 0;
+        }
+        .kanban-card-job-title {
+          font-size: 0.82rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0;
+        }
+        .kanban-card-job-company {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          margin: 0;
+        }
+        .kanban-empty-dropzone {
+          padding: 3rem 1rem;
+          text-align: center;
+          color: var(--text-muted);
+          font-size: 0.8rem;
+          border: 2px dashed var(--border-color);
+          border-radius: 12px;
+          background: rgba(255,255,255,0.005);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+          height: 100%;
+        }
+        .kanban-empty-dropzone:hover {
+          background: rgba(99, 102, 241, 0.03);
+          border-color: var(--primary);
+        }
+      `}</style>
+      <header style={styles.header}>
+        <div>
+          <h1 style={styles.title}>Candidate Applications</h1>
+          <p style={styles.subtitle}>Review resumes, inspect automated match ratings, and update selection phases.</p>
+        </div>
+
+        {/* View Mode Toggle Switch */}
+        <div style={styles.viewToggleContainer}>
+          <button
+            onClick={() => setViewMode('kanban')}
+            style={{
+              ...styles.viewToggleBtn,
+              backgroundColor: viewMode === 'kanban' ? 'var(--primary)' : 'transparent',
+              color: viewMode === 'kanban' ? '#fff' : 'var(--text-secondary)',
+            }}
+          >
+            <Kanban size={14} style={{ marginRight: '4px' }} />
+            <span>Kanban Board</span>
+          </button>
+          <button
+            onClick={() => setViewMode('table')}
+            style={{
+              ...styles.viewToggleBtn,
+              backgroundColor: viewMode === 'table' ? 'var(--primary)' : 'transparent',
+              color: viewMode === 'table' ? '#fff' : 'var(--text-secondary)',
+            }}
+          >
+            <Table size={14} style={{ marginRight: '4px' }} />
+            <span>Table List</span>
+          </button>
+        </div>
       </header>
 
       {/* Filter Toolbar */}
@@ -164,60 +554,25 @@ const AdminApplications = () => {
           <Filter size={18} color="var(--text-muted)" />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="All">All Stages</option>
-            <option value="Applied">Applied</option>
-            <option value="Reviewing">Reviewing</option>
-            <option value="Shortlisted">Shortlisted</option>
-            <option value="Interviewing">Interviewing</option>
-            <option value="Offered">Offered</option>
-            <option value="Rejected">Rejected</option>
+            {stages.map((stg) => (
+              <option key={stg} value={stg}>{stg}</option>
+            ))}
           </select>
         </div>
       </div>
 
       <div style={styles.layout}>
-        {/* Left Col: Applications Grid */}
+        {/* Left Col: Board/Table */}
         <div style={selectedApp ? styles.listColSplit : styles.listColFull}>
           {filteredApplications.length === 0 ? (
             <div className="glass-card" style={styles.emptyCard}>
               <FileText size={40} color="var(--text-muted)" />
               <p>No matching candidate applications found.</p>
             </div>
+          ) : viewMode === 'kanban' ? (
+            renderKanbanBoard()
           ) : (
-            <div style={styles.grid}>
-              {filteredApplications.map((app) => (
-                <div
-                  key={app._id}
-                  className="glass-card"
-                  style={{
-                    ...styles.appCard,
-                    ...(selectedApp?._id === app._id ? styles.activeCard : {}),
-                  }}
-                  onClick={() => handleSelectApp(app)}
-                >
-                  <div style={styles.appHeader}>
-                    <div>
-                      <h4 style={styles.studentName}>{app.student?.name}</h4>
-                      <p style={styles.studentEmail}>{app.student?.email}</p>
-                    </div>
-                    <span className={`badge badge-${app.status.toLowerCase()}`}>
-                      {app.status}
-                    </span>
-                  </div>
-
-                  <div style={styles.jobBox}>
-                    <span style={styles.jobHeading}>Role Applied</span>
-                    <h5 style={styles.jobTitle}>{app.job?.title}</h5>
-                    <p style={styles.jobCompany}>{app.job?.company}</p>
-                  </div>
-
-                  <div style={styles.cardFooter}>
-                    <span style={styles.viewLabel}>
-                      Review Candidate <Eye size={14} style={{ marginLeft: '4px' }} />
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            renderTableView()
           )}
         </div>
 
@@ -314,14 +669,24 @@ const AdminApplications = () => {
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
                   >
-                    <option value="Applied">Applied</option>
-                    <option value="Reviewing">Reviewing</option>
-                    <option value="Shortlisted">Shortlisted</option>
-                    <option value="Interviewing">Interviewing</option>
-                    <option value="Offered">Offered</option>
-                    <option value="Rejected">Rejected</option>
+                    {stages.map((stg) => (
+                      <option key={stg} value={stg}>{stg}</option>
+                    ))}
                   </select>
                 </div>
+
+                {status === 'Offered' && (
+                  <div className="form-group">
+                    <label className="form-label">Offer Letter URL / File Link</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. /uploads/offer-letter.pdf"
+                      value={offerLetterUrl}
+                      onChange={(e) => setOfferLetterUrl(e.target.value)}
+                    />
+                  </div>
+                )}
 
                 <div className="form-group">
                   <label className="form-label">Review Feedback</label>
@@ -353,6 +718,13 @@ const styles = {
     flexDirection: 'column',
     gap: '1.5rem',
   },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '1rem',
+    flexWrap: 'wrap',
+  },
   loading: {
     padding: '4rem',
     textAlign: 'center',
@@ -368,23 +740,44 @@ const styles = {
     fontSize: '1rem',
     color: 'var(--text-secondary)',
   },
+  viewToggleContainer: {
+    display: 'flex',
+    backgroundColor: 'var(--bg-surface-elevated)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '20px',
+    padding: '2px',
+    gap: '2px',
+  },
+  viewToggleBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    border: 'none',
+    padding: '0.4rem 1rem',
+    borderRadius: '18px',
+    cursor: 'pointer',
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    transition: 'all var(--transition-fast)',
+    background: 'transparent',
+    color: 'var(--text-secondary)',
+  },
   layout: {
     display: 'flex',
     gap: '2rem',
     alignItems: 'flex-start',
+    width: '100%',
+    minWidth: 0,
   },
   listColFull: {
     flex: 1,
+    width: '100%',
     transition: 'all 0.3s ease',
+    minWidth: 0,
   },
   listColSplit: {
     flex: 1.1,
     transition: 'all 0.3s ease',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '1.5rem',
+    minWidth: 0,
   },
   emptyCard: {
     textAlign: 'center',
@@ -396,23 +789,12 @@ const styles = {
     color: 'var(--text-muted)',
     fontSize: '0.95rem',
   },
-  appCard: {
-    cursor: 'pointer',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  },
   activeCard: {
     borderColor: 'var(--primary)',
     boxShadow: '0 0 15px var(--primary-glow)',
   },
-  appHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
   studentName: {
-    fontSize: '1.05rem',
+    fontSize: '0.92rem',
     fontWeight: '600',
     color: 'var(--text-primary)',
   },
@@ -423,13 +805,8 @@ const styles = {
   jobBox: {
     background: 'rgba(255,255,255,0.01)',
     border: '1px solid var(--border-color)',
-    borderRadius: 'var(--border-radius-md)',
-    padding: '0.75rem 1rem',
-  },
-  jobHeading: {
-    fontSize: '0.7rem',
-    color: 'var(--text-muted)',
-    textTransform: 'uppercase',
+    borderRadius: '8px',
+    padding: '0.5rem',
   },
   jobTitle: {
     fontSize: '0.92rem',
@@ -440,19 +817,6 @@ const styles = {
   jobCompany: {
     fontSize: '0.8rem',
     color: 'var(--accent)',
-  },
-  cardFooter: {
-    borderTop: '1px solid var(--border-color)',
-    paddingTop: '0.75rem',
-    display: 'flex',
-    justifyContent: 'flex-end',
-  },
-  viewLabel: {
-    fontSize: '0.85rem',
-    color: 'var(--primary)',
-    fontWeight: '600',
-    display: 'flex',
-    alignItems: 'center',
   },
   reviewDrawer: {
     flex: 0.9,
@@ -487,9 +851,6 @@ const styles = {
     cursor: 'pointer',
     fontSize: '1.2rem',
     transition: 'color var(--transition-fast)',
-    '&:hover': {
-      color: 'var(--text-primary)',
-    },
   },
   drawerBody: {
     overflowY: 'auto',
@@ -576,19 +937,6 @@ const styles = {
     flexDirection: 'column',
     gap: '1.25rem',
   },
-  selectField: {
-    background: 'rgba(15, 23, 42, 0.4)',
-    border: '1px solid var(--border-color)',
-    borderRadius: 'var(--border-radius-md)',
-    padding: '0.8rem 1rem',
-    color: 'var(--text-primary)',
-    fontSize: '0.95rem',
-    cursor: 'pointer',
-    width: '100%',
-    option: {
-      background: 'var(--bg-surface)',
-    },
-  },
   textArea: {
     minHeight: '100px',
     resize: 'none',
@@ -601,6 +949,92 @@ const styles = {
     alignItems: 'center',
     flexWrap: 'wrap',
     marginBottom: '1.5rem',
+  },
+  th: {
+    padding: '1rem 1.5rem',
+    textAlign: 'left',
+    fontSize: '0.85rem',
+    color: 'var(--text-muted)',
+    textTransform: 'uppercase',
+    borderBottom: '1px solid var(--border-color)',
+    background: 'var(--bg-surface-elevated)',
+  },
+  // Kanban board styles
+  kanbanBoard: {
+    display: 'flex',
+    gap: '1.25rem',
+    overflowX: 'auto',
+    paddingBottom: '1.5rem',
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  kanbanColumn: {
+    flex: '1',
+    minWidth: '240px',
+    background: 'rgba(15, 23, 42, 0.2)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '12px',
+    padding: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    minHeight: '520px',
+  },
+  kanbanColumnHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottom: '1px solid var(--border-color)',
+    paddingBottom: '0.5rem',
+    marginBottom: '0.2rem',
+  },
+  kanbanColumnTitle: {
+    fontSize: '0.9rem',
+    fontWeight: '700',
+    color: 'var(--text-primary)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  kanbanCount: {
+    background: 'var(--bg-surface-elevated)',
+    border: '1px solid var(--border-color)',
+    fontSize: '0.75rem',
+    padding: '0.15rem 0.5rem',
+    borderRadius: '10px',
+    color: 'var(--text-secondary)',
+    fontWeight: '600',
+  },
+  kanbanCardList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    flex: '1',
+    minHeight: '400px',
+  },
+  kanbanCard: {
+    padding: '1rem',
+    cursor: 'grab',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+    border: '1px solid var(--border-color)',
+    borderRadius: '10px',
+    backgroundColor: 'var(--bg-surface)',
+    transition: 'transform var(--transition-fast), border-color var(--transition-fast)',
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      borderColor: 'rgba(99, 102, 241, 0.3)',
+    },
+  },
+  kanbanEmptyText: {
+    padding: '2rem 0',
+    textAlign: 'center',
+    color: 'var(--text-muted)',
+    fontSize: '0.78rem',
+    border: '1px dashed var(--border-color)',
+    borderRadius: '8px',
+    background: 'rgba(255,255,255,0.01)',
   },
 };
 
