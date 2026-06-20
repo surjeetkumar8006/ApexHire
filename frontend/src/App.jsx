@@ -1,0 +1,112 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
+import LandingPage from './pages/LandingPage';
+import AuthPage from './pages/AuthPage';
+import StudentDashboard from './pages/StudentDashboard';
+import JobBoard from './pages/JobBoard';
+import AICoach from './pages/AICoach';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminJobs from './pages/AdminJobs';
+import AdminApplications from './pages/AdminApplications';
+import StudentApplications from './pages/StudentApplications';
+import AdminInterviews from './pages/AdminInterviews';
+import StudentInterviews from './pages/StudentInterviews';
+import AdminCompanies from './pages/AdminCompanies';
+import AdminAnalytics from './pages/AdminAnalytics';
+import StudentResources from './pages/StudentResources';
+import StudentAppAnalytics from './pages/StudentAppAnalytics';
+import AdminEvents from './pages/AdminEvents';
+import StudentEvents from './pages/StudentEvents';
+import AdminResumeBank from './pages/AdminResumeBank';
+import SettingsPage from './pages/SettingsPage';
+import ComingSoon from './pages/ComingSoon';
+
+import './styles/main.css';
+import './styles/responsive.css';
+
+// Protected Route Component
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to={user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard'} replace />;
+  }
+  
+  return children;
+};
+
+function App() {
+  const { user } = useAuth();
+  const [screen, setScreen] = useState('landing'); // 'landing' or 'auth'
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  if (!user) {
+    // When not logged in, we are not fully using router, just showing landing/auth
+    // However, to keep it simple, we will just handle it in state or use simple routing
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<AuthPage onBack={() => setScreen('landing')} />} />
+          <Route path="*" element={<LandingPage onGetStarted={() => window.location.href = '/login'} />} />
+        </Routes>
+      </BrowserRouter>
+    );
+  }
+
+  return (
+    <BrowserRouter>
+      <div className="app-container">
+        <Navbar onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+        <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+        <main className={`main-content ${isMobileMenuOpen ? 'sidebar-open' : ''}`}>
+          <div style={{ marginTop: '70px' }} className="animate-fade-in">
+            <Routes>
+              {/* Redirect root based on role */}
+              <Route path="/" element={<Navigate to={user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard'} replace />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+
+              {/* ----- Student Routes ----- */}
+              <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
+              <Route path="/student/jobs" element={<ProtectedRoute allowedRoles={['student']}><JobBoard /></ProtectedRoute>} />
+              <Route path="/student/applications" element={<ProtectedRoute allowedRoles={['student']}><StudentApplications /></ProtectedRoute>} />
+              <Route path="/student/ai-coach" element={<ProtectedRoute allowedRoles={['student']}><AICoach /></ProtectedRoute>} />
+              
+              <Route path="/student/interviews" element={<ProtectedRoute allowedRoles={['student']}><StudentInterviews /></ProtectedRoute>} />
+              <Route path="/student/resources" element={<ProtectedRoute allowedRoles={['student']}><StudentResources /></ProtectedRoute>} />
+              <Route path="/student/app-analytics" element={<ProtectedRoute allowedRoles={['student']}><StudentAppAnalytics /></ProtectedRoute>} />
+              <Route path="/student/events" element={<ProtectedRoute allowedRoles={['student']}><StudentEvents /></ProtectedRoute>} />
+              <Route path="/student/settings" element={<ProtectedRoute allowedRoles={['student']}><SettingsPage /></ProtectedRoute>} />
+
+              {/* ----- Admin Routes ----- */}
+              <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard view="overview" /></ProtectedRoute>} />
+              <Route path="/admin/jobs" element={<ProtectedRoute allowedRoles={['admin']}><AdminJobs /></ProtectedRoute>} />
+              <Route path="/admin/applications" element={<ProtectedRoute allowedRoles={['admin']}><AdminApplications /></ProtectedRoute>} />
+              <Route path="/admin/students" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard view="students" /></ProtectedRoute>} />
+              
+              <Route path="/admin/interviews" element={<ProtectedRoute allowedRoles={['admin']}><AdminInterviews /></ProtectedRoute>} />
+              <Route path="/admin/companies" element={<ProtectedRoute allowedRoles={['admin']}><AdminCompanies /></ProtectedRoute>} />
+              <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['admin']}><AdminAnalytics /></ProtectedRoute>} />
+              <Route path="/admin/resume-bank" element={<ProtectedRoute allowedRoles={['admin']}><AdminResumeBank /></ProtectedRoute>} />
+              <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><AdminEvents /></ProtectedRoute>} />
+              <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><SettingsPage /></ProtectedRoute>} />
+              
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </main>
+        {isMobileMenuOpen && (
+          <div className="mobile-overlay" onClick={() => setIsMobileMenuOpen(false)} />
+        )}
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;
