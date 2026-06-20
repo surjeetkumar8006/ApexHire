@@ -1,5 +1,6 @@
 import Profile from '../models/Profile.js';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 
 // @desc    Get current user's profile
 // @route   GET /api/profile
@@ -56,7 +57,7 @@ export const updateStudentProfile = async (req, res) => {
 // @route   PUT /api/profile/settings
 // @access  Private
 export const updateSettings = async (req, res) => {
-  const { name, phone, avatar, password, twoFactorEnabled, notificationPreferences, privacy } = req.body;
+  const { name, email, phone, avatar, password, twoFactorEnabled, notificationPreferences, privacy } = req.body;
 
   try {
     const user = await User.findById(req.user._id);
@@ -70,6 +71,13 @@ export const updateSettings = async (req, res) => {
     }
 
     if (name) user.name = name;
+    if (email && email.toLowerCase() !== user.email.toLowerCase()) {
+      const emailExists = await User.findOne({ email: email.toLowerCase() });
+      if (emailExists) {
+        return res.status(400).json({ message: 'Email address is already in use by another user' });
+      }
+      user.email = email.toLowerCase();
+    }
     if (phone !== undefined) user.phone = phone;
     if (avatar !== undefined) user.avatar = avatar;
     if (password) user.password = password; // will be hashed by pre-save hook
@@ -143,6 +151,16 @@ export const toggleVerification = async (req, res) => {
     }
     profile.isVerified = !profile.isVerified;
     await profile.save();
+
+    // Create verification notification
+    await Notification.create({
+      recipient: profile.user,
+      title: profile.isVerified ? 'Profile Verified! ✅' : 'Profile Status Shifted ⚠',
+      message: profile.isVerified
+        ? 'Your academic credentials have been approved by the placement cell. You are now eligible to apply for job vacancies.'
+        : 'Your account verification status has been shifted to pending review. Please contact the placement administrator.',
+    });
+
     res.json(profile);
   } catch (error) {
     res.status(500).json({ message: error.message });

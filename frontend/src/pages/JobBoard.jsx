@@ -11,6 +11,7 @@ const JobBoard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
   const [studentProfile, setStudentProfile] = useState(null);
+  const [recommendedJobs, setRecommendedJobs] = useState([]);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -67,6 +68,22 @@ const JobBoard = () => {
     }
   };
 
+  const fetchRecommendedJobs = async () => {
+    if (user && user.role === 'student') {
+      try {
+        const res = await fetch(`${API_BASE}/jobs/recommendations`, {
+          headers: authHeader(),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setRecommendedJobs(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
   const getMatchingSkills = (requirements, userSkills) => {
     if (!userSkills) return [];
     return requirements.filter((req) =>
@@ -106,7 +123,7 @@ const JobBoard = () => {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchJobs(), fetchMyApplications(), fetchStudentProfile()]).finally(() => setLoading(false));
+    Promise.all([fetchJobs(), fetchMyApplications(), fetchStudentProfile(), fetchRecommendedJobs()]).finally(() => setLoading(false));
   }, [search, location, type]);
 
   const handleApply = async (jobId) => {
@@ -191,6 +208,59 @@ const JobBoard = () => {
       {/* Jobs Grid */}
       <div style={styles.mainLayout}>
         <div style={selectedJob ? styles.jobsColSplit : styles.jobsColFull}>
+          {/* AI Recommended Jobs Section */}
+          {user && user.role === 'student' && recommendedJobs.filter(job => !myApplications.includes(job._id)).length > 0 && (
+            <div style={styles.recSection} className="animate-fade-in">
+              <div style={styles.recHeader}>
+                <Sparkles size={18} color="var(--accent)" />
+                <h3 style={styles.recTitle}>AI Suggested Opportunities</h3>
+              </div>
+              <div style={styles.recGrid}>
+                {recommendedJobs
+                  .filter(job => !myApplications.includes(job._id))
+                  .slice(0, 3)
+                  .map((job) => (
+                    <div
+                      key={job._id}
+                      className="glass-card"
+                      style={{
+                        ...styles.jobCard,
+                        ...styles.recCard,
+                        ...(selectedJob?._id === job._id ? styles.activeJobCard : {}),
+                      }}
+                      onClick={() => setSelectedJob(job)}
+                    >
+                      <div style={styles.jobHeader}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <h4 style={{ ...styles.jobTitle, fontSize: '0.98rem', margin: 0 }}>{job.title}</h4>
+                            <span
+                              style={{
+                                fontSize: '0.68rem',
+                                padding: '0.15rem 0.4rem',
+                                borderRadius: '4px',
+                                background: `${getMatchColor(job.matchPercentage)}10`,
+                                border: `1px solid ${getMatchColor(job.matchPercentage)}`,
+                                color: getMatchColor(job.matchPercentage),
+                                fontWeight: '700',
+                              }}
+                            >
+                              {job.matchPercentage}% Match
+                            </span>
+                          </div>
+                          <p style={{ ...styles.jobCompany, margin: '2px 0 0 0' }}>{job.company}</p>
+                        </div>
+                      </div>
+                      <div style={{ ...styles.jobMeta, margin: '0.25rem 0 0 0', display: 'flex', gap: '1rem', fontSize: '0.78rem' }}>
+                        <span style={styles.metaItem}><MapPin size={12} /> {job.location}</span>
+                        <span style={styles.metaItem}><DollarSign size={12} /> {job.salary}</span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
           {jobs.length === 0 ? (
             <div className="glass-card" style={styles.emptyCard}>
               <Briefcase size={40} color="var(--text-muted)" />
@@ -763,6 +833,31 @@ const styles = {
     fontSize: '0.78rem',
     color: 'var(--success)',
     fontWeight: '600',
+  },
+  recSection: {
+    marginBottom: '2rem',
+    borderBottom: '1px solid var(--border-color)',
+    paddingBottom: '1.5rem',
+  },
+  recHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '1rem',
+  },
+  recTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: 'var(--text-primary)',
+  },
+  recGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '1rem',
+  },
+  recCard: {
+    background: 'linear-gradient(145deg, rgba(99, 102, 241, 0.05) 0%, rgba(15, 23, 42, 0.1) 100%)',
+    borderColor: 'rgba(99, 102, 241, 0.2)',
   },
 };
 

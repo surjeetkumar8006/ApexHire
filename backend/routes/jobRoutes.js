@@ -5,12 +5,15 @@ import {
   createJob,
   updateJob,
   deleteJob,
+  getRecommendedJobs,
 } from '../controllers/jobController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.route('/').get(getJobs).post(protect, admin, createJob);
+
+router.route('/recommendations').get(protect, getRecommendedJobs);
 
 router
   .route('/:id')

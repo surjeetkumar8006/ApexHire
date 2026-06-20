@@ -14,7 +14,8 @@ import {
   BarChart,
   FileText,
   CalendarCheck,
-  FolderOpen
+  FolderOpen,
+  Award
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { X } from 'lucide-react';
@@ -31,6 +32,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/student/jobs', name: 'Job Board', icon: <Briefcase size={20} /> },
     { path: '/student/applications', name: 'My Applications', icon: <FileCheck size={20} /> },
     { path: '/student/ai-coach', name: 'AI Career Coach', icon: <Cpu size={20} /> },
+    { path: '/student/assessments', name: 'Skill Assessments', icon: <Award size={20} /> },
     { path: '/student/interviews', name: 'My Interviews', icon: <CalendarCheck size={20} /> },
     { path: '/student/resources', name: 'Prep Resources', icon: <FolderOpen size={20} /> },
     { path: '/student/events', name: 'Career Events', icon: <CalendarCheck size={20} /> },

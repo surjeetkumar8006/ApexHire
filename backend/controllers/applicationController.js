@@ -104,7 +104,7 @@ export const getJobApplications = async (req, res) => {
 // @route   PUT /api/applications/:id
 // @access  Private (Admin)
 export const updateApplicationStatus = async (req, res) => {
-  const { status, feedback } = req.body;
+  const { status, feedback, offerLetterUrl } = req.body;
 
   try {
     const application = await Application.findById(req.params.id)
@@ -114,6 +114,7 @@ export const updateApplicationStatus = async (req, res) => {
     if (application) {
       application.status = status || application.status;
       if (feedback !== undefined) application.feedback = feedback;
+      if (offerLetterUrl !== undefined) application.offerLetterUrl = offerLetterUrl;
 
       const updatedApplication = await application.save();
 
@@ -128,6 +129,45 @@ export const updateApplicationStatus = async (req, res) => {
     } else {
       res.status(404).json({ message: 'Application not found' });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Respond to offer (Accept / Reject)
+// @route   PUT /api/applications/:id/offer
+// @access  Private (Student)
+export const respondToOffer = async (req, res) => {
+  const { offerStatus } = req.body; // 'Accepted' or 'Rejected'
+
+  try {
+    const application = await Application.findById(req.params.id)
+      .populate('job');
+
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    // Verify it is indeed the logged-in student's application
+    if (application.student.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'Not authorized to respond to this offer' });
+    }
+
+    if (application.status !== 'Offered') {
+      return res.status(400).json({ message: 'No offer has been extended for this application' });
+    }
+
+    application.offerStatus = offerStatus;
+    const updatedApplication = await application.save();
+
+    // Create notification for the admin who posted the job
+    await Notification.create({
+      recipient: application.job.postedBy,
+      title: `Offer Status Update: ${application.job.title}`,
+      message: `${req.user.name} has ${offerStatus.toLowerCase()} the job offer for the position of ${application.job.title}.`,
+    });
+
+    res.json(updatedApplication);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

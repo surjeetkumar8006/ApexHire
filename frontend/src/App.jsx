@@ -14,6 +14,7 @@ import AdminApplications from './pages/AdminApplications';
 import StudentApplications from './pages/StudentApplications';
 import AdminInterviews from './pages/AdminInterviews';
 import StudentInterviews from './pages/StudentInterviews';
+import StudentAssessments from './pages/StudentAssessments';
 import AdminCompanies from './pages/AdminCompanies';
 import AdminAnalytics from './pages/AdminAnalytics';
 import StudentResources from './pages/StudentResources';
@@ -66,7 +67,7 @@ function App() {
         <Navbar onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
         <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
         <main className={`main-content ${isMobileMenuOpen ? 'sidebar-open' : ''}`}>
-          <div style={{ marginTop: '70px' }} className="animate-fade-in">
+          <div style={{ marginTop: '70px', minWidth: 0, width: '100%' }} className="animate-fade-in">
             <Routes>
               {/* Redirect root based on role */}
               <Route path="/" element={<Navigate to={user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard'} replace />} />
@@ -77,6 +78,7 @@ function App() {
               <Route path="/student/jobs" element={<ProtectedRoute allowedRoles={['student']}><JobBoard /></ProtectedRoute>} />
               <Route path="/student/applications" element={<ProtectedRoute allowedRoles={['student']}><StudentApplications /></ProtectedRoute>} />
               <Route path="/student/ai-coach" element={<ProtectedRoute allowedRoles={['student']}><AICoach /></ProtectedRoute>} />
+              <Route path="/student/assessments" element={<ProtectedRoute allowedRoles={['student']}><StudentAssessments /></ProtectedRoute>} />
               
               <Route path="/student/interviews" element={<ProtectedRoute allowedRoles={['student']}><StudentInterviews /></ProtectedRoute>} />
               <Route path="/student/resources" element={<ProtectedRoute allowedRoles={['student']}><StudentResources /></ProtectedRoute>} />

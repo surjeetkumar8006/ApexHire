@@ -25,6 +25,15 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    offerLetterUrl: {
+      type: String,
+      default: '',
+    },
+    offerStatus: {
+      type: String,
+      enum: ['Pending', 'Accepted', 'Rejected'],
+      default: 'Pending',
+    },
   },
   {
     timestamps: true,

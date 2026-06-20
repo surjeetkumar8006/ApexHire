@@ -53,7 +53,9 @@ const StudentAppAnalytics = () => {
     <div style={styles.container} className="animate-fade-in">
       <header style={styles.header}>
         <div style={styles.titleRow}>
-          <BarChart2 size={28} color="var(--primary)" />
+          <div style={styles.headerIconGlow}>
+            <BarChart2 size={28} color="var(--primary)" />
+          </div>
           <h1 style={styles.title}>Application Analytics</h1>
         </div>
         <p style={styles.subtitle}>Track your job hunt progress and application conversion funnel.</p>
@@ -61,29 +63,37 @@ const StudentAppAnalytics = () => {
 
       {/* Summary Cards */}
       <div className="analytics-grid">
-        <div className="premium-card" style={styles.summaryCard}>
-          <div style={styles.iconWrap}><Briefcase size={28} color="var(--primary)" /></div>
+        <div className="premium-card stagger-1" style={styles.summaryCard}>
+          <div style={{ ...styles.iconWrap, background: 'rgba(99, 102, 241, 0.1)', borderColor: 'rgba(99, 102, 241, 0.2)' }}>
+            <Briefcase size={28} color="var(--primary)" />
+          </div>
           <div>
             <h3 className="summary-val">{total}</h3>
             <p style={styles.summaryLabel}>Total Applied</p>
           </div>
         </div>
-        <div className="premium-card" style={styles.summaryCard}>
-          <div style={styles.iconWrap}><Clock size={28} color="var(--warning)" /></div>
+        <div className="premium-card stagger-2" style={styles.summaryCard}>
+          <div style={{ ...styles.iconWrap, background: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
+            <Clock size={28} color="var(--warning)" />
+          </div>
           <div>
             <h3 className="summary-val">{inProgress}</h3>
             <p style={styles.summaryLabel}>In Progress</p>
           </div>
         </div>
-        <div className="premium-card" style={styles.summaryCard}>
-          <div style={styles.iconWrap}><CheckCircle size={28} color="var(--success)" /></div>
+        <div className="premium-card stagger-3" style={styles.summaryCard}>
+          <div style={{ ...styles.iconWrap, background: 'rgba(16, 185, 129, 0.1)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
+            <CheckCircle size={28} color="var(--success)" />
+          </div>
           <div>
             <h3 className="summary-val">{offered}</h3>
             <p style={styles.summaryLabel}>Offers Received</p>
           </div>
         </div>
-        <div className="premium-card" style={styles.summaryCard}>
-          <div style={styles.iconWrap}><XCircle size={28} color="var(--danger)" /></div>
+        <div className="premium-card stagger-4" style={styles.summaryCard}>
+          <div style={{ ...styles.iconWrap, background: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+            <XCircle size={28} color="var(--danger)" />
+          </div>
           <div>
             <h3 className="summary-val">{rejected}</h3>
             <p style={styles.summaryLabel}>Rejected</p>
@@ -94,32 +104,37 @@ const StudentAppAnalytics = () => {
       <div className="charts-grid">
         
         {/* Funnel Chart */}
-        <div className="premium-card" style={styles.chartCard}>
-          <h3 style={styles.chartTitle}><PieChart size={20} color="var(--primary)" /> Conversion Funnel</h3>
+        <div className="premium-card stagger-5" style={styles.chartCard}>
+          <div style={styles.chartHeader}>
+            <div style={{ padding: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '8px' }}>
+              <PieChart size={20} color="var(--primary)" />
+            </div>
+            <h3 style={styles.chartTitle}>Conversion Funnel</h3>
+          </div>
           {total === 0 ? (
             <p style={styles.emptyText}>Apply to jobs to generate your funnel!</p>
           ) : (
             <div style={styles.funnelContainer}>
-              <div style={styles.funnelRow}>
+              <div className="funnel-row-hover" style={styles.funnelRow}>
                 <span style={styles.funnelLabel}>Applied</span>
                 <div style={styles.funnelTrack}>
-                  <div className="glow-bar" style={{ width: '100%', background: 'var(--primary)', boxShadow: '0 0 10px rgba(99, 102, 241, 0.4)' }}></div>
+                  <div className="glow-bar" style={{ width: '100%', background: 'linear-gradient(90deg, var(--primary), #818cf8)' }}></div>
                 </div>
                 <span style={styles.funnelValue}>{total} <span style={styles.pct}>({getPercent(total)}%)</span></span>
               </div>
               
-              <div style={styles.funnelRow}>
+              <div className="funnel-row-hover" style={styles.funnelRow}>
                 <span style={styles.funnelLabel}>Interviewing</span>
                 <div style={styles.funnelTrack}>
-                  <div className="glow-bar" style={{ width: `${getPercent(interviewing + offered)}%`, background: 'var(--warning)', boxShadow: '0 0 10px rgba(245, 158, 11, 0.4)' }}></div>
+                  <div className="glow-bar" style={{ width: `${getPercent(interviewing + offered)}%`, background: 'linear-gradient(90deg, var(--warning), #fbbf24)' }}></div>
                 </div>
                 <span style={styles.funnelValue}>{interviewing + offered} <span style={styles.pct}>({getPercent(interviewing + offered)}%)</span></span>
               </div>
               
-              <div style={styles.funnelRow}>
+              <div className="funnel-row-hover" style={styles.funnelRow}>
                 <span style={styles.funnelLabel}>Offers</span>
                 <div style={styles.funnelTrack}>
-                  <div className="glow-bar" style={{ width: `${getPercent(offered)}%`, background: 'var(--success)', boxShadow: '0 0 10px rgba(16, 185, 129, 0.4)' }}></div>
+                  <div className="glow-bar" style={{ width: `${getPercent(offered)}%`, background: 'linear-gradient(90deg, var(--success), #34d399)' }}></div>
                 </div>
                 <span style={styles.funnelValue}>{offered} <span style={styles.pct}>({getPercent(offered)}%)</span></span>
               </div>
@@ -128,49 +143,54 @@ const StudentAppAnalytics = () => {
         </div>
 
         {/* Status Breakdown */}
-        <div className="premium-card" style={styles.chartCard}>
-          <h3 style={styles.chartTitle}><BarChart2 size={20} color="var(--primary)" /> Detailed Breakdown</h3>
+        <div className="premium-card stagger-6" style={styles.chartCard}>
+          <div style={styles.chartHeader}>
+            <div style={{ padding: '0.4rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '8px' }}>
+              <BarChart2 size={18} color="var(--primary)" />
+            </div>
+            <h3 style={styles.chartTitle}>Detailed Breakdown</h3>
+          </div>
           {total === 0 ? (
             <p style={styles.emptyText}>No data available yet.</p>
           ) : (
             <div className="breakdown-grid">
               <div className="breakdown-box">
-                <div style={{...styles.dot, background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)'}}></div>
+                <div style={{...styles.dot, background: 'var(--primary)' }}></div>
                 <div style={styles.bdCol}>
                   <span style={styles.breakdownLabel}>Applied</span>
                   <span style={styles.breakdownValue}>{applied}</span>
                 </div>
               </div>
               <div className="breakdown-box">
-                <div style={{...styles.dot, background: 'var(--info)', boxShadow: '0 0 8px var(--info)'}}></div>
+                <div style={{...styles.dot, background: 'var(--info)' }}></div>
                 <div style={styles.bdCol}>
                   <span style={styles.breakdownLabel}>Reviewing</span>
                   <span style={styles.breakdownValue}>{reviewing}</span>
                 </div>
               </div>
               <div className="breakdown-box">
-                <div style={{...styles.dot, background: '#a855f7', boxShadow: '0 0 8px #a855f7'}}></div>
+                <div style={{...styles.dot, background: '#a855f7' }}></div>
                 <div style={styles.bdCol}>
                   <span style={styles.breakdownLabel}>Shortlisted</span>
                   <span style={styles.breakdownValue}>{shortlisted}</span>
                 </div>
               </div>
               <div className="breakdown-box">
-                <div style={{...styles.dot, background: 'var(--warning)', boxShadow: '0 0 8px var(--warning)'}}></div>
+                <div style={{...styles.dot, background: 'var(--warning)' }}></div>
                 <div style={styles.bdCol}>
                   <span style={styles.breakdownLabel}>Interviewing</span>
                   <span style={styles.breakdownValue}>{interviewing}</span>
                 </div>
               </div>
               <div className="breakdown-box">
-                <div style={{...styles.dot, background: 'var(--success)', boxShadow: '0 0 8px var(--success)'}}></div>
+                <div style={{...styles.dot, background: 'var(--success)' }}></div>
                 <div style={styles.bdCol}>
                   <span style={styles.breakdownLabel}>Offered</span>
                   <span style={styles.breakdownValue}>{offered}</span>
                 </div>
               </div>
               <div className="breakdown-box">
-                <div style={{...styles.dot, background: 'var(--danger)', boxShadow: '0 0 8px var(--danger)'}}></div>
+                <div style={{...styles.dot, background: 'var(--danger)' }}></div>
                 <div style={styles.bdCol}>
                   <span style={styles.breakdownLabel}>Rejected</span>
                   <span style={styles.breakdownValue}>{rejected}</span>
@@ -184,46 +204,75 @@ const StudentAppAnalytics = () => {
       <style>{`
         .analytics-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 1.5rem;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
         }
         .charts-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-          gap: 1.5rem;
+          gap: 1rem;
         }
         .breakdown-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 1.5rem;
-          padding: 1rem 0;
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+          gap: 0.75rem;
+          padding: 0.5rem 0;
         }
+        
+        /* Premium Card styling */
         .premium-card {
           padding: 1.5rem;
           border-radius: 16px;
-          background: var(--bg-surface);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-          backdrop-filter: blur(10px);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          box-shadow: none;
+          transition: border-color 0.3s ease;
+          position: relative;
+          overflow: hidden;
         }
+        
+        .premium-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0; height: 3px;
+          background: linear-gradient(90deg, var(--primary), transparent);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
         .premium-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-color: rgba(99, 102, 241, 0.4);
         }
+        
+        .premium-card:hover::before {
+          opacity: 1;
+        }
+
+        /* Staggered Animations */
+        .stagger-1 { animation: slideUpFade 0.5s ease forwards 0.1s; opacity: 0; }
+        .stagger-2 { animation: slideUpFade 0.5s ease forwards 0.2s; opacity: 0; }
+        .stagger-3 { animation: slideUpFade 0.5s ease forwards 0.3s; opacity: 0; }
+        .stagger-4 { animation: slideUpFade 0.5s ease forwards 0.4s; opacity: 0; }
+        .stagger-5 { animation: slideUpFade 0.5s ease forwards 0.5s; opacity: 0; }
+        .stagger-6 { animation: slideUpFade 0.5s ease forwards 0.6s; opacity: 0; }
+
+        @keyframes slideUpFade {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
         .summary-val {
           font-size: 2.2rem;
-          font-weight: 800;
-          background: linear-gradient(135deg, var(--text-primary), var(--text-muted));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          font-weight: 700;
+          color: var(--text-primary);
           margin: 0;
-          line-height: 1.2;
+          line-height: 1.1;
+          letter-spacing: -0.5px;
         }
+        
         .glow-bar {
           height: 100%;
-          border-radius: 12px;
+          border-radius: 8px;
           transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           overflow: hidden;
@@ -232,25 +281,38 @@ const StudentAppAnalytics = () => {
           content: '';
           position: absolute;
           top: 0; left: 0; right: 0; bottom: 0;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-          animation: shimmer 2s infinite;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+          animation: shimmer 2.5s infinite linear;
         }
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
         }
+        
+        .funnel-row-hover {
+          transition: transform 0.2s ease, background 0.2s ease;
+          padding: 0.5rem;
+          border-radius: 10px;
+        }
+        .funnel-row-hover:hover {
+          background: #f8fafc;
+          transform: scale(1.01);
+        }
+
         .breakdown-box {
           display: flex;
           align-items: center;
-          gap: 1rem;
-          padding: 1.2rem;
-          background: var(--bg-base);
+          gap: 0.8rem;
+          padding: 1rem;
+          background: #f8fafc;
           border-radius: 12px;
-          border: 1px solid var(--border-color);
+          border: 1px solid #e2e8f0;
+          box-shadow: none;
           transition: all 0.3s ease;
+          cursor: default;
         }
         .breakdown-box:hover {
-          background: var(--bg-surface-elevated);
+          background: #ffffff;
           border-color: var(--primary);
         }
         
@@ -260,6 +322,9 @@ const StudentAppAnalytics = () => {
           }
           .breakdown-grid {
             grid-template-columns: 1fr 1fr;
+          }
+          .premium-card {
+            padding: 1.25rem;
           }
         }
         @media (max-width: 480px) {
@@ -273,31 +338,60 @@ const StudentAppAnalytics = () => {
 };
 
 const styles = {
-  container: { display: 'flex', flexDirection: 'column', gap: '2rem' },
-  header: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
-  titleRow: { display: 'flex', alignItems: 'center', gap: '0.75rem' },
-  title: { fontSize: '2rem', fontWeight: '800', color: 'var(--text-primary)' },
-  subtitle: { fontSize: '1.05rem', color: 'var(--text-secondary)' },
+  container: { 
+    display: 'flex', 
+    flexDirection: 'column', 
+    gap: '2rem',
+    background: '#ffffff',
+    padding: '2.5rem',
+    borderRadius: '24px',
+    boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
+    border: '1px solid var(--border-color)'
+  },
+  header: { display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' },
+  titleRow: { display: 'flex', alignItems: 'center', gap: '1rem' },
+  headerIconGlow: { 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    width: '48px', 
+    height: '48px', 
+    borderRadius: '14px', 
+    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05))',
+    border: '1px solid rgba(99, 102, 241, 0.2)'
+  },
+  title: { fontSize: '2rem', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.5px' },
+  subtitle: { fontSize: '1.05rem', color: 'var(--text-secondary)', maxWidth: '600px', lineHeight: '1.5' },
   
   summaryCard: { display: 'flex', alignItems: 'center', gap: '1.2rem' },
-  iconWrap: { padding: '1rem', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)' },
-  summaryLabel: { fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-secondary)', margin: 0, marginTop: '0.2rem' },
+  iconWrap: { 
+    width: '52px', 
+    height: '52px', 
+    borderRadius: '14px', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    border: '1px solid',
+    flexShrink: 0
+  },
+  summaryLabel: { fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', margin: 0, marginTop: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.5px' },
   
   chartCard: { display: 'flex', flexDirection: 'column', gap: '1.5rem' },
-  chartTitle: { fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.7rem' },
-  emptyText: { color: 'var(--text-muted)', fontStyle: 'italic', padding: '2rem 0', textAlign: 'center' },
+  chartHeader: { display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '0.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' },
+  chartTitle: { fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-primary)', margin: 0 },
+  emptyText: { color: 'var(--text-muted)', fontStyle: 'italic', padding: '1.5rem 0', textAlign: 'center' },
   
-  funnelContainer: { display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1rem 0' },
+  funnelContainer: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
   funnelRow: { display: 'flex', alignItems: 'center', gap: '1rem' },
-  funnelLabel: { width: '100px', fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-secondary)' },
-  funnelTrack: { flex: 1, height: '24px', background: 'var(--bg-base)', borderRadius: '12px', border: '1px solid var(--border-color)' },
-  funnelValue: { width: '80px', textAlign: 'right', fontSize: '1rem', fontWeight: '800', color: 'var(--text-primary)' },
-  pct: { fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' },
+  funnelLabel: { width: '100px', fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-secondary)' },
+  funnelTrack: { flex: 1, height: '20px', background: 'var(--bg-base)', borderRadius: '10px', overflow: 'hidden' },
+  funnelValue: { width: '85px', textAlign: 'right', fontSize: '1rem', fontWeight: '600', color: 'var(--text-primary)' },
+  pct: { fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '500', marginLeft: '4px' },
 
   bdCol: { display: 'flex', flexDirection: 'column', gap: '0.2rem' },
-  dot: { width: '14px', height: '14px', borderRadius: '50%', flexShrink: 0 },
-  breakdownLabel: { fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' },
-  breakdownValue: { fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1 }
+  dot: { width: '12px', height: '12px', borderRadius: '50%', flexShrink: 0 },
+  breakdownLabel: { fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  breakdownValue: { fontSize: '1.4rem', fontWeight: '700', color: 'var(--text-primary)', lineHeight: 1 }
 };
 
 export default StudentAppAnalytics;

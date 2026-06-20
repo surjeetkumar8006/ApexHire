@@ -271,7 +271,8 @@ const AdminCompanies = () => {
           border: 1px solid var(--glass-border);
           border-radius: 16px;
           width: 100%;
-          max-width: 480px;
+          max-width: 520px;
+          max-height: 90vh;
           box-shadow: var(--shadow-lg);
           display: flex;
           flex-direction: column;
@@ -295,7 +296,7 @@ const AdminCompanies = () => {
           flex-grow: 1;
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 1.25rem;
         }
         .modal-footer-custom {
           display: flex;
@@ -323,35 +324,13 @@ const AdminCompanies = () => {
           background: var(--bg-surface-elevated);
         }
         
-        /* Custom Input & Select Styling inside Modal */
-        .modal-content-custom .form-input,
-        .modal-content-custom .form-select {
-          background: var(--input-bg) !important;
-          border: 1px solid var(--border-color) !important;
-          color: var(--text-primary) !important;
-          border-radius: var(--border-radius-sm) !important;
-          padding: 0.75rem 1rem !important;
-          width: 100% !important;
-          box-sizing: border-box !important;
-          transition: all 0.2s ease !important;
-        }
-        .modal-content-custom .form-input:focus,
-        .modal-content-custom .form-select:focus {
-          border-color: var(--primary) !important;
-          box-shadow: 0 0 0 3px var(--primary-glow) !important;
-          outline: none !important;
-        }
-        
         /* High Contrast Labels for Dark and Light Themes */
         .modal-content-custom label {
           font-size: 0.85rem !important;
           font-weight: 600 !important;
-          color: #9ca3af !important; /* Default light gray for Dark theme */
+          color: var(--text-secondary) !important;
           margin-bottom: 0.25rem !important;
           display: block !important;
-        }
-        body.light-theme .modal-content-custom label {
-          color: #4b5563 !important; /* Dark slate for Light theme */
         }
 
         .delete-btn-custom {
