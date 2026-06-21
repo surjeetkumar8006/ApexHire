@@ -618,7 +618,7 @@ const AdminApplications = () => {
                     {/* Resume download link */}
                     {studentProfile.resumeUrl && (
                       <a
-                        href={`http://localhost:5000${studentProfile.resumeUrl}`}
+                        href={`https://apexhire.onrender.com${studentProfile.resumeUrl}`}
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-secondary"
