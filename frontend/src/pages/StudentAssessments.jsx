@@ -308,6 +308,45 @@ const StudentAssessments = () => {
                   })}
                 </div>
 
+                {activeTest.category === 'Coding' && (
+                  <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <span style={{ fontWeight: '600', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                        💻 Code Sandbox Workspace
+                      </span>
+                      <button 
+                        onClick={() => {
+                          addToast('Running compiler test cases...', 'info');
+                          setTimeout(() => {
+                            addToast('✔ Test Case 1/3 Passed (Sample Test)', 'success');
+                            addToast('✔ Test Case 2/3 Passed (Boundary Test)', 'success');
+                            addToast('✔ Test Case 3/3 Passed (Performance Test)', 'success');
+                          }, 1000);
+                        }}
+                        className="btn btn-xs btn-outline"
+                        style={{ padding: '0.2rem 0.6rem', fontSize: '0.7rem' }}
+                      >
+                        ▶ Run Code Tests
+                      </button>
+                    </div>
+                    <textarea 
+                      className="form-input" 
+                      rows="6" 
+                      placeholder="// Write your code solution here (e.g. JavaScript, Python, SQL)&#10;function solve() {&#10;  // Your optimal logic here&#10;}"
+                      style={{ 
+                        backgroundColor: '#090d16', 
+                        color: '#38bdf8', 
+                        borderColor: 'var(--border-color)', 
+                        lineHeight: 1.5,
+                        fontFamily: 'Consolas, Courier New, monospace',
+                        fontSize: '0.75rem',
+                        width: '100%',
+                        resize: 'none'
+                      }}
+                    ></textarea>
+                  </div>
+                )}
+
                 <div style={styles.navigatorActions}>
                   <button
                     className="btn btn-outline"

@@ -2,6 +2,8 @@ import fs from 'fs';
 import pdf from 'pdf-parse';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import Profile from '../models/Profile.js';
+import Job from '../models/Job.js';
+import MockInterview from '../models/MockInterview.js';
 
 // Helper: Rule-based local resume analyzer (fallback/offline)
 const localAnalyzeResume = (text) => {
@@ -56,7 +58,6 @@ const localAnalyzeResume = (text) => {
     }
   }
 
-  // Score adjustments
   score += Math.min(foundTech.length * 3, 25); // max 25 points from skills
 
   if (foundTech.length < 4) {
@@ -122,7 +123,7 @@ const localAnalyzeResume = (text) => {
 
   return {
     score,
-    suggestions: suggestions.slice(0, 5), // Return top 5 recommendations
+    suggestions: suggestions.slice(0, 5),
     matchedRoles,
   };
 };
@@ -138,7 +139,6 @@ export const uploadResumeAndAnalyze = async (req, res) => {
   const filePath = req.file.path;
 
   try {
-    // Read PDF
     const dataBuffer = fs.readFileSync(filePath);
     const pdfData = await pdf(dataBuffer);
     const resumeText = pdfData.text;
@@ -149,7 +149,6 @@ export const uploadResumeAndAnalyze = async (req, res) => {
 
     let aiFeedback;
 
-    // Try Gemini API if key is present
     if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '') {
       try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -172,8 +171,6 @@ export const uploadResumeAndAnalyze = async (req, res) => {
 
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
-        
-        // Clean JSON formatting if Gemini adds markdown blocks
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           aiFeedback = JSON.parse(jsonMatch[0]);
@@ -185,23 +182,18 @@ export const uploadResumeAndAnalyze = async (req, res) => {
         aiFeedback = localAnalyzeResume(resumeText);
       }
     } else {
-      // Fallback
       aiFeedback = localAnalyzeResume(resumeText);
     }
 
-    // Update Student Profile
     const profile = await Profile.findOne({ user: req.user._id });
-
     if (!profile) {
       return res.status(404).json({ message: 'Student profile not found.' });
     }
 
-    // Save resume info and feedback
     profile.resumeUrl = `/uploads/${req.file.filename}`;
     profile.resumeParsedText = resumeText;
     profile.aiFeedback = aiFeedback;
 
-    // Parse and auto-extract skills if empty
     if (profile.skills.length === 0) {
       const techKeywords = ['javascript', 'typescript', 'react', 'node', 'express', 'mongodb', 'python', 'java', 'cpp', 'docker', 'kubernetes', 'aws', 'git', 'sql', 'html', 'css'];
       const lowercaseText = resumeText.toLowerCase();
@@ -247,7 +239,6 @@ export const getCareerAdvice = async (req, res) => {
       return res.status(404).json({ message: 'Profile not found' });
     }
 
-    // If Gemini key is set, get dynamic interactive advice
     if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '') {
       try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -274,7 +265,6 @@ export const getCareerAdvice = async (req, res) => {
       }
     }
 
-    // Default Fallback advice
     const recommendedSkillMap = {
       'React': ['TypeScript', 'Next.js', 'Redux'],
       'Node.js': ['Express', 'Docker', 'Redis'],
@@ -310,6 +300,491 @@ ${nextSkills.map((sk) => `- **${sk}**: Highly sought after for developer roles m
     `;
 
     res.json({ advice: adviceText });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Match student resume vs job details for similarity percentages
+// @route   POST /api/ai/match-job
+// @access  Private
+export const matchJobAndResume = async (req, res) => {
+  const { jobId, studentId } = req.body;
+
+  try {
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    const studentToQuery = studentId || req.user._id;
+    const profile = await Profile.findOne({ user: studentToQuery });
+    if (!profile) {
+      return res.status(404).json({ message: 'Student profile not found' });
+    }
+
+    const resumeText = profile.resumeParsedText || '';
+    const studentSkills = profile.skills || [];
+
+    let matchPercentage = 50;
+    let matchedSkills = [];
+    let missingSkills = [];
+    let suggestions = [];
+
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '') {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const prompt = `
+          You are an expert ATS screening system.
+          Compare this student's skills: [${studentSkills.join(', ')}] and Resume Text:
+          "${resumeText.slice(0, 3000)}"
+          
+          Against this Job Title: "${job.title}", Company: "${job.company}", Description: "${job.description}", and Requirements: [${job.requirements.join(', ')}].
+
+          Provide feedback in JSON format:
+          1. A matchPercentage (integer from 0 to 100).
+          2. A list of matchedSkills (array of strings) that are present in both the job requirements and student profile/resume.
+          3. A list of missingSkills (array of strings) required for the job but not explicitly shown in the student's profile/resume.
+          4. 2-3 specific suggestions (array of strings) on how this candidate can improve their chances for this job.
+
+          Respond ONLY with a valid JSON block. Do not write anything outside the JSON structure.
+        `;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        const matchData = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
+
+        matchPercentage = matchData.matchPercentage || 50;
+        matchedSkills = matchData.matchedSkills || [];
+        missingSkills = matchData.missingSkills || [];
+        suggestions = matchData.suggestions || [];
+      } catch (geminiError) {
+        console.error('Gemini job matching failed, falling back to local:', geminiError.message);
+      }
+    }
+
+    // Fallback rule if Gemini didn't run or failed
+    if (matchedSkills.length === 0 && missingSkills.length === 0) {
+      const jobReqs = job.requirements.map(r => r.toLowerCase());
+      const lowerSkills = studentSkills.map(s => s.toLowerCase());
+      
+      jobReqs.forEach(req => {
+        const matched = lowerSkills.some(s => req.includes(s)) || resumeText.toLowerCase().includes(req);
+        if (matched) {
+          matchedSkills.push(req);
+        } else {
+          missingSkills.push(req);
+        }
+      });
+
+      const total = matchedSkills.length + missingSkills.length;
+      matchPercentage = total > 0 ? Math.round((matchedSkills.length / total) * 100) : 50;
+      
+      if (missingSkills.length > 0) {
+        suggestions.push(`Acquire skills in: ${missingSkills.slice(0, 3).join(', ')} to bridge the gap.`);
+      }
+      suggestions.push("Tailor your project descriptions to match the requirements of this role.");
+    }
+
+    res.json({
+      matchPercentage,
+      matchedSkills,
+      missingSkills,
+      suggestions
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Interactive Coach chatbot message
+// @route   POST /api/ai/coach-chat
+// @access  Private (Student)
+export const coachChat = async (req, res) => {
+  const { message, chatHistory } = req.body;
+
+  try {
+    const profile = await Profile.findOne({ user: req.user._id }).populate('user', 'name');
+    if (!profile) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '') {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const profileSummary = `
+          Student Name: ${profile.user.name}
+          Skills: ${profile.skills.join(', ')}
+          Education: ${JSON.stringify(profile.education)}
+          Experience: ${JSON.stringify(profile.experience)}
+          Resume Scored ATS: ${profile.aiFeedback?.score || 'Not Scored'}
+        `;
+
+        const historyString = chatHistory
+          ? chatHistory.map(ch => `${ch.sender === 'user' ? 'Student' : 'Coach'}: ${ch.text}`).join('\n')
+          : '';
+
+        const prompt = `
+          You are "ApexHire AI Career Coach", an empathetic, elite corporate tech recruiter and career counselor.
+          You are speaking with ${profile.user.name}. Here is their profile summary:
+          ${profileSummary}
+
+          Conversation history:
+          ${historyString}
+
+          Student's current message: "${message}"
+
+          Provide a professional, friendly, structured response. Keep it under 250 words, use clear markdown list items for steps if any, and maintain context.
+        `;
+
+        const result = await model.generateContent(prompt);
+        return res.json({ reply: result.response.text() });
+      } catch (geminiError) {
+        console.error('Gemini Coach Chatbot failed:', geminiError.message);
+      }
+    }
+
+    // Offline fallback responder
+    let reply = `Hi ${profile.user.name}, I am your offline career coach. How can I help you today?`;
+    const lowercaseMsg = message.toLowerCase();
+
+    if (lowercaseMsg.includes('resume') || lowercaseMsg.includes('ats')) {
+      reply = `To optimize your resume score (currently at ${profile.aiFeedback?.score || 0}/100), ensure you list your technical skills at the top, format your education and project milestones with dates, and quantify your project achievements (e.g. "reduced response time by 20%"). You can upload your PDF resume in your Dashboard to analyze it!`;
+    } else if (lowercaseMsg.includes('skills') || lowercaseMsg.includes('learn')) {
+      reply = `Looking at your current skills (${profile.skills.join(', ') || 'No skills added yet'}), I recommend learning Docker, Kubernetes, AWS, and system architecture to stand out in Full-Stack and Backend developer hiring pipelines.`;
+    } else if (lowercaseMsg.includes('interview') || lowercaseMsg.includes('mock')) {
+      reply = `Preparing for interviews is key. Go to the "AI Mock Interview" section on your sidebar, select your target role/company, and practice mock questions! I can also advise on HR behavioral tips like utilizing the STAR method (Situation, Task, Action, Result).`;
+    } else if (lowercaseMsg.includes('jobs') || lowercaseMsg.includes('recommend')) {
+      reply = `Based on your skills, you should target roles like Full Stack Developer or Frontend Engineer. Go to "Search Jobs" in your dashboard, click on any active listing, and click "AI Match Score" to see how well your profile matches the role!`;
+    } else {
+      reply = `That is an interesting question! To make your profile competitive, make sure you maintain a clean projects portfolio, solve DSA problems under our "Assessments" challenge room, and stay active in campus Hackathons. Let me know if you need specific tips on resume building or roadmaps!`;
+    }
+
+    res.json({ reply });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Generate Learning Roadmap
+// @route   POST /api/ai/generate-roadmap
+// @access  Private (Student)
+export const generateRoadmap = async (req, res) => {
+  const { goal, experienceLevel = 'Intermediate', commitment = '10 hours/week' } = req.body;
+
+  if (!goal) {
+    return res.status(400).json({ message: 'Please provide a career goal role' });
+  }
+
+  try {
+    let roadmapData = [];
+
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '') {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const prompt = `
+          Generate a detailed 6-month learning curriculum / roadmap for a student whose goal is to become a "${goal}".
+          The student currently has a "${experienceLevel}" level of experience, and can dedicate "${commitment}" to studying every week.
+          Customize the pace, topic difficulty, and project scopes specifically to match their experience level and study commitment.
+          
+          For each of the 6 months, provide:
+          - The month number
+          - A high-level title
+          - A list of 4 key topics/skills to master
+          - A practical project to build that month
+          
+          Respond ONLY with a valid JSON array of objects, structured exactly like:
+          [
+            {
+              "month": 1,
+              "title": "...",
+              "topics": ["...", "...", "...", "..."],
+              "project": "..."
+            }
+          ]
+          Do not include markdown backticks or commentary, just the JSON block.
+        `;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+        roadmapData = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
+      } catch (geminiError) {
+        console.error('Gemini Roadmap generator failed, using fallback:', geminiError.message);
+      }
+    }
+
+    if (roadmapData.length === 0) {
+      // Fallback 6 month roadmap
+      roadmapData = [
+        {
+          month: 1,
+          title: `Foundations of ${goal}`,
+          topics: ['Core syntax and variables', 'Data structures basics', 'Command line & Git fundamentals', 'Logical problem solving'],
+          project: 'Local CLI automation script and Github repository setup'
+        },
+        {
+          month: 2,
+          title: 'Intermediate Concepts & APIs',
+          topics: ['Object Oriented Programming', 'HTTP protocol & REST conventions', 'Asynchronous processing', 'Database query styling'],
+          project: 'Fully functioning RESTful API backend with local data file persistence'
+        },
+        {
+          month: 3,
+          title: 'Database Architectures & Storage',
+          topics: ['SQL database structures', 'NoSQL documents (MongoDB)', 'Schema modeling & constraints', 'Indexes and performance'],
+          project: 'Full-featured database-backed application schema with migrations'
+        },
+        {
+          month: 4,
+          title: 'Frontend Linkage & UI Design',
+          topics: ['Modern components framework (React)', 'State state management', 'Component lifecycles', 'CSS Flexbox / Responsive grids'],
+          project: 'Responsive web portal that queries the month 2 API server'
+        },
+        {
+          month: 5,
+          title: 'Authentication & Security Protocols',
+          topics: ['JSON Web Token configurations', 'Hashing passwords securely', 'CORS & security headers', 'Validation middlewares'],
+          project: 'Secure user registration system with email confirmation mocks'
+        },
+        {
+          month: 6,
+          title: 'DevOps, Projects Portfolio & Interview Prep',
+          topics: ['Dockerizing containers', 'Cloud hosting (Vercel/Render)', 'DSA coding challenges', 'System design concepts'],
+          project: 'Deployed full-stack application on the cloud + optimized portfolio website'
+        }
+      ];
+    }
+
+    res.json({ goal, roadmap: roadmapData });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Generate Interview Questions
+// @route   POST /api/ai/generate-interview
+// @access  Private (Student)
+export const generateInterview = async (req, res) => {
+  const { role, company, type } = req.body;
+
+  if (!role || !company) {
+    return res.status(400).json({ message: 'Please provide role and company fields' });
+  }
+
+  try {
+    let questions = [];
+
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '') {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const prompt = `
+          Generate exactly 5 realistic interview questions for a candidate applying for the role: "${role}" at company: "${company}".
+          The interview type is: "${type || 'Technical'}".
+          Make the questions sound professional, technical, and targeted (include specific concepts like React hooks, Express routing, DSA, SQL queries, or HR situational questions depending on the role/type).
+          
+          Respond ONLY with a valid JSON array of objects structured exactly like:
+          [
+            { "id": 1, "question": "..." },
+            { "id": 2, "question": "..." }
+          ]
+          Do not include formatting wrapper, just JSON.
+        `;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+        questions = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
+      } catch (geminiError) {
+        console.error('Gemini interview generator failed, using offline bank:', geminiError.message);
+      }
+    }
+
+    if (questions.length === 0) {
+      // Fallback
+      if (type?.toLowerCase() === 'hr') {
+        questions = [
+          { id: 1, question: `Why do you want to join ${company} as a ${role}?` },
+          { id: 2, question: 'Tell me about a time you faced a conflict in a group project and how you resolved it.' },
+          { id: 3, question: 'Where do you see yourself in 5 years? How does this role align with your goals?' },
+          { id: 4, question: 'Describe a situation where you had to work under a tight deadline. How did you manage?' },
+          { id: 5, question: 'What is your greatest technical strength, and what is one area you are trying to improve?' }
+        ];
+      } else {
+        questions = [
+          { id: 1, question: `How would you explain the core architecture of a web application built for the ${role} stack?` },
+          { id: 2, question: `What are the typical scaling challenges faced in production systems at a company like ${company}?` },
+          { id: 3, question: 'Describe the differences between SQL relational schemas and NoSQL document structures. When is each preferred?' },
+          { id: 4, question: 'Explain how asynchronous executions are handled in JavaScript (Event loop, microtasks, callback queues).' },
+          { id: 5, question: 'How do you secure your APIs from unauthorized access or cross-site requests?' }
+        ];
+      }
+    }
+
+    res.json({ role, company, type: type || 'Technical', questions });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Evaluate Mock Interview Answers
+// @route   POST /api/ai/evaluate-interview
+// @access  Private (Student)
+export const evaluateInterview = async (req, res) => {
+  const { role, company, type, questions, answers } = req.body;
+
+  if (!questions || !answers || questions.length !== answers.length) {
+    return res.status(400).json({ message: 'Questions and Answers arrays must be provided and have matching lengths.' });
+  }
+
+  try {
+    let evaluationResult;
+
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '') {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const QnABlocks = questions.map((q, i) => `Q${i+1}: ${q}\nUser Answer: ${answers[i] || 'No answer provided'}`).join('\n\n');
+
+        const prompt = `
+          You are an elite corporate technical interviewer.
+          Grade the candidate's answers for a "${role}" role interview at "${company}". Type: "${type || 'Technical'}".
+          
+          Questions and Candidate Answers:
+          ${QnABlocks}
+
+          Evaluate each answer and generate a JSON review containing:
+          1. overallScore (integer from 0 to 100).
+          2. feedback (array of objects):
+             - question (string)
+             - answer (string)
+             - score (integer from 0 to 10 for this question)
+             - tips (specific suggestions for improvement)
+             - modelAnswer (a model answer in 2 sentences)
+          3. summary (string summarizing strengths and key areas to study).
+
+          Respond ONLY with a valid JSON block. No outside text.
+        `;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        evaluationResult = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
+      } catch (geminiError) {
+        console.error('Gemini evaluation failed, falling back to local grading:', geminiError.message);
+      }
+    }
+
+    if (!evaluationResult) {
+      // Local fallback builder
+      let totalPoints = 0;
+      const feedback = questions.map((q, i) => {
+        const ans = answers[i] || '';
+        let score = 2; // base
+        let tips = 'Expand on technical concepts and details. Give examples.';
+        
+        if (ans.trim().length > 30) {
+          score += 3;
+          tips = 'Good length. Add actual code references or design keywords to make it impact-oriented.';
+        }
+        if (ans.toLowerCase().includes('database') || ans.toLowerCase().includes('api') || ans.toLowerCase().includes('react') || ans.toLowerCase().includes('promise')) {
+          score += 3;
+          tips = 'Excellent. You are using the correct technical terms. Structure the response using bullet points.';
+        }
+        score = Math.min(score, 10);
+        totalPoints += score;
+
+        return {
+          question: q,
+          answer: ans,
+          score,
+          tips,
+          modelAnswer: `For: "${q}", a strong answer focuses on system reliability, scaling metrics, and concrete examples from projects.`
+        };
+      });
+
+      const overallScore = Math.round((totalPoints / (questions.length * 10)) * 100);
+
+      evaluationResult = {
+        overallScore,
+        feedback,
+        summary: `Offline evaluation complete. You achieved ${overallScore}%. Improve on listing concrete metrics, architecture diagrams, and explaining exact technical ownership in your code.`
+      };
+    }
+
+    // Save mock interview attempt to DB
+    await MockInterview.create({
+      user: req.user._id,
+      role,
+      company,
+      type: type || 'Technical',
+      overallScore: evaluationResult.overallScore,
+      summary: evaluationResult.summary,
+      feedback: evaluationResult.feedback
+    });
+
+    res.json(evaluationResult);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get user mock interviews history
+// @route   GET /api/ai/mock-interviews
+// @access  Private (Student)
+export const getMockInterviews = async (req, res) => {
+  try {
+    const history = await MockInterview.find({ user: req.user._id }).sort({ createdAt: -1 });
+    res.json(history);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all user mock interviews history (for admin)
+// @route   GET /api/ai/mock-interviews/all
+// @access  Private (Admin)
+export const getAllMockInterviews = async (req, res) => {
+  try {
+    const history = await MockInterview.find({})
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 });
+    res.json(history);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Add expert feedback/review to mock interview
+// @route   PUT /api/ai/mock-interviews/:id/expert-feedback
+// @access  Private (Admin)
+export const addExpertFeedback = async (req, res) => {
+  const { rating, comments } = req.body;
+  try {
+    const interview = await MockInterview.findById(req.params.id);
+    if (!interview) {
+      return res.status(404).json({ message: 'Mock interview session not found' });
+    }
+    
+    interview.expertFeedback = {
+      rating: Number(rating),
+      comments,
+      reviewedBy: req.user._id,
+      reviewedAt: new Date()
+    };
+    
+    await interview.save();
+    res.json(interview);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

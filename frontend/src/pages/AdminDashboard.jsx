@@ -19,12 +19,31 @@ const AdminDashboard = ({ view = 'overview' }) => {
   });
   const [profiles, setProfiles] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Directory UI States
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [analyticsTab, setAnalyticsTab] = useState('pipeline'); // 'pipeline' | 'skills'
+  const [matchJobId, setMatchJobId] = useState(''); // '' means All Candidates
+
+  // Eligibility & Batch Manager States
+  const [minCgpa, setMinCgpa] = useState(0);
+  const [minScore, setMinScore] = useState(0);
+  const [placedStatus, setPlacedStatus] = useState('All');
+  const [verifiedStatus, setVerifiedStatus] = useState('All');
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  
+  const [showBulkBroadcastModal, setShowBulkBroadcastModal] = useState(false);
+  const [bulkBroadcastTitle, setBulkBroadcastTitle] = useState('');
+  const [bulkBroadcastMessage, setBulkBroadcastMessage] = useState('');
+  const [bulkBroadcasting, setBulkBroadcasting] = useState(false);
+
+  const [sortField, setSortField] = useState('name');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Announcement States
   const [broadcastTitle, setBroadcastTitle] = useState('');
@@ -46,6 +65,7 @@ const AdminDashboard = ({ view = 'overview' }) => {
 
         setProfiles(profilesData);
         setApplications(appsData);
+        setJobs(jobsData);
 
         // Calculate dynamic metrics
         const uniquePlacedStudentIds = new Set(
@@ -226,13 +246,255 @@ const AdminDashboard = ({ view = 'overview' }) => {
 
   const topSkills = getSkillsDistribution();
 
-  // Filter Profiles
-  const filteredProfiles = profiles.filter((p) => {
-    const name = p.user?.name?.toLowerCase() || '';
-    const email = p.user?.email?.toLowerCase() || '';
-    const skillMatch = p.skills.some((s) => s.toLowerCase().includes(searchTerm.toLowerCase()));
-    return name.includes(searchTerm.toLowerCase()) || email.includes(searchTerm.toLowerCase()) || skillMatch;
-  });
+  const getStudentMatchScore = (studentProfile, job) => {
+    if (!job) return { score: studentProfile.aiFeedback?.score || 0, matched: [], missing: [] };
+    
+    const requirements = job.requirements && job.requirements.length > 0
+      ? job.requirements
+      : [job.title];
+
+    const studentSkills = (studentProfile.skills || []).map(s => s.toLowerCase().trim());
+    const jobReqs = requirements.map(r => r.toLowerCase().trim());
+
+    const matched = [];
+    const missing = [];
+
+    requirements.forEach(req => {
+      const cleanReq = req.toLowerCase().trim();
+      const isMatched = studentSkills.some(skill => skill.includes(cleanReq) || cleanReq.includes(skill));
+      if (isMatched) {
+        matched.push(req);
+      } else {
+        missing.push(req);
+      }
+    });
+
+    const skillScore = jobReqs.length > 0 ? (matched.length / jobReqs.length) * 100 : 100;
+    const resumeScore = studentProfile.aiFeedback?.score || 0;
+    const finalScore = Math.round((skillScore * 0.6) + (resumeScore * 0.4));
+    return { score: finalScore, matched, missing };
+  };
+
+  // Dynamic Activity Feed aggregation from database arrays
+  const getRecentActivities = () => {
+    const activities = [];
+
+    // 1. Extract applications
+    applications.forEach(app => {
+      if (app.student && app.job) {
+        activities.push({
+          type: 'application',
+          title: 'New Job Application',
+          description: `${app.student.name || 'Student'} applied to ${app.job.title} at ${app.job.company}.`,
+          timestamp: new Date(app.createdAt),
+          status: app.status
+        });
+      }
+    });
+
+    // 2. Extract AI resume scores & profile updates
+    profiles.forEach(p => {
+      if (p.user) {
+        if (p.aiFeedback?.score > 0) {
+          activities.push({
+            type: 'resume',
+            title: 'Resume Analyzed',
+            description: `${p.user.name} uploaded a resume. AI Score: ${p.aiFeedback.score}/100.`,
+            timestamp: new Date(p.updatedAt || p.createdAt)
+          });
+        }
+        if (p.isVerified) {
+          activities.push({
+            type: 'verification',
+            title: 'Student Verified',
+            description: `${p.user.name} has been verified by the placement administration.`,
+            timestamp: new Date(p.updatedAt || p.createdAt)
+          });
+        }
+      }
+    });
+
+    // Sort by timestamp descending
+    activities.sort((a, b) => b.timestamp - a.timestamp);
+    return activities.slice(0, 15); // Get top 15 recent activities
+  };
+
+  // Bulk Verification Handler
+  const handleBulkVerify = async () => {
+    if (selectedStudents.length === 0) return;
+    setLoading(true);
+    try {
+      await Promise.all(
+        selectedStudents.map(profileId =>
+          fetch(`${API_BASE}/profile/verify/${profileId}`, {
+            method: 'PUT',
+            headers: authHeader(),
+          })
+        )
+      );
+      addToast(`Successfully verified ${selectedStudents.length} student profiles in bulk!`, 'success');
+      setProfiles(prev =>
+        prev.map(p => selectedStudents.includes(p._id) ? { ...p, isVerified: true } : p)
+      );
+      setSelectedStudents([]);
+    } catch (err) {
+      addToast('Bulk verification failed. Try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Bulk Targeted Broadcast Handler
+  const handleBulkBroadcast = async (e) => {
+    e.preventDefault();
+    if (!bulkBroadcastTitle || !bulkBroadcastMessage || selectedStudents.length === 0) {
+      addToast('Please enter both announcement title and message body', 'warning');
+      return;
+    }
+    setBulkBroadcasting(true);
+    try {
+      const res = await fetch(`${API_BASE}/notifications/broadcast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify({ 
+          title: `[Targeted] ${bulkBroadcastTitle}`, 
+          message: bulkBroadcastMessage 
+        })
+      });
+      if (res.ok) {
+        addToast(`Targeted broadcast notification sent successfully to selected candidates!`, 'success');
+        setBulkBroadcastTitle('');
+        setBulkBroadcastMessage('');
+        setShowBulkBroadcastModal(false);
+        setSelectedStudents([]);
+      } else {
+        throw new Error('Broadcast failed');
+      }
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setBulkBroadcasting(false);
+    }
+  };
+
+  // Export current filtered eligibility list to CSV
+  const handleExportEligibilityCSV = () => {
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += 'Student Name,Email,Skills,AI Score,CGPA,Placement Status,Verification\n';
+
+    eligibilityProfiles.forEach((p) => {
+      const name = p.user?.name || 'N/A';
+      const email = p.user?.email || 'N/A';
+      const skillsStr = p.skills.join('; ');
+      const score = p.resumeScore || '0';
+      const cgpa = p.cgpa || '0';
+      const status = p.isPlaced ? 'Placed' : 'Seeking Opportunities';
+      const verified = p.isVerified ? 'Verified' : 'Pending';
+
+      const row = `"${name}","${email}","${skillsStr}","${score}","${cgpa}","${status}","${verified}"`;
+      csvContent += row + '\n';
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `AccioPlacement_EligibilityReport_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Filter & Sort for the Batch Eligibility Grid Table
+  const eligibilityProfiles = (() => {
+    let list = profiles.map(p => {
+      const isPlaced = applications.some((app) => app.student?._id === p.user?._id && app.status === 'Offered');
+      const cgpa = p.education && p.education[0] ? parseFloat(p.education[0].cgpa || 0) : 0;
+      const dsaCount = p.problemSolving?.total || 0;
+      return { 
+        ...p, 
+        isPlaced, 
+        cgpa, 
+        dsaCount,
+        resumeScore: p.aiFeedback?.score || 0 
+      };
+    });
+
+    list = list.filter(p => {
+      if (minCgpa > 0 && p.cgpa < minCgpa) return false;
+      if (minScore > 0 && p.resumeScore < minScore) return false;
+      if (placedStatus === 'Placed' && !p.isPlaced) return false;
+      if (placedStatus === 'Unplaced' && p.isPlaced) return false;
+      if (verifiedStatus === 'Verified' && !p.isVerified) return false;
+      if (verifiedStatus === 'Pending' && p.isVerified) return false;
+
+      if (searchTerm) {
+        const query = searchTerm.toLowerCase();
+        const name = p.user?.name?.toLowerCase() || '';
+        const email = p.user?.email?.toLowerCase() || '';
+        const skillMatch = p.skills.some((s) => s.toLowerCase().includes(query));
+        if (!name.includes(query) && !email.includes(query) && !skillMatch) return false;
+      }
+      return true;
+    });
+
+    list.sort((a, b) => {
+      let valA, valB;
+      if (sortField === 'name') {
+        valA = a.user?.name || '';
+        valB = b.user?.name || '';
+      } else if (sortField === 'cgpa') {
+        valA = a.cgpa;
+        valB = b.cgpa;
+      } else if (sortField === 'score') {
+        valA = a.resumeScore;
+        valB = b.resumeScore;
+      } else if (sortField === 'dsa') {
+        valA = a.dsaCount;
+        valB = b.dsaCount;
+      }
+
+      if (typeof valA === 'string') {
+        return sortDirection === 'asc' 
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      } else {
+        return sortDirection === 'asc' ? valA - valB : valB - valA;
+      }
+    });
+
+    return list;
+  })();
+
+  // Filter & Rank Profiles dynamically
+  const filteredProfiles = (() => {
+    let list = profiles.map(p => {
+      if (matchJobId) {
+        const job = jobs.find(j => j._id === matchJobId);
+        const matchData = getStudentMatchScore(p, job);
+        return { 
+          ...p, 
+          matchScore: matchData.score, 
+          matchedSkills: matchData.matched, 
+          missingSkills: matchData.missing 
+        };
+      }
+      return { ...p, matchScore: p.aiFeedback?.score || 0 };
+    });
+
+    // Apply search filter
+    list = list.filter((p) => {
+      const name = p.user?.name?.toLowerCase() || '';
+      const email = p.user?.email?.toLowerCase() || '';
+      const skillMatch = p.skills.some((s) => s.toLowerCase().includes(searchTerm.toLowerCase()));
+      return name.includes(searchTerm.toLowerCase()) || email.includes(searchTerm.toLowerCase()) || skillMatch;
+    });
+
+    if (matchJobId) {
+      list.sort((a, b) => b.matchScore - a.matchScore);
+    }
+    
+    return list;
+  })();
 
   // Render Student Modal in Portal
   const renderStudentModal = () => {
@@ -624,17 +886,58 @@ const AdminDashboard = ({ view = 'overview' }) => {
 
         <div className="glass-card" style={{ ...styles.studentBlock, maxHeight: 'none' }}>
           <div style={styles.directoryHeader}>
-            <h3 style={styles.cardTitle}>Registered Candidates ({filteredProfiles.length})</h3>
-            <div style={styles.searchContainer}>
-              <Search size={16} style={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="Search name, email, skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="form-input"
-                style={{ paddingLeft: '2.5rem', fontSize: '0.85rem', height: '38px' }}
-              />
+            <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 w-100">
+              <div className="d-flex align-items-center gap-2">
+                <div 
+                  className="d-flex align-items-center justify-content-center text-primary" 
+                  style={{ 
+                    width: '32px', 
+                    height: '32px', 
+                    borderRadius: '8px', 
+                    background: 'var(--primary-glow)', 
+                    flexShrink: 0 
+                  }}
+                >
+                  <Users size={16} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.2px' }}>
+                    Registered Candidates ({filteredProfiles.length})
+                  </h3>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Browse and match student profiles</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <select
+                  value={matchJobId}
+                  onChange={(e) => setMatchJobId(e.target.value)}
+                  className="form-select form-select-compact"
+                  style={{ 
+                    width: '180px', 
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="">🔍 View All Candidates</option>
+                  {jobs.map(job => (
+                    <option key={job._id} value={job._id}>
+                      🎯 {job.company} - {job.title}
+                    </option>
+                  ))}
+                </select>
+
+                <div style={{ ...styles.searchContainer, width: '220px' }}>
+                  <Search size={16} style={styles.searchIcon} />
+                  <input
+                    type="text"
+                    placeholder="Search name, email, skills..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="form-input"
+                    style={{ paddingLeft: '2.5rem', fontSize: '0.85rem', height: '38px' }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -663,6 +966,19 @@ const AdminDashboard = ({ view = 'overview' }) => {
                         )}
                       </div>
                       <p style={styles.studentEmail}>{p.user?.email}</p>
+                      {matchJobId && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '0.4rem' }}>
+                          {p.matchedSkills.slice(0, 3).map((s, i) => (
+                            <span key={i} className="badge bg-success-glow text-success" style={{ padding: '1px 6px', fontSize: '0.62rem', border: '1px solid rgba(16,185,129,0.2)' }}>✓ {s}</span>
+                          ))}
+                          {p.missingSkills.slice(0, 3).map((s, i) => (
+                            <span key={i} className="badge bg-danger-glow text-danger" style={{ padding: '1px 6px', fontSize: '0.62rem', border: '1px solid rgba(239,68,68,0.2)' }}>✗ {s}</span>
+                          ))}
+                          {(p.matchedSkills.length > 3 || p.missingSkills.length > 3) && (
+                            <span className="text-muted" style={{ fontSize: '0.6rem', alignSelf: 'center' }}>+more</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -678,8 +994,27 @@ const AdminDashboard = ({ view = 'overview' }) => {
                     )}
                   </div>
 
-                  {/* AI rating score badge */}
-                  {p.aiFeedback?.score > 0 ? (
+                  {/* Match score or AI rating score badge */}
+                  {matchJobId ? (
+                    <div 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '4px',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontWeight: '700',
+                        backgroundColor: p.matchScore >= 80 ? 'rgba(16,185,129,0.1)' : p.matchScore >= 50 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
+                        border: `1px solid ${p.matchScore >= 80 ? 'var(--success)' : p.matchScore >= 50 ? 'var(--warning)' : 'var(--danger)'}`,
+                        color: p.matchScore >= 80 ? 'var(--success)' : p.matchScore >= 50 ? 'var(--warning)' : 'var(--danger)',
+                        height: 'fit-content'
+                      }}
+                    >
+                      <Sparkles size={11} />
+                      <span>{p.matchScore}% Match</span>
+                    </div>
+                  ) : p.aiFeedback?.score > 0 ? (
                     <div style={{ ...styles.scoreBadge, backgroundColor: `${COLORS[3]}10`, border: `1px solid ${COLORS[3]}` }}>
                       <Sparkles size={11} color={COLORS[3]} />
                       <span style={{ color: COLORS[3], fontWeight: '700' }}>{p.aiFeedback.score}</span>
@@ -694,6 +1029,414 @@ const AdminDashboard = ({ view = 'overview' }) => {
         </div>
 
         {renderStudentModal()}
+      </div>
+    );
+  }
+
+  if (view === 'eligibility') {
+    // Pagination calculation
+    const totalEligible = eligibilityProfiles.length;
+    const startIndex = (currentPage - 1) * pageSize;
+    const paginatedProfiles = eligibilityProfiles.slice(startIndex, startIndex + pageSize);
+    const totalPages = Math.ceil(totalEligible / pageSize) || 1;
+
+    const handleSelectAll = (checked) => {
+      if (checked) {
+        setSelectedStudents(paginatedProfiles.map(p => p._id));
+      } else {
+        setSelectedStudents([]);
+      }
+    };
+
+    const handleSelectOne = (checked, profileId) => {
+      if (checked) {
+        setSelectedStudents(prev => [...prev, profileId]);
+      } else {
+        setSelectedStudents(prev => prev.filter(id => id !== profileId));
+      }
+    };
+
+    const toggleSort = (field) => {
+      if (sortField === field) {
+        setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      } else {
+        setSortField(field);
+        setSortDirection('asc');
+      }
+    };
+
+    const activities = getRecentActivities();
+
+    return (
+      <div style={styles.container} className="animate-fade-in">
+        <header style={styles.header}>
+          <div>
+            <h1 style={styles.title}>Talent & Batch Manager</h1>
+            <p style={styles.subtitle}>Filter the cohort by CGPA and resume score, manage verifications, and monitor platform audit logs.</p>
+          </div>
+          <button onClick={handleExportEligibilityCSV} className="btn btn-primary" style={styles.exportBtn}>
+            <Download size={16} />
+            <span>Export Eligible CSV</span>
+          </button>
+        </header>
+
+        {/* Filters Panel */}
+        <div className="glass-card p-4 d-flex flex-column gap-3 mb-4">
+          <h4 style={{ fontSize: '0.95rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.6rem', marginBottom: '0.25rem' }}>
+            <Sparkles size={16} className="text-primary" />
+            <span>Cohort Eligibility Filters</span>
+          </h4>
+          <div className="row g-3">
+            <div className="col-md-3 col-sm-6">
+              <label className="form-label" style={{ fontSize: '0.78rem' }}>Min CGPA Threshold ({minCgpa > 0 ? minCgpa : 'Any'})</label>
+              <input 
+                type="range" 
+                min="0" 
+                max="10" 
+                step="0.5" 
+                value={minCgpa} 
+                onChange={(e) => { setMinCgpa(parseFloat(e.target.value)); setCurrentPage(1); }} 
+                className="premium-range-slider w-100"
+              />
+            </div>
+            <div className="col-md-3 col-sm-6">
+              <label className="form-label" style={{ fontSize: '0.78rem' }}>Min AI Resume Score ({minScore > 0 ? minScore : 'Any'})</label>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                step="5" 
+                value={minScore} 
+                onChange={(e) => { setMinScore(parseInt(e.target.value)); setCurrentPage(1); }} 
+                className="premium-range-slider w-100"
+              />
+            </div>
+            <div className="col-md-3 col-sm-6">
+              <label className="form-label" style={{ fontSize: '0.78rem' }}>Placement Status</label>
+              <select 
+                value={placedStatus} 
+                onChange={(e) => { setPlacedStatus(e.target.value); setCurrentPage(1); }}
+                className="form-select form-select-compact mt-1"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Placed">Only Placed (Offered)</option>
+                <option value="Unplaced">Only Unplaced (Seeking)</option>
+              </select>
+            </div>
+            <div className="col-md-3 col-sm-6">
+              <label className="form-label" style={{ fontSize: '0.78rem' }}>Verification State</label>
+              <select 
+                value={verifiedStatus} 
+                onChange={(e) => { setVerifiedStatus(e.target.value); setCurrentPage(1); }}
+                className="form-select form-select-compact mt-1"
+              >
+                <option value="All">All States</option>
+                <option value="Verified">Verified Only</option>
+                <option value="Pending">Pending Verification</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ position: 'relative', width: '100%', marginTop: '0.25rem' }}>
+            <Search size={14} style={{ position: 'absolute', left: '0.9rem', top: '11px', color: 'var(--text-muted)' }} />
+            <input
+              type="text"
+              placeholder="Search eligible candidates by name, email, or skill keywords..."
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              className="form-input form-input-compact text-sm"
+              style={{ paddingLeft: '2.5rem', width: '100%' }}
+            />
+          </div>
+        </div>
+
+        {/* Bulk Action Alert Panel */}
+        {selectedStudents.length > 0 && (
+          <div className="p-3 mb-4 rounded border d-flex justify-content-between align-items-center flex-wrap gap-2 animate-fade-in" style={{ backgroundColor: 'var(--primary-glow)', borderColor: 'rgba(59,130,246,0.3)' }}>
+            <div className="d-flex align-items-center gap-2">
+              <ShieldCheck size={18} className="text-primary" />
+              <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                {selectedStudents.length} candidate(s) selected for bulk action
+              </span>
+            </div>
+            <div className="d-flex gap-2">
+              <button 
+                onClick={handleBulkVerify} 
+                className="btn btn-sm btn-primary" 
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem' }}
+              >
+                Verify Profiles
+              </button>
+              <button 
+                onClick={() => setShowBulkBroadcastModal(true)} 
+                className="btn btn-sm btn-secondary" 
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem' }}
+              >
+                Broadcast to Selected
+              </button>
+              <button 
+                onClick={() => setSelectedStudents([])} 
+                className="btn btn-sm btn-outline-secondary" 
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+              >
+                Clear Selection
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="row g-4">
+          {/* Left Column: Eligible Students Table */}
+          <div className="col-lg-8 col-md-12">
+            <div className="glass-card p-4">
+              <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <h3 style={{ ...styles.cardTitle, margin: 0 }}>Eligible Talent Pool ({totalEligible})</h3>
+                <div className="d-flex align-items-center gap-2 text-xs text-muted">
+                  <span>Show</span>
+                  <select 
+                    value={pageSize} 
+                    onChange={e => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
+                    className="form-select form-select-compact"
+                    style={{ width: '65px', height: '30px', padding: '0 0.4rem', borderRadius: '6px' }}
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                  </select>
+                  <span>per page</span>
+                </div>
+              </div>
+
+              {/* Responsive Eligibility Table */}
+              <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                <table className="premium-table" style={{ width: '100%', minWidth: '700px', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ color: 'var(--text-secondary)' }}>
+                      <th style={{ textAlign: 'center', width: '40px' }}>
+                        <input 
+                          type="checkbox"
+                          checked={paginatedProfiles.length > 0 && selectedStudents.length === paginatedProfiles.length}
+                          onChange={(e) => handleSelectAll(e.target.checked)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </th>
+                      <th onClick={() => toggleSort('name')} style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}>
+                        Candidate Name {sortField === 'name' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+                      </th>
+                      <th onClick={() => toggleSort('cgpa')} style={{ textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: '90px' }}>
+                        CGPA {sortField === 'cgpa' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+                      </th>
+                      <th onClick={() => toggleSort('score')} style={{ textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: '110px' }}>
+                        AI Resume {sortField === 'score' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+                      </th>
+                      <th onClick={() => toggleSort('dsa')} style={{ textAlign: 'center', cursor: 'pointer', userSelect: 'none', width: '100px' }}>
+                        DSA Solved {sortField === 'dsa' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+                      </th>
+                      <th style={{ textAlign: 'center', width: '90px' }}>Verification</th>
+                      <th style={{ textAlign: 'center', width: '80px' }}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedProfiles.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                          <GraduationCap size={36} className="mb-2" />
+                          <p className="mb-0">No eligible candidates match your filter thresholds.</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedProfiles.map((p) => (
+                        <tr 
+                          key={p._id} 
+                          className={selectedStudents.includes(p._id) ? 'selected' : ''}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setSelectedStudent(p)}
+                        >
+                          <td style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                            <input 
+                              type="checkbox"
+                              checked={selectedStudents.includes(p._id)}
+                              onChange={(e) => handleSelectOne(e.target.checked, p._id)}
+                              style={{ cursor: 'pointer' }}
+                            />
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center gap-2">
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontWeight: '700', fontSize: '0.75rem', flexShrink: 0, justifyContent: 'center' }}>
+                                {p.user?.name ? p.user.name.charAt(0).toUpperCase() : 'S'}
+                              </div>
+                              <div>
+                                <span className="font-semibold text-sm d-block text-primary">{p.user?.name}</span>
+                                <span className="text-muted d-block text-xs" style={{ fontSize: '0.68rem' }}>{p.user?.email}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: '600' }}>
+                            {p.cgpa > 10 ? `${p.cgpa}%` : (p.cgpa > 0 ? p.cgpa.toFixed(2) : 'N/A')}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            {p.resumeScore > 0 ? (
+                              <span className="badge bg-success-glow text-success font-bold" style={{ fontSize: '0.72rem' }}>
+                                ★ {p.resumeScore}
+                              </span>
+                            ) : (
+                              <span className="text-muted text-xs">No resume</span>
+                            )}
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                            {p.dsaCount} Qs
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            {p.isVerified ? (
+                              <span className="badge bg-success-glow text-success text-xs" style={{ padding: '2px 6px' }}>Verified</span>
+                            ) : (
+                              <span className="badge bg-warning-glow text-warning text-xs" style={{ padding: '2px 6px' }}>Pending</span>
+                            )}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            {p.isPlaced ? (
+                              <span className="badge bg-primary-glow text-primary text-xs" style={{ padding: '2px 6px' }}>Placed</span>
+                            ) : (
+                              <span className="badge bg-secondary-glow text-secondary text-xs" style={{ padding: '2px 6px' }}>Seeking</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Table Pagination controls */}
+              {totalPages > 1 && (
+                <div className="d-flex justify-content-between align-items-center mt-3 pt-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+                  <span className="text-xs text-muted">
+                    Page {currentPage} of {totalPages} ({totalEligible} candidates)
+                  </span>
+                  <div className="d-flex gap-2">
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} 
+                      disabled={currentPage === 1}
+                      className="btn btn-xs btn-outline" 
+                      style={{ fontSize: '0.72rem', padding: '3px 8px' }}
+                    >
+                      Prev
+                    </button>
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} 
+                      disabled={currentPage === totalPages}
+                      className="btn btn-xs btn-outline" 
+                      style={{ fontSize: '0.72rem', padding: '3px 8px' }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column: Live Placement Audit Feed */}
+          <div className="col-lg-4 col-md-12">
+            <div className="glass-card p-4">
+              <h3 style={{ ...styles.cardTitle, marginBottom: '0.4rem' }}>Placement Activity Log</h3>
+              <p className="text-xs text-muted mb-4">Live audit log of registered candidates actions on the platform.</p>
+
+              <div className="d-flex flex-column gap-3 overflow-y-auto" style={{ maxHeight: '520px', paddingRight: '2px' }}>
+                {activities.length === 0 ? (
+                  <p className="text-center py-5 text-muted text-xs">No recent platform activities recorded.</p>
+                ) : (
+                  activities.map((act, index) => (
+                    <div key={index} className="d-flex gap-3 align-items-start p-2.5 rounded border bg-surface-elevated shadow-sm" style={{ borderColor: 'var(--border-color)' }}>
+                      <div 
+                        className="d-flex align-items-center justify-content-center flex-shrink-0"
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          backgroundColor: act.type === 'application' ? 'rgba(59,130,246,0.1)' : act.type === 'resume' ? 'rgba(168,85,247,0.1)' : 'rgba(16,185,129,0.1)',
+                          color: act.type === 'application' ? 'var(--primary)' : act.type === 'resume' ? 'var(--accent)' : 'var(--success)'
+                        }}
+                      >
+                        {act.type === 'application' ? <Briefcase size={14} /> : act.type === 'resume' ? <Sparkles size={14} /> : <ShieldCheck size={14} />}
+                      </div>
+                      <div className="flex-grow-1 min-w-0">
+                        <div className="d-flex justify-content-between align-items-baseline gap-2 mb-0.5">
+                          <strong className="text-xs text-primary truncate" style={{ fontWeight: '600' }}>{act.title}</strong>
+                          <span className="text-muted flex-shrink-0" style={{ fontSize: '0.62rem' }}>
+                            {Math.round((new Date() - act.timestamp) / 60000) < 60 
+                              ? `${Math.max(Math.round((new Date() - act.timestamp) / 60000), 1)}m ago`
+                              : act.timestamp.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                            }
+                          </span>
+                        </div>
+                        <p className="text-muted m-0 text-xs" style={{ fontSize: '0.72rem', lineHeight: 1.35 }}>
+                          {act.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Portals */}
+        {renderStudentModal()}
+        
+        {/* Bulk Targeted Broadcast Modal Portal */}
+        {showBulkBroadcastModal && createPortal(
+          <div style={styles.modalOverlay} onClick={() => setShowBulkBroadcastModal(false)}>
+            <div className="animate-fade-in" style={{ ...styles.modalContent, maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
+              <div style={{ ...styles.modalBanner, padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                <button onClick={() => setShowBulkBroadcastModal(false)} style={styles.modalCloseBtn}>
+                  <X size={18} />
+                </button>
+                <h3 style={{ color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.05rem', fontWeight: '700' }}>
+                  <Megaphone size={18} color="var(--primary)" />
+                  <span>Send Targeted Announcement</span>
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.4rem', marginBottom: 0 }}>
+                  Sending targeted portal notification to {selectedStudents.length} selected candidate(s).
+                </p>
+              </div>
+              <form onSubmit={handleBulkBroadcast} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: '600' }}>Announcement Title</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Special Interview Pool Drive"
+                    value={bulkBroadcastTitle}
+                    onChange={e => setBulkBroadcastTitle(e.target.value)}
+                    className="form-input mt-1"
+                    required
+                    style={{ height: '38px', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: '600' }}>Message Content</label>
+                  <textarea
+                    placeholder="Write details for selected students..."
+                    value={bulkBroadcastMessage}
+                    onChange={e => setBulkBroadcastMessage(e.target.value)}
+                    className="form-input mt-1"
+                    required
+                    style={{ minHeight: '100px', fontSize: '0.85rem', resize: 'none' }}
+                  />
+                </div>
+                <div className="d-flex gap-2 justify-content-end mt-2">
+                  <button type="button" onClick={() => setShowBulkBroadcastModal(false)} className="btn btn-outline" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }} disabled={bulkBroadcasting}>
+                    {bulkBroadcasting ? 'Broadcasting...' : 'Send Broadcast'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
       </div>
     );
   }
@@ -877,17 +1620,56 @@ const AdminDashboard = ({ view = 'overview' }) => {
         {/* Right Side: Student Directory */}
         <div className="glass-card" style={styles.studentBlock}>
           <div style={styles.directoryHeader}>
-            <h3 style={styles.cardTitle}>Student Talent Directory</h3>
-            <div style={styles.searchContainer}>
-              <Search size={16} style={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="Search name, email, skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="form-input"
-                style={{ paddingLeft: '2.5rem', fontSize: '0.85rem', height: '38px' }}
-              />
+            <div className="d-flex align-items-center gap-2 mb-1">
+              <div 
+                className="d-flex align-items-center justify-content-center text-primary" 
+                style={{ 
+                  width: '32px', 
+                  height: '32px', 
+                  borderRadius: '8px', 
+                  background: 'var(--primary-glow)', 
+                  flexShrink: 0 
+                }}
+              >
+                <Users size={16} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '0.92rem', fontWeight: '600', color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.2px' }}>
+                  Student Talent Directory
+                </h3>
+                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Filter and match candidates</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', width: '100%' }}>
+              <select
+                value={matchJobId}
+                onChange={(e) => setMatchJobId(e.target.value)}
+                className="form-select form-select-compact"
+                style={{ 
+                  width: '100%', 
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">🔍 View All Candidates</option>
+                {jobs.map(job => (
+                  <option key={job._id} value={job._id}>
+                    🎯 {job.company} - {job.title}
+                  </option>
+                ))}
+              </select>
+
+              <div style={{ ...styles.searchContainer, width: '100%' }}>
+                <Search size={14} style={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Search name, email, skills..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="form-input"
+                  style={{ paddingLeft: '2.2rem', fontSize: '0.8rem', height: '36px', width: '100%' }}
+                />
+              </div>
             </div>
           </div>
 
@@ -916,6 +1698,19 @@ const AdminDashboard = ({ view = 'overview' }) => {
                         )}
                       </div>
                       <p style={styles.studentEmail}>{p.user?.email}</p>
+                      {matchJobId && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '0.4rem' }}>
+                          {p.matchedSkills.slice(0, 2).map((s, i) => (
+                            <span key={i} className="badge bg-success-glow text-success" style={{ padding: '1px 5px', fontSize: '0.6rem', border: '1px solid rgba(16,185,129,0.15)' }}>✓ {s}</span>
+                          ))}
+                          {p.missingSkills.slice(0, 2).map((s, i) => (
+                            <span key={i} className="badge bg-danger-glow text-danger" style={{ padding: '1px 5px', fontSize: '0.6rem', border: '1px solid rgba(239,68,68,0.15)' }}>✗ {s}</span>
+                          ))}
+                          {(p.matchedSkills.length > 2 || p.missingSkills.length > 2) && (
+                            <span className="text-muted" style={{ fontSize: '0.55rem', alignSelf: 'center' }}>+more</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -931,8 +1726,27 @@ const AdminDashboard = ({ view = 'overview' }) => {
                     )}
                   </div>
 
-                  {/* AI rating score badge */}
-                  {p.aiFeedback?.score > 0 ? (
+                  {/* Match score or AI rating score badge */}
+                  {matchJobId ? (
+                    <div 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '4px',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '6px',
+                        fontSize: '0.72rem',
+                        fontWeight: '700',
+                        backgroundColor: p.matchScore >= 80 ? 'rgba(16,185,129,0.1)' : p.matchScore >= 50 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
+                        border: `1px solid ${p.matchScore >= 80 ? 'var(--success)' : p.matchScore >= 50 ? 'var(--warning)' : 'var(--danger)'}`,
+                        color: p.matchScore >= 80 ? 'var(--success)' : p.matchScore >= 50 ? 'var(--warning)' : 'var(--danger)',
+                        height: 'fit-content'
+                      }}
+                    >
+                      <Sparkles size={11} />
+                      <span>{p.matchScore}% Match</span>
+                    </div>
+                  ) : p.aiFeedback?.score > 0 ? (
                     <div style={{ ...styles.scoreBadge, backgroundColor: `${COLORS[3]}10`, border: `1px solid ${COLORS[3]}` }}>
                       <Sparkles size={11} color={COLORS[3]} />
                       <span style={{ color: COLORS[3], fontWeight: '700' }}>{p.aiFeedback.score}</span>

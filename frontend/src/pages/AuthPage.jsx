@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { Lock, Mail, User, ArrowLeft, GraduationCap, Shield, Sparkles, CheckCircle } from 'lucide-react';
+import { Lock, Mail, User, ArrowLeft, GraduationCap, Shield, Sparkles, CheckCircle, Briefcase } from 'lucide-react';
 
 const companies = [
   { name: 'Google', icon: 'G' },
@@ -280,6 +280,21 @@ const AuthPage = ({ onBack }) => {
                     <div style={styles.roleCardText}>
                       <span style={{ ...styles.roleCardName, color: role === 'student' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>Student</span>
                       <span style={styles.roleCardDesc}>Search & apply</span>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setRole('recruiter')}
+                    className={`auth-role-card ${role === 'recruiter' ? 'active-recruiter' : ''}`}
+                    style={{
+                      borderColor: role === 'recruiter' ? 'var(--accent)' : 'var(--border-color)',
+                      backgroundColor: role === 'recruiter' ? 'var(--accent-glow)' : 'var(--input-bg)',
+                    }}
+                  >
+                    <Briefcase size={20} color={role === 'recruiter' ? 'var(--accent)' : 'var(--text-muted)'} />
+                    <div style={styles.roleCardText}>
+                      <span style={{ ...styles.roleCardName, color: role === 'recruiter' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>Recruiter</span>
+                      <span style={styles.roleCardDesc}>Post jobs & hire</span>
                     </div>
                   </div>
 
