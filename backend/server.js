@@ -18,6 +18,8 @@ import eventRoutes from './routes/eventRoutes.js';
 import assessmentRoutes from './routes/assessmentRoutes.js';
 import interviewRoutes from './routes/interviewRoutes.js';
 import platformConfigRoutes from './routes/platformConfigRoutes.js';
+import recruiterRoutes from './routes/recruiterRoutes.js';
+import ecosystemRoutes from './routes/ecosystemRoutes.js';
 
 // Load Env variables
 dotenv.config();
@@ -53,6 +55,9 @@ app.use('/api/events', eventRoutes);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/platform-config', platformConfigRoutes);
+app.use('/api/recruiter', recruiterRoutes);
+app.use('/api/community', ecosystemRoutes);
+app.use('/api/ecosystem', ecosystemRoutes);
 
 // Base route for API check
 app.get('/', (req, res) => {

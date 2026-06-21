@@ -233,3 +233,56 @@ export const getLeaderboard = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Create a new assessment
+// @route   POST /api/assessments
+// @access  Private (Admin only)
+export const createAssessment = async (req, res) => {
+  const { title, category, description, duration, questions } = req.body;
+
+  try {
+    if (!title || !category || !duration || !questions || questions.length === 0) {
+      return res.status(400).json({ message: 'Title, category, duration, and questions are required' });
+    }
+
+    const assessment = await Assessment.create({
+      title,
+      category,
+      description,
+      duration: Number(duration),
+      questions,
+      submissions: [],
+    });
+
+    // Notify all students of new assessment
+    const students = await User.find({ role: 'student' });
+    const notifications = students.map((student) => ({
+      recipient: student._id,
+      title: 'New Assessment Added! 📝',
+      message: `A new assessment "${title}" in category "${category}" is now available.`,
+      read: false,
+    }));
+    await Notification.insertMany(notifications);
+
+    res.status(201).json(assessment);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete an assessment
+// @route   DELETE /api/assessments/:id
+// @access  Private (Admin only)
+export const deleteAssessment = async (req, res) => {
+  try {
+    const assessment = await Assessment.findById(req.params.id);
+    if (!assessment) {
+      return res.status(404).json({ message: 'Assessment not found' });
+    }
+
+    await assessment.deleteOne();
+    res.json({ message: 'Assessment removed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

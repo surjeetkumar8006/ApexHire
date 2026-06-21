@@ -213,6 +213,208 @@ const StudentDashboard = () => {
 
   const completeness = computeCompleteness();
 
+  const generateAndDownloadPortfolio = () => {
+    if (!profile) return;
+    const skillsListHTML = (profile.skills || []).map(s => `<span class="skill-tag">${s}</span>`).join('') || '<p>Skills coming soon...</p>';
+    const educationListHTML = (profile.education || []).map(edu => `
+        <div class="card">
+          <div class="card-title">${edu.degree}</div>
+          <div class="card-sub">${edu.school} ${edu.cgpa ? `• CGPA: ${edu.cgpa}` : ''}</div>
+        </div>
+    `).join('') || '<p>Education coming soon...</p>';
+    const experienceListHTML = (profile.experience || []).map(exp => `
+        <div class="card">
+          <div class="card-title">${exp.position}</div>
+          <div class="card-sub">${exp.company}</div>
+          <p>${exp.description}</p>
+        </div>
+    `).join('') || '<p>Experience coming soon...</p>';
+
+    const portfolioHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${user.name} - Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --primary: #6366f1;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #06b6d4;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      padding: 5rem 2rem;
+      text-align: center;
+      background: linear-gradient(185deg, #111827, #090d16);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    h1 {
+      font-size: 3rem;
+      margin: 0;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+    section {
+      margin-bottom: 4rem;
+    }
+    h2 {
+      font-size: 1.8rem;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+      margin-bottom: 2rem;
+    }
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .skill-tag {
+      background-color: var(--card-bg);
+      padding: 0.5rem 1.25rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.05);
+      color: var(--accent);
+    }
+    .card {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 0 0 0.5rem 0;
+    }
+    .card-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    footer {
+      text-align: center;
+      padding: 3rem 0;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${user.name}</h1>
+    <p class="subtitle">Software Developer Portfolio</p>
+  </header>
+  <div class="container">
+    <section>
+      <h2>Technical Expertise</h2>
+      <div class="skills-grid">
+        ${skillsListHTML}
+      </div>
+    </section>
+
+    <section>
+      <h2>Education Journey</h2>
+      ${educationListHTML}
+    </section>
+
+    <section>
+      <h2>Work Experience & Projects</h2>
+      ${experienceListHTML}
+    </section>
+  </div>
+  <footer>
+    <p>&copy; ${new Date().getFullYear()} ${user.name}. Generated via ApexHire Portal.</p>
+  </footer>
+</body>
+</html>
+    `;
+    const blob = new Blob([portfolioHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${user.name.toLowerCase().replace(/\s+/g, '-')}-portfolio.html`;
+    link.click();
+    addToast('Interactive portfolio website downloaded successfully!', 'success');
+  };
+
+  const generateAndDownloadResume = () => {
+    if (!profile) return;
+    const eduHTML = profile.education.map(e => `
+    <div class="item">
+      <div class="item-title">${e.degree}</div>
+      <div class="item-sub">${e.school} ${e.cgpa ? `| CGPA: ${e.cgpa}` : ''}</div>
+    </div>
+    `).join('');
+
+    const expHTML = profile.experience.map(exp => `
+    <div class="item">
+      <div class="item-title">${exp.position}</div>
+      <div class="item-sub">${exp.company}</div>
+      <p>${exp.description}</p>
+    </div>
+    `).join('');
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+<html>
+<head>
+  <title>${user.name} - Resume</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; color: #333; max-width: 800px; margin: 0 auto; line-height: 1.5; }
+    h1 { font-size: 2.2rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+    .contact { font-size: 0.9rem; color: #666; margin-bottom: 2rem; }
+    h2 { font-size: 1.4rem; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; margin-top: 2rem; }
+    .item { margin-bottom: 1.25rem; }
+    .item-title { font-weight: bold; font-size: 1.1rem; }
+    .item-sub { color: #666; font-style: italic; font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .skills-list { font-weight: bold; }
+  </style>
+</head>
+<body onload="window.print()">
+  <h1>${user.name}</h1>
+  <div class="contact">Email: ${user.email} | Powered by ApexHire Ecosystem</div>
+  
+  <h2>Technical Skills</h2>
+  <p class="skills-list">${profile.skills.join(', ')}</p>
+
+  <h2>Education</h2>
+  ${eduHTML}
+
+  <h2>Experience</h2>
+  ${expHTML}
+</body>
+</html>
+    `);
+    printWindow.document.close();
+  };
+
   if (loading) {
     return <div style={styles.loading}>Analyzing profile details...</div>;
   }
@@ -498,6 +700,67 @@ const StudentDashboard = () => {
                 Open AI Career Coach
               </a>
             </div>
+          )}
+
+          {profile && (
+            <>
+              {/* Creator Hub */}
+              <div className="glass-card" style={{ marginTop: '0rem' }}>
+                <h3 style={styles.cardTitle}>Developer Creator Hub</h3>
+                <p style={styles.cardDesc}>Download a print-ready resume or generate a custom personal portfolio site.</p>
+                <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+                  <button onClick={generateAndDownloadResume} className="btn btn-primary" style={{ fontSize: '0.8rem', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    📄 Download Profile Resume
+                  </button>
+                  <button onClick={generateAndDownloadPortfolio} className="btn btn-outline" style={{ fontSize: '0.8rem', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    🌐 Download Personal Portfolio Page
+                  </button>
+                </div>
+              </div>
+
+              {/* LinkedIn Optimizer */}
+              <div className="glass-card" style={{ marginTop: '0rem' }}>
+                <h3 style={styles.cardTitle}>LinkedIn Optimizer</h3>
+                <p style={styles.cardDesc}>AI recommendations to maximize your profile views:</p>
+                <div style={{ padding: '0.75rem', borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.02)', fontSize: '0.8rem', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                  <strong>Headline suggestion:</strong>
+                  <p className="mb-2 mt-1 font-semibold text-primary">Software Engineer Associate | Specialized in {profile.skills.slice(0,3).join(', ') || 'Development'}</p>
+                  <strong>Keywords recommendation:</strong>
+                  <p className="mb-0">List {profile.skills.slice(0,5).join(', ')} prominently in your LinkedIn skills section to trigger search algorithms.</p>
+                </div>
+              </div>
+
+              {/* Badges Panel */}
+              <div className="glass-card" style={{ marginTop: '0rem' }}>
+                <h3 style={styles.cardTitle}>Achievement Badges</h3>
+                <p style={styles.cardDesc}>Gamified campus achievements unlocked based on progress:</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div style={{ padding: '0.5rem', borderRadius: 8, backgroundColor: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', textAlign: 'center' }}>
+                    <span style={{ fontSize: '1.5rem', display: 'block' }}>🚀</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', color: 'var(--primary)' }}>Active Profile</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Verified Candidate</span>
+                  </div>
+
+                  <div style={{ padding: '0.5rem', borderRadius: 8, backgroundColor: completeness === 100 ? 'rgba(16,185,129,0.05)' : 'rgba(255,255,255,0.02)', border: completeness === 100 ? '1px solid rgba(16,185,129,0.2)' : '1px solid var(--border-color)', textAlign: 'center', opacity: completeness === 100 ? 1 : 0.5 }}>
+                    <span style={{ fontSize: '1.5rem', display: 'block' }}>🏆</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', color: 'var(--success)' }}>Complete</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>100% Filled</span>
+                  </div>
+
+                  <div style={{ padding: '0.5rem', borderRadius: 8, backgroundColor: aiScore >= 85 ? 'rgba(6,182,212,0.05)' : 'rgba(255,255,255,0.02)', border: aiScore >= 85 ? '1px solid rgba(6,182,212,0.2)' : '1px solid var(--border-color)', textAlign: 'center', opacity: aiScore >= 85 ? 1 : 0.5 }}>
+                    <span style={{ fontSize: '1.5rem', display: 'block' }}>⚡</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', color: 'var(--accent)' }}>Resume Star</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>ATS Score &gt;= 85</span>
+                  </div>
+
+                  <div style={{ padding: '0.5rem', borderRadius: 8, backgroundColor: (profile.skills.length >= 6) ? 'rgba(245,158,11,0.05)' : 'rgba(255,255,255,0.02)', border: (profile.skills.length >= 6) ? '1px solid rgba(245,158,11,0.2)' : '1px solid var(--border-color)', textAlign: 'center', opacity: (profile.skills.length >= 6) ? 1 : 0.5 }}>
+                    <span style={{ fontSize: '1.5rem', display: 'block' }}>🔥</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', color: 'var(--warning)' }}>Tech Buff</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>6+ skills listed</span>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
           {/* Profile Details Form */}

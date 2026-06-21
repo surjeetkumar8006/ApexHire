@@ -15,7 +15,10 @@ import {
   FileText,
   CalendarCheck,
   FolderOpen,
-  Award
+  Award,
+  MessageSquare,
+  MessagesSquare,
+  GraduationCap
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { X } from 'lucide-react';
@@ -32,12 +35,22 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/student/jobs', name: 'Job Board', icon: <Briefcase size={20} /> },
     { path: '/student/applications', name: 'My Applications', icon: <FileCheck size={20} /> },
     { path: '/student/ai-coach', name: 'AI Career Coach', icon: <Cpu size={20} /> },
+    { path: '/student/mock-interviews', name: 'AI Mock Interview', icon: <Cpu size={20} /> },
     { path: '/student/assessments', name: 'Skill Assessments', icon: <Award size={20} /> },
     { path: '/student/interviews', name: 'My Interviews', icon: <CalendarCheck size={20} /> },
-    { path: '/student/resources', name: 'Prep Resources', icon: <FolderOpen size={20} /> },
     { path: '/student/events', name: 'Career Events', icon: <CalendarCheck size={20} /> },
+    { path: '/student/forum', name: 'Discussion Forum', icon: <MessagesSquare size={20} /> },
+    { path: '/student/chat', name: 'Inbox Chat', icon: <MessageSquare size={20} /> },
     { path: '/student/app-analytics', name: 'App Analytics', icon: <BarChart size={20} /> },
     { path: '/student/settings', name: 'Profile Settings', icon: <Settings size={20} /> },
+  ];
+
+  const recruiterLinks = [
+    { path: '/recruiter/dashboard', name: 'ATS Dashboard', icon: <LayoutDashboard size={20} /> },
+    { path: '/recruiter/resumes', name: 'Resume Database', icon: <FileText size={20} /> },
+    { path: '/recruiter/forum', name: 'Discussion Forum', icon: <MessagesSquare size={20} /> },
+    { path: '/recruiter/chat', name: 'Inbox Chat', icon: <MessageSquare size={20} /> },
+    { path: '/recruiter/settings', name: 'Settings', icon: <Settings size={20} /> },
   ];
 
   const adminLinks = [
@@ -45,15 +58,25 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/admin/jobs', name: 'Manage Jobs', icon: <PlusCircle size={20} /> },
     { path: '/admin/applications', name: 'Applications', icon: <FileCheck size={20} /> },
     { path: '/admin/students', name: 'Student Directory', icon: <Users size={20} /> },
+    { path: '/admin/eligibility', name: 'Talent & Batch Manager', icon: <GraduationCap size={20} /> },
+    { path: '/admin/assessments', name: 'Assessment Manager', icon: <Award size={20} /> },
+    { path: '/admin/alumni', name: 'Alumni & Referrals', icon: <Building size={20} /> },
+    { path: '/admin/mock-feedback', name: 'Mock Grading Desk', icon: <Cpu size={20} /> },
     { path: '/admin/interviews', name: 'Interview Scheduler', icon: <Calendar size={20} /> },
     { path: '/admin/companies', name: 'Employer Partners', icon: <Building size={20} /> },
     { path: '/admin/analytics', name: 'Advanced Analytics', icon: <BarChart size={20} /> },
     { path: '/admin/resume-bank', name: 'Resume Bank', icon: <FileText size={20} /> },
     { path: '/admin/events', name: 'Career Events', icon: <CalendarCheck size={20} /> },
+    { path: '/admin/forum', name: 'Discussion Forum', icon: <MessagesSquare size={20} /> },
+    { path: '/admin/chat', name: 'Inbox Chat', icon: <MessageSquare size={20} /> },
     { path: '/admin/settings', name: 'Platform Settings', icon: <Settings size={20} /> },
   ];
 
-  const links = user.role === 'admin' ? adminLinks : studentLinks;
+  const links = user.role === 'admin'
+    ? adminLinks
+    : user.role === 'recruiter'
+      ? recruiterLinks
+      : studentLinks;
 
   return (
     <aside className={`app-sidebar ${isOpen ? 'open' : ''}`} style={styles.sidebar}>

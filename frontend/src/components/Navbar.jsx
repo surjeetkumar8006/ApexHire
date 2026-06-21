@@ -325,7 +325,7 @@ const styles = {
     width: '320px',
     maxHeight: '400px',
     background: 'var(--bg-surface)',
-    border: '1px solid var(--glass-border)',
+    border: '1px solid var(--border-color)',
     borderRadius: 'var(--border-radius-lg)',
     boxShadow: 'var(--shadow-lg)',
     display: 'flex',
@@ -353,6 +353,7 @@ const styles = {
   dropdownBody: {
     overflowY: 'auto',
     flex: 1,
+    maxHeight: '340px',
   },
   notificationItem: {
     padding: '1rem',
@@ -381,6 +382,7 @@ const styles = {
     height: '6px',
     backgroundColor: 'var(--primary)',
     borderRadius: '50%',
+    boxShadow: '0 0 6px var(--primary)',
   },
   notifMsg: {
     fontSize: '0.8rem',
