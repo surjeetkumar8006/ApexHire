@@ -299,7 +299,7 @@ const AdminDashboard = ({ view = 'overview' }) => {
               </button>
               {selectedStudent.resumeUrl && (
                 <a
-                  href={`http://localhost:5000${selectedStudent.resumeUrl}`}
+                  href={`https://apexhire.onrender.com${selectedStudent.resumeUrl}`}
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-primary"

@@ -291,7 +291,7 @@ const StudentDashboard = () => {
                     {app.feedback && <p style={styles.offerFeedback}><strong>Feedback Note:</strong> {app.feedback}</p>}
                     {app.offerLetterUrl && (
                       <a
-                        href={app.offerLetterUrl.startsWith('http') ? app.offerLetterUrl : `http://localhost:5000${app.offerLetterUrl}`}
+                        href={app.offerLetterUrl.startsWith('http') ? app.offerLetterUrl : `https://apexhire.onrender.com${app.offerLetterUrl}`}
                         target="_blank"
                         rel="noreferrer"
                         style={styles.downloadLink}
@@ -385,7 +385,7 @@ const StudentDashboard = () => {
                {profile?.resumeUrl && (
                   <div style={styles.resumeUrlBox}>
                      <CheckCircle2 size={16} color="var(--success)" />
-                     <a href={`http://localhost:5000${profile.resumeUrl}`} target="_blank" rel="noreferrer" style={styles.resumeLink}>
+                     <a href={`https://apexhire.onrender.com${profile.resumeUrl}`} target="_blank" rel="noreferrer" style={styles.resumeLink}>
                      View Resume
                      </a>
                   </div>
