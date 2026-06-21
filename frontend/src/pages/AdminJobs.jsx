@@ -148,7 +148,7 @@ const AdminJobs = () => {
 
     try {
       // Fetch all students
-      const res = await fetch(`${API_BASE}/users/students`, {
+      const res = await fetch(`${API_BASE}/profile/all`, {
         headers: authHeader(),
       });
       if (!res.ok) throw new Error('Failed to fetch students for matching');
