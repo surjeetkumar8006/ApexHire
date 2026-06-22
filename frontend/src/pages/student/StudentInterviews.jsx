@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Video, FileText, CheckCircle, ExternalLink } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
 
 const StudentInterviews = () => {
   const { authHeader } = useAuth();

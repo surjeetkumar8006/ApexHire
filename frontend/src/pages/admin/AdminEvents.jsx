@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, MapPin, Users, Clock, Plus, Trash2, X, Loader, Briefcase } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const AdminEvents = () => {
   const { authHeader } = useAuth();

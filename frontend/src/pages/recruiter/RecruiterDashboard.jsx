@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useNavigate } from 'react-router-dom';
+import { useAuth, API_BASE, BACKEND_URL } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 import { 
   Briefcase, 
   Users, 
@@ -24,6 +25,7 @@ import {
 const RecruiterDashboard = ({ view = 'overview' }) => {
   const { authHeader, user } = useAuth();
   const { addToast } = useNotification();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState(view === 'resumes' ? 'resumes' : 'overview');
   const [jobs, setJobs] = useState([]);
@@ -31,6 +33,10 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
   const [resumes, setResumes] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setActiveTab(view === 'resumes' ? 'resumes' : 'overview');
+  }, [view]);
 
   // Job form state
   const [showJobModal, setShowJobModal] = useState(false);
@@ -128,7 +134,7 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
         requirements: newJob.requirements.split(',').map(r => r.trim()).filter(Boolean)
       };
 
-      const res = await fetch(`${API_BASE}/admin/jobs`, {
+      const res = await fetch(`${API_BASE}/jobs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeader() },
         body: JSON.stringify(jobPayload)
@@ -217,25 +223,25 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
   return (
     <div className="container-fluid py-4" style={{ color: 'var(--text-primary)' }}>
       {/* Dashboard Sub Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div className="recruiter-header-section">
         <div>
-          <h1 style={{ fontWeight: 800, fontSize: '2rem', letterSpacing: '-0.5px' }}>
+          <h1 className="recruiter-header-title">
             Recruiter Workspace
           </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
+          <p className="recruiter-header-desc">
             Empower hiring with ATS pipelines, AI match ranking, and resume directory scanning.
           </p>
         </div>
-        <div className="d-flex gap-2">
+        <div className="recruiter-tab-capsule">
           <button 
-            className={`btn ${activeTab === 'overview' ? 'btn-primary' : 'btn-outline'}`}
-            onClick={() => setActiveTab('overview')}
+            className={`recruiter-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+            onClick={() => navigate('/recruiter/dashboard')}
           >
             ATS Dashboard
           </button>
           <button 
-            className={`btn ${activeTab === 'resumes' ? 'btn-primary' : 'btn-outline'}`}
-            onClick={() => setActiveTab('resumes')}
+            className={`recruiter-tab-btn ${activeTab === 'resumes' ? 'active' : ''}`}
+            onClick={() => navigate('/recruiter/resumes')}
           >
             Search Resumes
           </button>
@@ -246,42 +252,42 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
         <>
           {/* Analytics Cards */}
           <div className="analytics-grid mb-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
-            <div className="glass-card p-4 d-flex align-items-center justify-content-between">
+            <div className="recruiter-stat-card jobs">
               <div>
-                <span className="text-muted d-block mb-1 text-sm font-semibold">Active Jobs</span>
-                <span className="h2 font-bold">{analytics?.totalJobs || 0}</span>
+                <span className="recruiter-stat-title">Active Jobs</span>
+                <span className="recruiter-stat-value">{analytics?.totalJobs || 0}</span>
               </div>
-              <div className="icon-badge bg-primary-glow text-primary p-3 rounded">
+              <div className="recruiter-stat-icon-wrap bg-primary-glow text-primary">
                 <Briefcase size={22} />
               </div>
             </div>
 
-            <div className="glass-card p-4 d-flex align-items-center justify-content-between">
+            <div className="recruiter-stat-card applicants">
               <div>
-                <span className="text-muted d-block mb-1 text-sm font-semibold">Total Applicants</span>
-                <span className="h2 font-bold">{analytics?.totalApplicants || 0}</span>
+                <span className="recruiter-stat-title">Total Applicants</span>
+                <span className="recruiter-stat-value">{analytics?.totalApplicants || 0}</span>
               </div>
-              <div className="icon-badge bg-secondary-glow text-secondary p-3 rounded">
+              <div className="recruiter-stat-icon-wrap bg-secondary-glow text-secondary">
                 <Users size={22} />
               </div>
             </div>
 
-            <div className="glass-card p-4 d-flex align-items-center justify-content-between">
+            <div className="recruiter-stat-card candidates">
               <div>
-                <span className="text-muted d-block mb-1 text-sm font-semibold">Selected Candidates</span>
-                <span className="h2 font-bold">{(analytics?.selected || 0) + (analytics?.joined || 0)}</span>
+                <span className="recruiter-stat-title">Selected Candidates</span>
+                <span className="recruiter-stat-value">{analytics?.offerSent || 0}</span>
               </div>
-              <div className="icon-badge bg-success-glow text-success p-3 rounded">
+              <div className="recruiter-stat-icon-wrap bg-success-glow text-success">
                 <UserCheck size={22} />
               </div>
             </div>
 
-            <div className="glass-card p-4 d-flex align-items-center justify-content-between">
+            <div className="recruiter-stat-card interviewing">
               <div>
-                <span className="text-muted d-block mb-1 text-sm font-semibold">Interviewing</span>
-                <span className="h2 font-bold">{analytics?.interviewScheduled || 0}</span>
+                <span className="recruiter-stat-title">Interviewing</span>
+                <span className="recruiter-stat-value">{analytics?.interviewScheduled || 0}</span>
               </div>
-              <div className="icon-badge bg-warning-glow text-warning p-3 rounded">
+              <div className="recruiter-stat-icon-wrap bg-warning-glow text-warning">
                 <Calendar size={22} />
               </div>
             </div>
@@ -309,15 +315,15 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                     </div>
                   ) : (
                     jobs.map(job => (
-                      <div key={job._id} className="p-3 rounded border border-color" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                      <div key={job._id} className="recruiter-job-card">
                         <div className="d-flex justify-content-between align-items-start">
                           <div>
-                            <span className="font-bold d-block text-sm">{job.title}</span>
-                            <span className="text-muted text-xs d-block mb-2">{job.company} • {job.location}</span>
+                            <span className="recruiter-job-title">{job.title}</span>
+                            <span className="recruiter-job-meta">{job.company} • {job.location}</span>
                           </div>
-                          <span className="badge badge-success text-xs">{job.type}</span>
+                          <span className="recruiter-job-badge">{job.type}</span>
                         </div>
-                        <div className="d-flex justify-content-between align-items-center text-xs text-muted">
+                        <div className="recruiter-job-footer text-xs text-muted">
                           <span>Salary: {job.salary}</span>
                           <span className={`dot-status ${job.status === 'active' ? 'bg-success' : 'bg-muted'}`} style={{ width: 8, height: 8, borderRadius: '50%' }}></span>
                         </div>
@@ -338,17 +344,14 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                   <select 
                     value={statusFilter} 
                     onChange={(e) => setStatusFilter(e.target.value)} 
-                    className="form-input text-xs"
-                    style={{ width: 'auto', padding: '0.4rem 1.8rem 0.4rem 0.8rem' }}
+                    className="recruiter-pipeline-select"
                   >
                     <option value="All">All Applications</option>
                     <option value="Applied">Applied</option>
-                    <option value="Under Review">Under Review</option>
+                    <option value="Reviewing">Reviewing</option>
                     <option value="Shortlisted">Shortlisted</option>
-                    <option value="Interview Scheduled">Interview Scheduled</option>
-                    <option value="Selected">Selected</option>
-                    <option value="Offer Sent">Offer Sent</option>
-                    <option value="Joined">Joined</option>
+                    <option value="Interviewing">Interviewing</option>
+                    <option value="Offered">Offered</option>
                     <option value="Rejected">Rejected</option>
                   </select>
                 </div>
@@ -367,10 +370,10 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                     {filteredApplicants.map(app => {
                       const matchData = matchScores[app._id];
                       return (
-                        <div key={app._id} className="p-4 rounded border border-color" style={{ background: 'rgba(255, 255, 255, 0.01)' }}>
+                        <div key={app._id} className="recruiter-applicant-card">
                           <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                             <div className="d-flex gap-3 align-items-center">
-                              <div className="avatar-circle bg-primary-glow font-bold text-primary" style={{ width: 44, height: 44, fontSize: '1.1rem' }}>
+                              <div className="recruiter-applicant-avatar">
                                 {app.student.name.charAt(0)}
                               </div>
                               <div>
@@ -381,7 +384,7 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
 
                             <div className="d-flex align-items-center gap-2">
                               {matchData && (
-                                <div className="d-flex align-items-center gap-1 bg-accent-glow p-2 rounded text-accent text-xs font-semibold">
+                                <div className="recruiter-ai-match-badge">
                                   <Star size={14} fill="var(--accent)" />
                                   <span>AI Match: {matchData.matchPercentage}%</span>
                                 </div>
@@ -390,23 +393,20 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                               <select 
                                 value={app.status} 
                                 onChange={(e) => handleUpdateStatus(app._id, e.target.value)}
-                                className="form-input text-xs" 
-                                style={{ width: 'auto', padding: '0.3rem 1.6rem 0.3rem 0.6rem' }}
+                                className="recruiter-pipeline-select" 
                               >
                                 <option value="Applied">Applied</option>
-                                <option value="Under Review">Under Review</option>
+                                <option value="Reviewing">Reviewing</option>
                                 <option value="Shortlisted">Shortlisted</option>
-                                <option value="Interview Scheduled">Interview Scheduled</option>
-                                <option value="Selected">Selected</option>
-                                <option value="Offer Sent">Offer Sent</option>
-                                <option value="Joined">Joined</option>
+                                <option value="Interviewing">Interviewing</option>
+                                <option value="Offered">Offered</option>
                                 <option value="Rejected">Rejected</option>
                               </select>
                             </div>
                           </div>
 
                           {matchData && matchData.missingSkills?.length > 0 && (
-                            <div className="mb-3 p-2 rounded bg-base text-xs text-muted" style={{ borderLeft: '3px solid var(--accent)' }}>
+                            <div className="recruiter-missing-skills-box">
                               <strong>Missing Required Skills:</strong> {matchData.missingSkills.join(', ')}
                             </div>
                           )}
@@ -419,7 +419,7 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                             <div className="d-flex gap-2">
                               {app.resumeUrl && (
                                 <a 
-                                  href={`https://apexhire.onrender.com${app.resumeUrl}`} 
+                                  href={`${BACKEND_URL}${app.resumeUrl}`} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
                                   className="btn btn-xs btn-outline d-flex align-items-center gap-1"
@@ -477,9 +477,9 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
             </div>
           ) : (
             <div className="table-responsive">
-              <table className="table table-hover border border-color rounded" style={{ minWidth: '700px' }}>
+              <table className="premium-table">
                 <thead>
-                  <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                  <tr>
                     <th>Candidate</th>
                     <th>Email</th>
                     <th>Current Skills</th>
@@ -490,33 +490,52 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                 <tbody>
                   {resumes.map(profile => (
                     <tr key={profile._id}>
-                      <td className="font-semibold">{profile.user.name}</td>
-                      <td>{profile.user.email}</td>
+                      <td>
+                        <div className="d-flex align-items-center gap-2">
+                          <div className="recruiter-applicant-avatar" style={{ width: 32, height: 32, fontSize: '0.85rem' }}>
+                            {profile.user.name.charAt(0)}
+                          </div>
+                          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{profile.user.name}</span>
+                        </div>
+                      </td>
+                      <td style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{profile.user.email}</td>
                       <td>
                         <div className="d-flex flex-wrap gap-1">
                           {profile.skills.slice(0, 5).map((sk, idx) => (
-                            <span key={idx} className="badge bg-primary-glow text-primary text-xs">{sk}</span>
+                            <span key={idx} className="badge bg-primary-glow text-primary text-xs" style={{ borderRadius: '12px', padding: '0.2rem 0.6rem' }}>{sk}</span>
                           ))}
-                          {profile.skills.length > 5 && <span className="badge bg-muted text-xs">+{profile.skills.length - 5} more</span>}
+                          {profile.skills.length > 5 && (
+                            <span className="badge bg-secondary-glow text-secondary text-xs" style={{ borderRadius: '12px', padding: '0.2rem 0.6rem' }}>
+                              +{profile.skills.length - 5} more
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td>
-                        <span className={`font-bold ${profile.aiFeedback?.score >= 80 ? 'text-success' : profile.aiFeedback?.score >= 60 ? 'text-warning' : 'text-danger'}`}>
-                          {profile.aiFeedback?.score || 'N/A'}
-                        </span>
+                        {profile.aiFeedback?.score ? (
+                          <span className={`badge ${profile.aiFeedback.score >= 80 ? 'bg-success-glow text-success' : profile.aiFeedback.score >= 60 ? 'bg-warning-glow text-warning' : 'bg-danger-glow text-danger'} font-bold`} style={{ fontSize: '0.8rem', padding: '0.35rem 0.65rem', borderRadius: '20px' }}>
+                            {profile.aiFeedback.score}%
+                          </span>
+                        ) : (
+                          <span className="text-muted text-xs">N/A</span>
+                        )}
                       </td>
                       <td>
                         {profile.resumeUrl ? (
                           <a 
-                            href={`https://apexhire.onrender.com${profile.resumeUrl}`} 
+                            href={`${BACKEND_URL}${profile.resumeUrl}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="btn btn-xs btn-outline d-flex align-items-center gap-1"
-                            style={{ width: 'fit-content' }}
+                            className="btn btn-xs btn-primary d-flex align-items-center gap-1"
+                            style={{ width: 'fit-content', borderRadius: '14px', padding: '0.3rem 0.75rem' }}
                           >
                             View Resume <ExternalLink size={12} />
                           </a>
-                        ) : <span className="text-muted text-xs">Missing</span>}
+                        ) : (
+                          <span className="text-muted text-xs d-flex align-items-center gap-1">
+                            <AlertCircle size={12} /> Missing
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -530,9 +549,10 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
       {/* Post Job Modal */}
       {showJobModal && (
         <div className="modal-overlay-custom" onClick={() => setShowJobModal(false)}>
-          <div className="glass-card modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%' }}>
-            <div className="modal-header-custom p-4 border-bottom border-color">
-              <h3 className="h5 font-bold mb-0">Post New Career Opportunity</h3>
+          <div className="modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%' }}>
+            <div className="modal-header-custom p-4 border-bottom border-color d-flex align-items-center gap-2">
+              <Briefcase className="text-primary" size={20} />
+              <h3 className="h5 font-bold mb-0" style={{ color: 'var(--text-primary)' }}>Post New Career Opportunity</h3>
             </div>
             <form onSubmit={handlePostJob} className="modal-body-custom p-4 d-flex flex-column gap-3 overflow-y-auto" style={{ maxHeight: '70vh' }}>
               <div className="form-group">
@@ -632,10 +652,13 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
       {/* Schedule Interview Modal */}
       {showInterviewModal && selectedApp && (
         <div className="modal-overlay-custom" onClick={() => setShowInterviewModal(false)}>
-          <div className="glass-card modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%' }}>
+          <div className="modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%' }}>
             <div className="modal-header-custom p-4 border-bottom border-color">
-              <h3 className="h5 font-bold mb-0">Schedule Interview</h3>
-              <p className="text-muted text-xs mb-0">Candidate: {selectedApp.student.name}</p>
+              <div className="d-flex align-items-center gap-2 mb-1">
+                <Calendar className="text-primary" size={20} />
+                <h3 className="h5 font-bold mb-0" style={{ color: 'var(--text-primary)' }}>Schedule Interview</h3>
+              </div>
+              <p className="text-muted text-xs mb-0" style={{ paddingLeft: '1.75rem' }}>Candidate: {selectedApp.student.name}</p>
             </div>
             <form onSubmit={handleScheduleInterview} className="modal-body-custom p-4 d-flex flex-column gap-3">
               <div className="form-group">

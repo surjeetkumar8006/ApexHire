@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Award, BookOpen, Clock, FileText, CheckCircle, AlertTriangle, ArrowRight, Play, Trophy } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const StudentAssessments = () => {
   const { authHeader, user } = useAuth();

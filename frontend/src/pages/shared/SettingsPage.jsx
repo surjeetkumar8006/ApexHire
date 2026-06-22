@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Lock, Bell, Shield, Smartphone, Globe, CheckCircle, Users, Trash, Pencil, Plus, X, Loader } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const SettingsPage = () => {
   const { user, updateUser, authHeader } = useAuth();
@@ -55,7 +55,7 @@ const SettingsPage = () => {
     }
     const fetchSettings = async () => {
       try {
-        const res = await fetch('https://apexhire.onrender.com/api/profile', { headers: authHeader() });
+        const res = await fetch(`${API_BASE}/profile`, { headers: authHeader() });
         if (res.ok) {
           const data = await res.json();
           setFormData(prev => ({
@@ -106,7 +106,7 @@ const SettingsPage = () => {
         payload.privacy = { profileVisibility: formData.profileVisibility };
       }
 
-      const res = await fetch('https://apexhire.onrender.com/api/profile/settings', {
+      const res = await fetch(`${API_BASE}/profile/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ const SettingsPage = () => {
   const fetchCoordinators = async () => {
     setCoordLoading(true);
     try {
-      const res = await fetch('https://apexhire.onrender.com/api/auth/coordinators', {
+      const res = await fetch(`${API_BASE}/auth/coordinators`, {
         headers: authHeader()
       });
       if (res.ok) {
@@ -152,7 +152,7 @@ const SettingsPage = () => {
   const fetchPlatformConfig = async () => {
     setPlatformLoading(true);
     try {
-      const res = await fetch('https://apexhire.onrender.com/api/platform-config', {
+      const res = await fetch(`${API_BASE}/platform-config`, {
         headers: authHeader()
       });
       if (res.ok) {
@@ -192,8 +192,8 @@ const SettingsPage = () => {
 
     try {
       const url = coordEditId 
-        ? `https://apexhire.onrender.com/api/auth/coordinators/${coordEditId}` 
-        : 'https://apexhire.onrender.com/api/auth/coordinators';
+        ? `${API_BASE}/auth/coordinators/${coordEditId}` 
+        : `${API_BASE}/auth/coordinators`;
       const method = coordEditId ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -228,7 +228,7 @@ const SettingsPage = () => {
     if (!window.confirm('Are you sure you want to remove this placement coordinator?')) return;
 
     try {
-      const res = await fetch(`https://apexhire.onrender.com/api/auth/coordinators/${id}`, {
+      const res = await fetch(`${API_BASE}/auth/coordinators/${id}`, {
         method: 'DELETE',
         headers: authHeader()
       });
@@ -260,7 +260,7 @@ const SettingsPage = () => {
     e.preventDefault();
     setPlatformLoading(true);
     try {
-      const res = await fetch('https://apexhire.onrender.com/api/platform-config', {
+      const res = await fetch(`${API_BASE}/platform-config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

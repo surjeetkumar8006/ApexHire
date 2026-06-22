@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Download, User, Award, FileText, Loader, Check, RefreshCw, ShieldCheck, TrendingUp, Users } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const AdminResumeBank = () => {
   const { authHeader } = useAuth();

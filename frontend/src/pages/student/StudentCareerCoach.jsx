@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 import { 
   Send, 
   Cpu, 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Cpu, Sparkles, Send, Award, Compass, BookOpen } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const AICoach = () => {
   const { authHeader } = useAuth();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Briefcase, MapPin, DollarSign, Trash2, ShieldAlert, CheckCircle, AlertCircle, Sparkles, X } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const AdminJobs = () => {
   const { authHeader } = useAuth();

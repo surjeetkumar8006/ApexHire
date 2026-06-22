@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Award, Plus, Trash2, Calendar, Clock, BookOpen, Search, X, CheckCircle, AlertCircle, FileText, ChevronRight, BarChart as BarChartIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const AdminAssessments = () => {
   const { authHeader } = useAuth();

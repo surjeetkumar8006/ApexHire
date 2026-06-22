@@ -16,7 +16,7 @@ import {
   Activity,
   Users
 } from 'lucide-react';
-import { API_BASE } from '../context/AuthContext';
+import { API_BASE } from '../../context/AuthContext';
 
 const LandingPage = ({ onGetStarted }) => {
   const [activeTab, setActiveTab] = useState('coach');

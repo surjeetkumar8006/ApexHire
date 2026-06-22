@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Video, User, CheckCircle, Plus, MoreVertical, X, ExternalLink, Trash, Pencil } from 'lucide-react';
-import { useNotification } from '../context/NotificationContext';
-import { useAuth, API_BASE } from '../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
 
 const AdminInterviews = () => {
   const { authHeader } = useAuth();

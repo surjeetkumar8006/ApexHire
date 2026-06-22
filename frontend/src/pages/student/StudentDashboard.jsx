@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Sparkles, BookOpen, GraduationCap, CheckCircle2, AlertCircle, Plus, Trash, Briefcase, Eye, Target, Activity, Clock } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE, BACKEND_URL } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const StudentDashboard = () => {
   const { user, authHeader } = useAuth();
@@ -493,7 +493,7 @@ const StudentDashboard = () => {
                     {app.feedback && <p style={styles.offerFeedback}><strong>Feedback Note:</strong> {app.feedback}</p>}
                     {app.offerLetterUrl && (
                       <a
-                        href={app.offerLetterUrl.startsWith('http') ? app.offerLetterUrl : `https://apexhire.onrender.com${app.offerLetterUrl}`}
+                        href={app.offerLetterUrl.startsWith('http') ? app.offerLetterUrl : `${BACKEND_URL}${app.offerLetterUrl}`}
                         target="_blank"
                         rel="noreferrer"
                         style={styles.downloadLink}
@@ -587,7 +587,7 @@ const StudentDashboard = () => {
                {profile?.resumeUrl && (
                   <div style={styles.resumeUrlBox}>
                      <CheckCircle2 size={16} color="var(--success)" />
-                     <a href={`https://apexhire.onrender.com${profile.resumeUrl}`} target="_blank" rel="noreferrer" style={styles.resumeLink}>
+                     <a href={`${BACKEND_URL}${profile.resumeUrl}`} target="_blank" rel="noreferrer" style={styles.resumeLink}>
                      View Resume
                      </a>
                   </div>
