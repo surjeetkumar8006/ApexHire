@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth, API_BASE } from '../context/AuthContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
 import { FileCheck, Clock, CheckCircle2, AlertCircle, Building, MapPin, Briefcase } from 'lucide-react';
 
 const StudentApplications = () => {

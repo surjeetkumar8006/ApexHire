@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building, MapPin, Globe, Plus, Search, Mail, Trash2, X, Loader, ExternalLink, Briefcase, Edit } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const AdminCompanies = () => {
   const { authHeader } = useAuth();

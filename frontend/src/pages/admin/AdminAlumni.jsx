@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building, Users, Search, Plus, Trash2, ShieldCheck, ShieldAlert, CheckCircle, X, ExternalLink, Link2, Mail, Briefcase, Award } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const AdminAlumni = () => {
   const { authHeader } = useAuth();

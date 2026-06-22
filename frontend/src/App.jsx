@@ -3,35 +3,42 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
-import LandingPage from './pages/LandingPage';
-import AuthPage from './pages/AuthPage';
-import StudentDashboard from './pages/StudentDashboard';
-import JobBoard from './pages/JobBoard';
-import AICoach from './pages/AICoach';
-import StudentCareerCoach from './pages/StudentCareerCoach';
-import StudentMockInterviews from './pages/StudentMockInterviews';
-import ForumAndCommunity from './pages/ForumAndCommunity';
-import ChatPortal from './pages/ChatPortal';
-import RecruiterDashboard from './pages/RecruiterDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminJobs from './pages/AdminJobs';
-import AdminApplications from './pages/AdminApplications';
-import StudentApplications from './pages/StudentApplications';
-import AdminInterviews from './pages/AdminInterviews';
-import StudentInterviews from './pages/StudentInterviews';
-import StudentAssessments from './pages/StudentAssessments';
-import AdminCompanies from './pages/AdminCompanies';
-import AdminAnalytics from './pages/AdminAnalytics';
-import StudentResources from './pages/StudentResources';
-import StudentAppAnalytics from './pages/StudentAppAnalytics';
-import AdminEvents from './pages/AdminEvents';
-import StudentEvents from './pages/StudentEvents';
-import AdminResumeBank from './pages/AdminResumeBank';
-import SettingsPage from './pages/SettingsPage';
-import ComingSoon from './pages/ComingSoon';
-import AdminAssessments from './pages/AdminAssessments';
-import AdminAlumni from './pages/AdminAlumni';
-import AdminMockFeedback from './pages/AdminMockFeedback';
+// Shared Pages
+import LandingPage from './pages/shared/LandingPage';
+import AuthPage from './pages/shared/AuthPage';
+import SettingsPage from './pages/shared/SettingsPage';
+import ComingSoon from './pages/shared/ComingSoon';
+import ChatPortal from './pages/shared/ChatPortal';
+import ForumAndCommunity from './pages/shared/ForumAndCommunity';
+
+// Student Pages
+import StudentDashboard from './pages/student/StudentDashboard';
+import JobBoard from './pages/student/JobBoard';
+import AICoach from './pages/student/AICoach';
+import StudentCareerCoach from './pages/student/StudentCareerCoach';
+import StudentMockInterviews from './pages/student/StudentMockInterviews';
+import StudentApplications from './pages/student/StudentApplications';
+import StudentInterviews from './pages/student/StudentInterviews';
+import StudentAssessments from './pages/student/StudentAssessments';
+import StudentResources from './pages/student/StudentResources';
+import StudentAppAnalytics from './pages/student/StudentAppAnalytics';
+import StudentEvents from './pages/student/StudentEvents';
+
+// Recruiter Pages
+import RecruiterDashboard from './pages/recruiter/RecruiterDashboard';
+
+// Admin Pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminJobs from './pages/admin/AdminJobs';
+import AdminApplications from './pages/admin/AdminApplications';
+import AdminInterviews from './pages/admin/AdminInterviews';
+import AdminCompanies from './pages/admin/AdminCompanies';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminEvents from './pages/admin/AdminEvents';
+import AdminResumeBank from './pages/admin/AdminResumeBank';
+import AdminAssessments from './pages/admin/AdminAssessments';
+import AdminAlumni from './pages/admin/AdminAlumni';
+import AdminMockFeedback from './pages/admin/AdminMockFeedback';
 
 import './styles/main.css';
 import './styles/responsive.css';

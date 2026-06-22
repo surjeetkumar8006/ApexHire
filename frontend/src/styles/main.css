@@ -3561,3 +3561,373 @@ body.light-theme .assessment-score-card {
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* ==========================================================================
+   PREMIUM RECRUITER WORKSPACE & ATS PIPELINE STYLES
+   ========================================================================== */
+
+/* Modern Sub-header styling */
+.recruiter-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.recruiter-header-title {
+  font-family: var(--font-primary);
+  font-weight: 800;
+  font-size: 2rem;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.recruiter-header-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* Premium Switcher Switch Capsule */
+.recruiter-tab-capsule {
+  display: flex;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 4px;
+  gap: 4px;
+  width: fit-content;
+  box-shadow: var(--shadow-sm);
+}
+
+.recruiter-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+}
+
+.recruiter-tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.recruiter-tab-btn.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white !important;
+  box-shadow: 0 4px 10px -3px var(--primary-glow);
+}
+
+/* Premium Stat Cards with left borders and soft icons */
+.recruiter-stat-card {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.recruiter-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: hsla(250, 84%, 58%, 0.2);
+  box-shadow: var(--shadow-md);
+}
+
+/* Subtle accent bars for different stats */
+.recruiter-stat-card.jobs::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary);
+}
+
+.recruiter-stat-card.applicants::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--secondary);
+}
+
+.recruiter-stat-card.candidates::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--success);
+}
+
+.recruiter-stat-card.interviewing::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--warning);
+}
+
+.recruiter-stat-title {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.recruiter-stat-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.recruiter-stat-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Job card design under active job postings */
+.recruiter-job-card {
+  padding: 1.15rem;
+  border-radius: 14px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.recruiter-job-card:hover {
+  transform: translateY(-1.5px);
+  border-color: hsla(250, 84%, 58%, 0.2);
+  background: var(--bg-surface-elevated);
+}
+
+body.light-theme .recruiter-job-card {
+  background: #f8fafc;
+}
+body.light-theme .recruiter-job-card:hover {
+  background: #f1f5f9;
+}
+
+.recruiter-job-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--primary), var(--secondary));
+  opacity: 0.6;
+}
+
+.recruiter-job-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.recruiter-job-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.recruiter-job-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.recruiter-job-badge {
+  font-size: 0.68rem;
+  font-weight: 750;
+  color: var(--primary);
+  background: var(--primary-glow);
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+/* Applicant Cards inside tracking pipeline */
+.recruiter-applicant-card {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-normal);
+}
+
+.recruiter-applicant-card:hover {
+  border-color: hsla(250, 84%, 58%, 0.25);
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-surface-elevated);
+}
+
+body.light-theme .recruiter-applicant-card {
+  background: #f8fafc;
+}
+body.light-theme .recruiter-applicant-card:hover {
+  background: #f1f5f9;
+}
+
+.recruiter-applicant-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 10px -2px var(--primary-glow);
+}
+
+.recruiter-ai-match-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--accent-glow);
+  border: 1px solid hsla(187, 85%, 45%, 0.15);
+  color: var(--accent);
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.recruiter-missing-skills-box {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-surface);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+body.light-theme .recruiter-missing-skills-box {
+  background: #ffffff;
+}
+
+/* Modals & Inputs */
+.recruiter-pipeline-select {
+  background: var(--bg-surface-elevated) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 10px !important;
+  color: var(--text-primary) !important;
+  font-size: 0.8rem !important;
+  padding: 0.45rem 1.8rem 0.45rem 0.75rem !important;
+  cursor: pointer;
+  transition: all var(--transition-fast) !important;
+}
+
+.recruiter-pipeline-select:hover {
+  border-color: var(--primary) !important;
+}
+
+/* Re-use tables designs */
+.recruiter-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.01) !important;
+}
+
+/* Premium Modals Enhancements */
+.modal-content-custom {
+  position: relative;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08) !important;
+}
+
+.modal-content-custom::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  z-index: 10;
+}
+
+.modal-header-custom {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding: 1.5rem 1.75rem !important;
+  background: var(--bg-surface-elevated) !important;
+}
+
+.modal-body-custom {
+  background: var(--bg-surface) !important;
+  padding: 1.75rem !important;
+}
+
+.modal-content-custom .form-label {
+  font-weight: 700 !important;
+  font-size: 0.74rem !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  color: var(--text-secondary) !important;
+  margin-bottom: 0.5rem !important;
+  display: block;
+}
+
+.modal-content-custom .form-input {
+  border-radius: 10px !important;
+  padding: 0.65rem 0.85rem !important;
+  font-size: 0.85rem !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-base) !important;
+}
+
+body.light-theme .modal-content-custom .form-input {
+  background-color: #fbfbfd !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .modal-content-custom .form-input:focus {
+  background-color: #ffffff !important;
+}
+
+.modal-content-custom textarea.form-input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+

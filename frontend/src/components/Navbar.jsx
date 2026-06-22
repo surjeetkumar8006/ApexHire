@@ -206,7 +206,11 @@ const Navbar = ({ onMenuClick }) => {
             <div className="nav-hide-mobile" style={styles.userInfo}>
               <span style={styles.userName}>{user.name}</span>
               <span style={styles.userRole}>
-                {user.role === 'admin' ? 'Placement Admin' : 'Student'}
+                {user.role === 'admin' 
+                  ? 'Placement Admin' 
+                  : user.role === 'recruiter' 
+                    ? 'Recruiter' 
+                    : 'Student'}
               </span>
             </div>
             <button onClick={logout} className="nav-logout-btn nav-hide-mobile" title="Logout">

@@ -6,6 +6,10 @@ export const API_BASE = window.location.hostname === 'localhost' || window.locat
   ? 'http://localhost:5000/api'
   : 'https://apexhire.onrender.com/api';
 
+export const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:5000'
+  : 'https://apexhire.onrender.com';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);

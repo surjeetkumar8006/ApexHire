@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Eye, CheckCircle2, User, Sparkles, AlertTriangle, Send, Search, Filter, Kanban, Table } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE, BACKEND_URL } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const AdminApplications = () => {
   const { authHeader } = useAuth();
@@ -618,7 +618,7 @@ const AdminApplications = () => {
                     {/* Resume download link */}
                     {studentProfile.resumeUrl && (
                       <a
-                        href={`https://apexhire.onrender.com${studentProfile.resumeUrl}`}
+                        href={`${BACKEND_URL}${studentProfile.resumeUrl}`}
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-secondary"

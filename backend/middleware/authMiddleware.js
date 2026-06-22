@@ -34,3 +34,11 @@ export const admin = (req, res, next) => {
     res.status(403).json({ message: 'Not authorized as an admin' });
   }
 };
+
+export const adminOrRecruiter = (req, res, next) => {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'recruiter')) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Not authorized, admin or recruiter role required' });
+  }
+};

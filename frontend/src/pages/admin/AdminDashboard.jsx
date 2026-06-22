@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Users, Briefcase, FileCheck, CheckCircle2, TrendingUp, Sparkles, FileText, Search, Download, X, Award, GraduationCap, BookOpen, ShieldAlert, ShieldCheck, Megaphone, Github, Linkedin, Globe, ExternalLink, Code2, Cpu, Trophy } from 'lucide-react';
-import { useAuth, API_BASE } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { useAuth, API_BASE, BACKEND_URL } from '../../context/AuthContext';
+import { useNotification } from '../../context/NotificationContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const AdminDashboard = ({ view = 'overview' }) => {
@@ -561,7 +561,7 @@ const AdminDashboard = ({ view = 'overview' }) => {
               </button>
               {selectedStudent.resumeUrl && (
                 <a
-                  href={`https://apexhire.onrender.com${selectedStudent.resumeUrl}`}
+                  href={`${BACKEND_URL}${selectedStudent.resumeUrl}`}
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-primary"

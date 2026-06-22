@@ -83,6 +83,10 @@ export const updateJob = async (req, res) => {
     const job = await Job.findById(req.params.id);
 
     if (job) {
+      if (req.user.role === 'recruiter' && job.postedBy.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'Not authorized to modify this job' });
+      }
+
       if (title) job.title = title;
       if (company) job.company = company;
       if (description) job.description = description;
@@ -112,6 +116,10 @@ export const deleteJob = async (req, res) => {
     const job = await Job.findById(req.params.id);
 
     if (job) {
+      if (req.user.role === 'recruiter' && job.postedBy.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'Not authorized to delete this job' });
+      }
+
       await job.deleteOne();
       res.json({ message: 'Job removed successfully' });
     } else {

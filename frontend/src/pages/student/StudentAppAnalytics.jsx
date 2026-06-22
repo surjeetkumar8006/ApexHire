@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth, API_BASE } from '../context/AuthContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
 import { BarChart2, PieChart, Briefcase, FileCheck, XCircle, CheckCircle, Clock } from 'lucide-react';
 
 const StudentAppAnalytics = () => {
