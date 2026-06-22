@@ -14,7 +14,7 @@ router.route('/').get(protect, admin, getInterviews).post(protect, admin, create
 router.route('/my').get(protect, getStudentInterviews);
 router
   .route('/:id')
-  .put(protect, admin, updateInterview)
+  .put(protect, updateInterview)
   .delete(protect, admin, deleteInterview);
 
 export default router;

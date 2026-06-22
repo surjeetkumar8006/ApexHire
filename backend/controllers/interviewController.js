@@ -110,13 +110,22 @@ export const createInterview = async (req, res) => {
 // @route   PUT /api/interviews/:id
 // @access  Private (Admin)
 export const updateInterview = async (req, res) => {
-  const { company, role, date, time, type, status, link } = req.body;
+  const { company, role, date, time, type, status, link, studentFeedback } = req.body;
 
   try {
     const interview = await Interview.findById(req.params.id);
 
     if (!interview) {
       return res.status(404).json({ message: 'Interview not found' });
+    }
+
+    // Authorization check: only admin, recruiter, or the student candidate can update this interview
+    if (
+      req.user.role !== 'admin' &&
+      req.user.role !== 'recruiter' &&
+      interview.student.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({ message: 'Not authorized to modify this interview' });
     }
 
     if (company) interview.company = company;
@@ -126,6 +135,7 @@ export const updateInterview = async (req, res) => {
     if (type) interview.type = type;
     if (status) interview.status = status;
     if (link !== undefined) interview.link = link;
+    if (studentFeedback) interview.studentFeedback = studentFeedback;
 
     const updatedInterview = await interview.save();
 

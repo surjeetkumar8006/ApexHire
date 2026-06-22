@@ -38,6 +38,11 @@ const interviewSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    studentFeedback: {
+      rating: { type: Number, min: 1, max: 5 },
+      notes: { type: String, default: '' },
+      felt: { type: String, enum: ['Excellent', 'Good', 'Average', 'Poor'], default: 'Good' }
+    }
   },
   {
     timestamps: true,
