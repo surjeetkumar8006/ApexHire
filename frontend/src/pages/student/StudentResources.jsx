@@ -89,12 +89,12 @@ const StudentResources = () => {
       resources: [
         { name: 'Pramp - Peer Mock Interviews', link: 'https://www.pramp.com/', type: 'Platform', platform: 'Pramp' },
         { name: 'Interviewing.io', link: 'https://interviewing.io/', type: 'Platform', platform: 'Interviewing.io' },
-        { name: 'ApexHire AI Mock Coach', link: '/student/ai-coach', type: 'Internal', platform: 'ApexHire' }
+        { name: 'ApexHire AI Mock Coach', link: '/student/mock-interviews', type: 'Internal', platform: 'ApexHire' }
       ],
       allResources: [
         { name: 'Pramp - Peer Mock Interviews', link: 'https://www.pramp.com/', type: 'Platform', desc: 'Free peer-to-peer mock assessments where you take turns interviewing.' },
         { name: 'Interviewing.io (FAANG Experts)', link: 'https://interviewing.io/', type: 'Platform', desc: 'Practice anonymously with real staff/principal engineers from Meta, Google, etc.' },
-        { name: 'ApexHire AI Mock Coach', link: '/student/ai-coach', type: 'Internal', desc: 'Leverage AI to practice conversational and coding assessment questions directly in-portal.' },
+        { name: 'ApexHire AI Mock Coach', link: '/student/mock-interviews', type: 'Internal', desc: 'Leverage AI to practice conversational and coding assessment questions directly in-portal.' },
         { name: 'Google Interview Warmup', link: 'https://grow.google/certificates/interview-warmup/', type: 'Platform', desc: 'Google tool that listens and uses machine learning to analyze your responses.' },
         { name: 'Exponent Mock Interview Videos', link: 'https://www.youtube.com/@tryexponent', type: 'Video', desc: 'Recordings of real software engineer, PM, and system design mock rounds.' }
       ]

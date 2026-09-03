@@ -64,7 +64,7 @@ const StudentAppAnalytics = () => {
       {/* Summary Cards */}
       <div className="analytics-grid">
         <div className="premium-card stagger-1" style={styles.summaryCard}>
-          <div style={{ ...styles.iconWrap, background: 'rgba(99, 102, 241, 0.1)', borderColor: 'rgba(99, 102, 241, 0.2)' }}>
+          <div style={{ ...styles.iconWrap, background: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}>
             <Briefcase size={28} color="var(--primary)" />
           </div>
           <div>
@@ -106,7 +106,7 @@ const StudentAppAnalytics = () => {
         {/* Funnel Chart */}
         <div className="premium-card stagger-5" style={styles.chartCard}>
           <div style={styles.chartHeader}>
-            <div style={{ padding: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '8px' }}>
+            <div style={{ padding: '0.5rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px' }}>
               <PieChart size={20} color="var(--primary)" />
             </div>
             <h3 style={styles.chartTitle}>Conversion Funnel</h3>
@@ -118,7 +118,7 @@ const StudentAppAnalytics = () => {
               <div className="funnel-row-hover" style={styles.funnelRow}>
                 <span style={styles.funnelLabel}>Applied</span>
                 <div style={styles.funnelTrack}>
-                  <div className="glow-bar" style={{ width: '100%', background: 'linear-gradient(90deg, var(--primary), #818cf8)' }}></div>
+                  <div className="glow-bar" style={{ width: '100%', background: 'linear-gradient(90deg, #ffffff, #cbd5e1)' }}></div>
                 </div>
                 <span style={styles.funnelValue}>{total} <span style={styles.pct}>({getPercent(total)}%)</span></span>
               </div>
@@ -145,7 +145,7 @@ const StudentAppAnalytics = () => {
         {/* Status Breakdown */}
         <div className="premium-card stagger-6" style={styles.chartCard}>
           <div style={styles.chartHeader}>
-            <div style={{ padding: '0.4rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '8px' }}>
+            <div style={{ padding: '0.4rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px' }}>
               <BarChart2 size={18} color="var(--primary)" />
             </div>
             <h3 style={styles.chartTitle}>Detailed Breakdown</h3>
@@ -223,9 +223,9 @@ const StudentAppAnalytics = () => {
         .premium-card {
           padding: 1.5rem;
           border-radius: 16px;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          box-shadow: none;
+          background: var(--bg-card);
+          border: 1px solid var(--border-color);
+          box-shadow: var(--shadow-sm);
           transition: border-color 0.3s ease;
           position: relative;
           overflow: hidden;
@@ -235,13 +235,14 @@ const StudentAppAnalytics = () => {
           content: '';
           position: absolute;
           top: 0; left: 0; right: 0; height: 3px;
-          background: linear-gradient(90deg, var(--primary), transparent);
+          background: #ffffff;
           opacity: 0;
           transition: opacity 0.3s ease;
         }
 
         .premium-card:hover {
-          border-color: rgba(99, 102, 241, 0.4);
+          border-color: rgba(255, 255, 255, 0.35);
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 15px -3px rgba(255, 255, 255, 0.12);
         }
         
         .premium-card:hover::before {
@@ -295,7 +296,7 @@ const StudentAppAnalytics = () => {
           border-radius: 10px;
         }
         .funnel-row-hover:hover {
-          background: #f8fafc;
+          background: var(--bg-base);
           transform: scale(1.01);
         }
 
@@ -304,15 +305,15 @@ const StudentAppAnalytics = () => {
           align-items: center;
           gap: 0.8rem;
           padding: 1rem;
-          background: #f8fafc;
+          background: var(--bg-base);
           border-radius: 12px;
-          border: 1px solid #e2e8f0;
+          border: 1px solid var(--border-color);
           box-shadow: none;
           transition: all 0.3s ease;
           cursor: default;
         }
         .breakdown-box:hover {
-          background: #ffffff;
+          background: var(--bg-card);
           border-color: var(--primary);
         }
         
@@ -342,10 +343,10 @@ const styles = {
     display: 'flex', 
     flexDirection: 'column', 
     gap: '2rem',
-    background: '#ffffff',
+    background: 'var(--bg-card)',
     padding: '2.5rem',
     borderRadius: '24px',
-    boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
+    boxShadow: 'var(--shadow-md)',
     border: '1px solid var(--border-color)'
   },
   header: { display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' },
@@ -357,8 +358,8 @@ const styles = {
     width: '48px', 
     height: '48px', 
     borderRadius: '14px', 
-    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05))',
-    border: '1px solid rgba(99, 102, 241, 0.2)'
+    background: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)'
   },
   title: { fontSize: '2rem', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.5px' },
   subtitle: { fontSize: '1.05rem', color: 'var(--text-secondary)', maxWidth: '600px', lineHeight: '1.5' },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, User, LogOut, CheckSquare, Sun, Moon, Menu } from 'lucide-react';
+import { Bell, User, LogOut, CheckSquare, Menu } from 'lucide-react';
 import { useAuth, API_BASE } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 
@@ -10,25 +10,11 @@ const Navbar = ({ onMenuClick }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme') || 'dark';
-    if (saved === 'light') {
-      document.body.classList.add('light-theme');
-    } else {
-      document.body.classList.remove('light-theme');
-    }
-    return saved;
-  });
-
-  const changeTheme = (newTheme) => {
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    if (newTheme === 'light') {
-      document.body.classList.add('light-theme');
-    } else {
-      document.body.classList.remove('light-theme');
-    }
-  };
+  useEffect(() => {
+    // Enforce dark mode permanently
+    document.body.classList.remove('light-theme');
+    localStorage.setItem('theme', 'dark');
+  }, []);
 
   const fetchNotifications = async () => {
     if (!user) return;
@@ -166,34 +152,6 @@ const Navbar = ({ onMenuClick }) => {
             )}
           </div>
 
-          {/* Theme Selector Dual-Pill Switch */}
-          <div className="nav-hide-mobile" style={styles.themeToggleContainer}>
-            <button
-              onClick={() => changeTheme('light')}
-              style={{
-                ...styles.themeToggleBtn,
-                backgroundColor: theme === 'light' ? 'var(--primary)' : 'transparent',
-                color: theme === 'light' ? '#fff' : 'var(--text-secondary)',
-              }}
-              title="Switch to Light Theme"
-            >
-              <Sun size={14} />
-              <span>Light</span>
-            </button>
-            <button
-              onClick={() => changeTheme('dark')}
-              style={{
-                ...styles.themeToggleBtn,
-                backgroundColor: theme === 'dark' ? 'var(--primary)' : 'transparent',
-                color: theme === 'dark' ? '#fff' : 'var(--text-secondary)',
-              }}
-              title="Switch to Dark Theme"
-            >
-              <Moon size={14} />
-              <span>Dark</span>
-            </button>
-          </div>
-
           {/* User Profile Info */}
           <div style={styles.userCard}>
             <div style={styles.avatar}>
@@ -240,26 +198,6 @@ const styles = {
     right: 0,
     zIndex: 1000,
   },
-  themeToggleContainer: {
-    display: 'flex',
-    backgroundColor: 'var(--bg-surface-elevated)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '20px',
-    padding: '2px',
-    gap: '2px',
-  },
-  themeToggleBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.35rem',
-    padding: '0.4rem 0.8rem',
-    borderRadius: '18px',
-    cursor: 'pointer',
-    fontSize: '0.78rem',
-    fontWeight: '600',
-    transition: 'all var(--transition-fast)',
-    border: 'none',
-  },
   navLeft: {
     display: 'flex',
     alignItems: 'center',
@@ -274,12 +212,11 @@ const styles = {
     letterSpacing: '-0.5px',
   },
   logoGradient: {
-    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: '#ffffff',
+    WebkitTextFillColor: '#ffffff',
   },
   subBrand: {
-    color: 'var(--accent)',
+    color: '#ffffff',
     fontSize: '1.2rem',
     fontWeight: '600',
   },
@@ -405,23 +342,27 @@ const styles = {
     color: 'var(--text-muted)',
   },
   userCard: {
-    background: 'rgba(255, 255, 255, 0.03)',
-    border: '1px solid var(--glass-border)',
-    borderRadius: '12px',
-    padding: '0.4rem 0.6rem 0.4rem 0.8rem',
+    height: '40px',
+    background: 'var(--bg-surface-elevated)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '10px',
+    padding: '0 0.8rem',
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem',
+    gap: '0.65rem',
+    boxSizing: 'border-box',
   },
   avatar: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '8px',
-    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+    width: '26px',
+    height: '26px',
+    borderRadius: '6px',
+    background: 'rgba(255, 255, 255, 0.15)',
+    border: '1px solid rgba(255, 255, 255, 0.25)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#fff',
+    color: '#ffffff',
+    flexShrink: 0,
   },
   userInfo: {
     display: 'flex',
@@ -435,7 +376,8 @@ const styles = {
   },
   userRole: {
     fontSize: '0.7rem',
-    color: 'var(--accent)',
+    color: '#ffffff',
+    opacity: 0.8,
     fontWeight: '500',
   },
   logoutBtn: {

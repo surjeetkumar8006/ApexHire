@@ -30,6 +30,15 @@ export const getRecruiterApplicants = async (req, res) => {
       .populate('job', 'title company location type')
       .sort({ createdAt: -1 });
 
+    // Auto-increment Profile Views for candidates viewed by recruiter
+    const studentUserIds = [...new Set(applications.map(app => app.student?._id).filter(Boolean))];
+    if (studentUserIds.length > 0) {
+      await Profile.updateMany(
+        { user: { $in: studentUserIds } },
+        { $inc: { profileViews: 1 } }
+      );
+    }
+
     res.json(applications);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -55,6 +64,14 @@ export const updateApplicationStatus = async (req, res) => {
     if (feedback !== undefined) application.feedback = feedback;
 
     await application.save();
+
+    // Increment candidate profileViews when status is updated by recruiter
+    if (application.student?._id) {
+      await Profile.findOneAndUpdate(
+        { user: application.student._id },
+        { $inc: { profileViews: 1 } }
+      );
+    }
 
     // Notify student about stage updates
     await Notification.create({
@@ -94,6 +111,12 @@ export const scheduleRecruiterInterview = async (req, res) => {
       status: 'Scheduled',
       link,
     });
+
+    // Increment profileViews for interview candidate
+    await Profile.findOneAndUpdate(
+      { user: studentId },
+      { $inc: { profileViews: 1 } }
+    );
 
     // Notify student
     await Notification.create({
@@ -153,6 +176,15 @@ export const searchResumes = async (req, res) => {
     const profiles = await Profile.find(query)
       .populate('user', 'name email phone avatar')
       .sort({ updatedAt: -1 });
+
+    // Auto-increment Profile Views for candidates surfaced in search
+    const profileIds = profiles.map(p => p._id);
+    if (profileIds.length > 0) {
+      await Profile.updateMany(
+        { _id: { $in: profileIds } },
+        { $inc: { profileViews: 1 } }
+      );
+    }
 
     res.json(profiles);
   } catch (error) {

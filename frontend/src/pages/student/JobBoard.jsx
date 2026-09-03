@@ -212,7 +212,7 @@ const JobBoard = () => {
           {user && user.role === 'student' && recommendedJobs.filter(job => !myApplications.includes(job._id)).length > 0 && (
             <div style={styles.recSection} className="animate-fade-in">
               <div style={styles.recHeader}>
-                <Sparkles size={18} color="var(--accent)" />
+                <Sparkles size={18} color="#ffffff" />
                 <h3 style={styles.recTitle}>AI Suggested Opportunities</h3>
               </div>
               <div style={styles.recGrid}>

@@ -421,36 +421,26 @@ const StudentMockInterviews = () => {
                           handleStartInterview(preset.name, preset.company);
                         }}
                         className="preset-card"
-                        style={{
-                          padding: '1.15rem 1.25rem',
-                          minHeight: '175px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          background: 'var(--bg-surface)',
-                          border: '1px solid var(--border-color)',
-                          boxShadow: 'var(--shadow-sm)'
-                        }}
                       >
                         <div>
                           <div className="d-flex align-items-center justify-content-between mb-2">
-                            <div className="preset-icon-container" style={{ width: '38px', height: '38px' }}>
+                            <div className="preset-icon-container">
                               {preset.icon}
                             </div>
                             <span className="text-xxs font-bold text-muted uppercase tracking-wider">TOP COMPANY</span>
                           </div>
-                          <h4 className="preset-card-title" style={{ fontSize: '1.05rem', margin: '0.35rem 0 0.15rem 0', fontWeight: 600 }}>{preset.name}</h4>
-                          <span className="preset-card-company" style={{ fontSize: '0.75rem' }}>Simulated Target: {preset.company}</span>
+                          <h4 className="preset-card-title">{preset.name}</h4>
+                          <span className="preset-card-company">Simulated Target: {preset.company}</span>
                         </div>
                         
                         <div className="mt-3">
                           <div className="d-flex flex-wrap gap-1 mb-2">
                             {preset.tags.map((tag, tIdx) => (
-                              <span key={tIdx} className="preset-tag" style={{ padding: '0.15rem 0.45rem', fontSize: '0.65rem', borderRadius: '4px' }}>{tag}</span>
+                              <span key={tIdx} className="preset-tag">{tag}</span>
                             ))}
                           </div>
-                          <span className="preset-launch-btn" style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-                            Launch Room <ArrowRight size={10} />
+                          <span className="preset-launch-btn">
+                            Launch Room <ArrowRight size={12} />
                           </span>
                         </div>
                       </div>

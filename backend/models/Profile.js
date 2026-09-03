@@ -65,6 +65,10 @@ const profileSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    profileViews: {
+      type: Number,
+      default: 0
+    },
     problemSolving: {
       total: { type: Number, default: 0 },
       easy: { type: Number, default: 0 },

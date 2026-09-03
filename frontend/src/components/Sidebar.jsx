@@ -34,7 +34,6 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/student/dashboard', name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/student/jobs', name: 'Job Board', icon: <Briefcase size={20} /> },
     { path: '/student/applications', name: 'My Applications', icon: <FileCheck size={20} /> },
-    { path: '/student/ai-coach', name: 'AI Career Coach', icon: <Cpu size={20} /> },
     { path: '/student/mock-interviews', name: 'AI Mock Interview', icon: <Cpu size={20} /> },
     { path: '/student/assessments', name: 'Skill Assessments', icon: <Award size={20} /> },
     { path: '/student/interviews', name: 'My Interviews', icon: <CalendarCheck size={20} /> },
@@ -90,22 +89,26 @@ const Sidebar = ({ isOpen, onClose }) => {
           return (
             <button
               key={link.path}
-              onClick={() => navigate(link.path)}
+              onClick={() => {
+                navigate(link.path);
+                if (isOpen && onClose) onClose();
+              }}
               className={`sidebar-menu-item ${isActive ? 'active' : ''}`}
+              title={link.name}
             >
               <span style={isActive ? styles.activeIcon : styles.icon}>
                 {link.icon}
               </span>
-              <span>{link.name}</span>
+              <span className="sidebar-link-text">{link.name}</span>
             </button>
           );
         })}
       </div>
 
       <div style={styles.footer}>
-        <button onClick={logout} className="sidebar-logout-btn">
+        <button onClick={logout} className="sidebar-logout-btn" title="Logout">
           <LogOut size={20} />
-          <span>Logout</span>
+          <span className="sidebar-link-text">Logout</span>
         </button>
       </div>
     </aside>
@@ -152,14 +155,16 @@ const styles = {
     border: '1px solid rgba(99, 102, 241, 0.25)',
   },
   icon: {
-    color: 'var(--text-muted)',
+    color: '#ffffff',
     display: 'flex',
     alignItems: 'center',
+    opacity: 0.8,
   },
   activeIcon: {
-    color: 'var(--primary)',
+    color: '#ffffff',
     display: 'flex',
     alignItems: 'center',
+    opacity: 1,
   },
   linkText: {
     fontSize: '0.95rem',
