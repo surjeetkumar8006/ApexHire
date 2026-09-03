@@ -34,7 +34,7 @@ const StudentApplications = () => {
     <div style={styles.container} className="animate-fade-in">
       <header style={styles.header}>
         <div style={styles.titleRow}>
-          <FileCheck size={28} color="var(--primary)" />
+          <FileCheck size={28} color="#ffffff" />
           <h1 style={styles.title}>My Applications</h1>
         </div>
         <p style={styles.subtitle}>Track your application status and recruiter feedback.</p>
@@ -92,7 +92,7 @@ const StudentApplications = () => {
 
               {app.feedback && (
                 <div style={styles.feedbackBox}>
-                  <AlertCircle size={16} color="var(--primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <AlertCircle size={16} color="#ffffff" style={{ flexShrink: 0, marginTop: '2px' }} />
                   <div>
                     <h4 style={styles.feedbackTitle}>Recruiter Feedback</h4>
                     <p style={styles.feedbackText}>{app.feedback}</p>

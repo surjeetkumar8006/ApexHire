@@ -310,22 +310,20 @@ const SettingsPage = () => {
 
       <div style={styles.layout}>
         {/* Settings Sidebar */}
-        <div className="glass-card" style={styles.sidebar}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                ...styles.tabBtn,
-                background: activeTab === tab.id ? 'var(--primary-glow)' : 'transparent',
-                color: activeTab === tab.id ? 'var(--primary)' : 'var(--text-secondary)',
-                borderRight: activeTab === tab.id ? '3px solid var(--primary)' : '3px solid transparent'
-              }}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
+        <div className="glass-card p-3" style={{ width: '260px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          {tabs.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`settings-tab-btn ${isActive ? 'active' : ''}`}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Settings Content Area */}

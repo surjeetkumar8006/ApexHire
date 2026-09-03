@@ -3,15 +3,15 @@
   --font-primary: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 
   /* Theme-independent colors (Accents & Primary) */
-  --primary: hsl(250, 84%, 58%);
-  --primary-hover: hsl(250, 84%, 64%);
-  --primary-glow: hsla(250, 84%, 58%, 0.15);
+  --primary: #ffffff;
+  --primary-hover: #f1f5f9;
+  --primary-glow: rgba(255, 255, 255, 0.15);
   
-  --secondary: hsl(277, 85%, 55%);
-  --secondary-glow: hsla(277, 85%, 55%, 0.15);
+  --secondary: #ffffff;
+  --secondary-glow: rgba(255, 255, 255, 0.15);
   
-  --accent: hsl(187, 85%, 45%);
-  --accent-glow: hsla(187, 85%, 45%, 0.15);
+  --accent: #ffffff;
+  --accent-glow: rgba(255, 255, 255, 0.15);
 
   --success: hsl(142, 65%, 44%);
   --success-glow: hsla(142, 65%, 44%, 0.15);
@@ -35,65 +35,71 @@
   --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* --- DEFAULT (DARK) THEME VARIABLES --- */
-  --bg-base: hsl(222, 47%, 9%);
-  --bg-surface: hsl(222, 47%, 13%);
-  --bg-surface-elevated: hsl(222, 47%, 17%);
+  --bg-base: #05070d;
+  --bg-surface: #0c101a;
+  --bg-surface-elevated: #131929;
   
-  --text-primary: hsl(210, 40%, 98%);
-  --text-secondary: hsl(215, 20%, 75%);
-  --text-muted: hsl(215, 14%, 52%);
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
 
-  --border-color: hsla(217, 30%, 30%, 0.25);
-  --border-focus: hsla(250, 84%, 58%, 0.5);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(255, 255, 255, 0.4);
   
-  --glass-bg: rgba(13, 20, 38, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-blur: blur(12px);
+  --glass-bg: rgba(12, 16, 26, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(16px);
 
-  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 20px -4px rgba(0, 0, 0, 0.7);
-  --shadow-lg: 0 10px 35px -8px rgba(0, 0, 0, 0.8), 0 0 20px -2px var(--primary-glow);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 255, 255, 0.1);
 
   /* Premium Form Input Variables (Dark Mode) */
-  --input-bg: rgba(13, 20, 38, 0.5);
-  --input-bg-hover: rgba(13, 20, 38, 0.7);
-  --input-bg-focus: rgba(8, 12, 24, 0.85);
-  --input-border: rgba(255, 255, 255, 0.08);
-  --input-text: hsl(210, 40%, 98%);
-  --input-placeholder: hsl(215, 14%, 55%);
-  --input-focus-border: hsl(250, 84%, 58%);
-  --input-focus-shadow: 0 0 0 4px hsla(250, 84%, 58%, 0.25);
+  --input-bg: rgba(12, 16, 26, 0.8);
+  --input-bg-hover: rgba(12, 16, 26, 0.95);
+  --input-bg-focus: rgba(12, 16, 26, 1);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --input-text: #f9fafb;
+  --input-placeholder: #6b7280;
+  --input-focus-border: rgba(255, 255, 255, 0.5);
+  --input-focus-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+
+  --bg-mesh-1: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.03) 0px, transparent 50%);
+  --bg-mesh-2: radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.02) 0px, transparent 50%);
 }
 
 /* --- LIGHT THEME VARIABLES --- */
 body.light-theme {
-  --bg-base: hsl(210, 40%, 96%);
-  --bg-surface: hsl(0, 0%, 100%);
-  --bg-surface-elevated: hsl(210, 35%, 92%);
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f1f5f9;
   
-  --text-primary: hsl(222, 47%, 12%);
-  --text-secondary: hsl(215, 22%, 35%);
-  --text-muted: hsl(215, 14%, 52%);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
 
-  --border-color: hsla(217, 20%, 60%, 0.15);
+  --border-color: rgba(0, 0, 0, 0.08);
   --border-focus: hsla(250, 84%, 58%, 0.6);
   
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-blur: blur(12px);
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-blur: blur(16px);
 
-  --shadow-sm: 0 2px 6px -1px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 8px 24px -6px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 16px 40px -12px rgba(0, 0, 0, 0.18), 0 0 15px -3px var(--primary-glow);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 36px -8px rgba(0, 0, 0, 0.12), 0 0 25px rgba(99, 102, 241, 0.1);
 
   /* Premium Form Input Variables (Light Mode) */
-  --input-bg: hsl(0, 0%, 100%);
-  --input-bg-hover: hsl(210, 40%, 98%);
-  --input-bg-focus: hsl(0, 0%, 100%);
-  --input-border: hsla(217, 20%, 60%, 0.28);
-  --input-text: hsl(222, 47%, 12%);
-  --input-placeholder: hsl(215, 14%, 62%);
+  --input-bg: #ffffff;
+  --input-bg-hover: #f8fafc;
+  --input-bg-focus: #ffffff;
+  --input-border: rgba(0, 0, 0, 0.12);
+  --input-text: #0f172a;
+  --input-placeholder: #94a3b8;
   --input-focus-border: hsl(250, 84%, 58%);
   --input-focus-shadow: 0 0 0 4px hsla(250, 84%, 58%, 0.15);
+
+  --bg-mesh-1: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%);
+  --bg-mesh-2: radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
 }
 

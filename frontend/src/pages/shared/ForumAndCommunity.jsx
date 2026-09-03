@@ -63,6 +63,16 @@ const ForumAndCommunity = () => {
 
   useEffect(() => {
     fetchTabData();
+
+    if (activeSubTab === 'forum') {
+      const interval = setInterval(() => {
+        fetch(`${API_BASE}/community/forum`, { headers: authHeader() })
+          .then(res => res.ok ? res.json() : null)
+          .then(data => data && setPosts(data))
+          .catch(() => {});
+      }, 10000);
+      return () => clearInterval(interval);
+    }
   }, [activeSubTab]);
 
   const fetchTabData = async () => {
@@ -340,8 +350,8 @@ const ForumAndCommunity = () => {
                         <span className="badge bg-secondary-glow text-secondary text-xs">{post.category}</span>
                       </div>
 
-                      <h4 className="font-bold h6 mb-2">{post.title}</h4>
-                      <p className="text-muted text-sm mb-4" style={{ lineHeight: 1.6 }}>{post.content}</p>
+                      <h4 className="font-bold mb-2" style={{ color: 'var(--text-primary)', fontSize: '1.1rem' }}>{post.title}</h4>
+                      <p className="mb-4" style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6 }}>{post.content}</p>
 
                       {/* Upvotes / Comments count footer */}
                       <div className="d-flex justify-content-between align-items-center border-top border-color pt-3 flex-wrap gap-2">
@@ -353,7 +363,7 @@ const ForumAndCommunity = () => {
                             <ThumbsUp size={12} /> Upvote ({post.upvotes.length})
                           </button>
                         </div>
-                        <div className="text-xs text-muted">
+                        <div className="text-xs" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>
                           {post.comments.length} Comments
                         </div>
                       </div>
@@ -362,18 +372,18 @@ const ForumAndCommunity = () => {
                       <div className="comments-section mt-4 pt-3 border-top border-color">
                         {post.comments.map((comment, cIdx) => (
                           <div key={cIdx} className="d-flex gap-3 align-items-start mb-3">
-                            <div className="avatar-circle bg-base text-xs font-semibold text-secondary" style={{ width: 28, height: 28, minWidth: 28 }}>
+                            <div className="avatar-circle font-bold text-xs" style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'var(--bg-surface)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               {comment.user?.name?.charAt(0) || 'U'}
                             </div>
-                            <div className="flex-grow-1 p-2 rounded bg-base text-xs">
+                            <div className="flex-grow-1 p-3 rounded-3" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
                               <div className="d-flex justify-content-between align-items-center mb-1">
-                                <span className="font-semibold text-primary">
+                                <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
                                   {comment.user?.name || 'Anonymous'}
                                   {comment.user?.role && getRoleBadge(comment.user.role)}
                                 </span>
-                                <span className="text-muted text-xxs">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{new Date(comment.createdAt).toLocaleDateString()}</span>
                               </div>
-                              <p className="mb-0 text-muted">{comment.text}</p>
+                              <p className="mb-0 text-sm" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>{comment.text}</p>
                             </div>
                           </div>
                         ))}

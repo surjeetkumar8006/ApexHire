@@ -34,6 +34,8 @@ const StudentEvents = () => {
 
   useEffect(() => {
     fetchEvents();
+    const interval = setInterval(fetchEvents, 12000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleRegister = async (eventId, isRegistered) => {

@@ -44,7 +44,8 @@ export const updateStudentProfile = async (req, res) => {
       if (achievements) profile.achievements = achievements;
 
       const updatedProfile = await profile.save();
-      res.json(updatedProfile);
+      const populatedProfile = await Profile.findById(updatedProfile._id).populate('user', 'name email role');
+      res.json(populatedProfile);
     } else {
       res.status(404).json({ message: 'Profile not found' });
     }
@@ -193,6 +194,9 @@ export const getPublicProfile = async (req, res) => {
     if (profile.privacy && profile.privacy.profileVisibility === 'private') {
       return res.status(403).json({ message: 'This profile is private' });
     }
+
+    profile.profileViews = (profile.profileViews || 0) + 1;
+    await profile.save();
 
     res.json(profile);
   } catch (error) {

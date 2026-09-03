@@ -134,9 +134,9 @@ const AuthPage = ({ onBack }) => {
               onClick={() => setIsLogin(true)}
               style={{
                 ...styles.switcherBtn,
-                color: isLogin ? '#fff' : 'var(--text-secondary)',
-                backgroundColor: isLogin ? 'var(--primary)' : 'transparent',
-                boxShadow: isLogin ? 'var(--shadow-sm)' : 'none',
+                color: isLogin ? '#0b0f19' : 'var(--text-secondary)',
+                backgroundColor: isLogin ? '#ffffff' : 'transparent',
+                boxShadow: isLogin ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none',
               }}
             >
               Sign In
@@ -146,9 +146,9 @@ const AuthPage = ({ onBack }) => {
               onClick={() => setIsLogin(false)}
               style={{
                 ...styles.switcherBtn,
-                color: !isLogin ? '#fff' : 'var(--text-secondary)',
-                backgroundColor: !isLogin ? 'var(--primary)' : 'transparent',
-                boxShadow: !isLogin ? 'var(--shadow-sm)' : 'none',
+                color: !isLogin ? '#0b0f19' : 'var(--text-secondary)',
+                backgroundColor: !isLogin ? '#ffffff' : 'transparent',
+                boxShadow: !isLogin ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none',
               }}
             >
               Register

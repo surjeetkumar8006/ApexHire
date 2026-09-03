@@ -14,13 +14,63 @@ import {
   Award, 
   HelpCircle,
   Activity,
-  Users
+  Users,
+  Cpu,
+  Zap,
+  Check
 } from 'lucide-react';
 import { API_BASE } from '../../context/AuthContext';
 
 const LandingPage = ({ onGetStarted }) => {
   const [activeTab, setActiveTab] = useState('coach');
   const [openFaq, setOpenFaq] = useState(null);
+
+  // Real-Time Skill Match Calculator Playground State
+  const [calcRole, setCalcRole] = useState('Full Stack Engineer');
+  const [userSkills, setUserSkills] = useState(['React', 'Node.js', 'System Design']);
+
+  const roleSkillMap = {
+    'Full Stack Engineer': ['React', 'Node.js', 'System Design', 'MongoDB', 'REST APIs'],
+    'Frontend Specialist': ['React', 'TypeScript', 'CSS Layout', 'Performance', 'HTML5'],
+    'Backend Engineer': ['Node.js', 'System Design', 'Databases', 'APIs', 'Docker'],
+    'AI / ML Specialist': ['Python', 'LLMs', 'PyTorch', 'System Design', 'APIs']
+  };
+
+  const allAvailableSkills = ['React', 'Node.js', 'Python', 'System Design', 'MongoDB', 'TypeScript', 'Docker', 'REST APIs', 'PyTorch', 'CSS Layout', 'Performance'];
+
+  const targetRequired = roleSkillMap[calcRole] || [];
+  const matchedSkills = userSkills.filter(s => targetRequired.includes(s));
+  const missingSkills = targetRequired.filter(s => !userSkills.includes(s));
+  const calcScore = Math.round((matchedSkills.length / targetRequired.length) * 100);
+
+  // Real-Time CTC Estimator State
+  const [branch, setBranch] = useState('CSE / IT');
+  const [prepTier, setPrepTier] = useState('ready');
+
+  const ctcMatrix = {
+    'CSE / IT': {
+      foundation: { range: '₹6.5 - ₹10 LPA', highest: '₹18 LPA', recruiters: 42, companies: 'Amazon, Infosys, TCS, Wipro' },
+      ready: { range: '₹12 - ₹18 LPA', highest: '₹32 LPA', recruiters: 85, companies: 'Google, Microsoft, Cred, Flipkart' },
+      elite: { range: '₹22 - ₹45 LPA', highest: '₹65 LPA', recruiters: 120, companies: 'Meta, Uber, Atlassian, Goldman Sachs' }
+    },
+    'ECE / EEE': {
+      foundation: { range: '₹5.5 - ₹8.5 LPA', highest: '₹14 LPA', recruiters: 28, companies: 'Qualcomm, Intel, L&T, Siemens' },
+      ready: { range: '₹10 - ₹15 LPA', highest: '₹26 LPA', recruiters: 54, companies: 'Texas Instruments, Nvidia, AMD, Apple' },
+      elite: { range: '₹18 - ₹36 LPA', highest: '₹52 LPA', recruiters: 75, companies: 'Nvidia, Samsung R&D, Qualcomm, Arm' }
+    },
+    'Mechanical': {
+      foundation: { range: '₹4.8 - ₹7.5 LPA', highest: '₹12 LPA', recruiters: 20, companies: 'Tata Motors, Mahindra, L&T' },
+      ready: { range: '₹8 - ₹12 LPA', highest: '₹20 LPA', recruiters: 38, companies: 'Tesla, Boeing, Airbus, Caterpillar' },
+      elite: { range: '₹14 - ₹24 LPA', highest: '₹38 LPA', recruiters: 45, companies: 'Mercedes-Benz, BMW R&D, Rolls-Royce' }
+    },
+    'Civil / Other': {
+      foundation: { range: '₹4.5 - ₹6.8 LPA', highest: '₹10 LPA', recruiters: 18, companies: 'L&T, DLF, Shapoorji Pallonji' },
+      ready: { range: '₹7.5 - ₹11 LPA', highest: '₹16 LPA', recruiters: 30, companies: 'Bechtel, Jacobs, AECOM' },
+      elite: { range: '₹12 - ₹20 LPA', highest: '₹28 LPA', recruiters: 36, companies: 'McKinsey, BCG, KPMG Advisory' }
+    }
+  };
+
+  const estimatedCtc = ctcMatrix[branch]?.[prepTier] || ctcMatrix['CSE / IT']['ready'];
 
   const [stats, setStats] = useState({
     placementRate: 95,
@@ -134,8 +184,8 @@ const LandingPage = ({ onGetStarted }) => {
       <section className="landing-hero">
         <div className="landing-hero-left">
           <div className="hero-badge">
-            <TrendingUp size={14} color="var(--accent)" />
-            <span>ApexHire Showcase 2026</span>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e', display: 'inline-block' }}></span>
+            <span>Real-Time Placement & AI Career Engine</span>
           </div>
           <h1 className="hero-title">
             Elevate Your Career Path With <br />
@@ -164,7 +214,7 @@ const LandingPage = ({ onGetStarted }) => {
               <div className="mockup-body">
                 {/* Profile Card */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', textAlign: 'left' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#ffffff', color: '#0b0f19', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
                     AM
                   </div>
                   <div>
@@ -181,14 +231,14 @@ const LandingPage = ({ onGetStarted }) => {
                         className="circle-bg"
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
-                        stroke="rgba(255,255,255,0.04)"
+                        stroke="rgba(255,255,255,0.06)"
                         strokeWidth="3.5"
                       />
                       <path
                         className="circle"
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
-                        stroke="var(--accent)"
+                        stroke="#ffffff"
                         strokeDasharray="88, 100"
                         strokeWidth="3.5"
                         strokeLinecap="round"
@@ -197,7 +247,7 @@ const LandingPage = ({ onGetStarted }) => {
                     <span className="score-number">88</span>
                   </div>
                   <div className="score-info">
-                    <h4>AI Match Score: Excellent</h4>
+                    <h4 style={{ color: '#ffffff' }}>AI Match Score: Excellent</h4>
                     <p>Matches: Frontend Dev & React Developer roles</p>
                   </div>
                 </div>
@@ -220,6 +270,156 @@ const LandingPage = ({ onGetStarted }) => {
                     <span className="step-label">Interview</span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 1.5 REAL-TIME INTERACTIVE AI SKILL MATCH PLAYGROUND */}
+      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 5rem auto', padding: '0 1rem' }}>
+        <div 
+          className="glass-card" 
+          style={{ 
+            background: 'var(--bg-surface-elevated)', 
+            border: '1px solid var(--border-color)', 
+            borderRadius: '24px', 
+            padding: '2.5rem',
+            boxShadow: 'var(--shadow-lg)'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+              <div className="d-flex align-items-center gap-2 mb-1">
+                <span className="badge bg-primary-glow text-primary font-semibold text-xs px-2.5 py-1 rounded-pill d-inline-flex align-items-center gap-1">
+                  <Zap size={12} className="animate-pulse" /> Interactive Real-Time Playground
+                </span>
+                <span className="text-xxs text-muted">• Gemini AI Match Calibrator</span>
+              </div>
+              <h3 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                Simulate AI Match Score in Real-Time
+              </h3>
+            </div>
+            
+            <div className="d-flex align-items-center gap-2">
+              <span className="text-xs text-muted">Target Role:</span>
+              <select 
+                value={calcRole} 
+                onChange={(e) => setCalcRole(e.target.value)}
+                className="form-select text-xs font-semibold"
+                style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', borderRadius: '8px', padding: '0.4rem 0.8rem' }}
+              >
+                {Object.keys(roleSkillMap).map(role => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="row g-4 align-items-center">
+            <div className="col-lg-7">
+              <p className="text-xs text-muted mb-3">
+                Click skills below to simulate real-time AI parser score calculations for <strong>{calcRole}</strong> target vacancies:
+              </p>
+              
+              <div className="d-flex flex-wrap gap-2 mb-4">
+                {allAvailableSkills.map(skill => {
+                  const isSelected = userSkills.includes(skill);
+                  const isRequired = targetRequired.includes(skill);
+                  return (
+                    <button
+                      key={skill}
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setUserSkills(prev => prev.filter(s => s !== skill));
+                        } else {
+                          setUserSkills(prev => [...prev, skill]);
+                        }
+                      }}
+                      style={{
+                        padding: '0.4rem 0.85rem',
+                        borderRadius: '30px',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        background: isSelected ? '#ffffff' : 'var(--bg-base)',
+                        color: isSelected ? '#0b0f19' : 'var(--text-secondary)',
+                        border: isSelected ? '1px solid #ffffff' : '1px solid var(--border-color)',
+                        boxShadow: isSelected ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      {isSelected && <Check size={12} />}
+                      {skill}
+                      {isRequired && !isSelected && <span style={{ opacity: 0.6, fontSize: '0.65rem' }}>(Req)</span>}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="p-3 rounded-3" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+                <div className="d-flex justify-content-between align-items-center text-xs mb-2">
+                  <span className="font-semibold text-secondary">Matching Status Breakdown</span>
+                  <span className="font-bold" style={{ color: calcScore >= 75 ? 'var(--success)' : calcScore >= 50 ? 'var(--warning)' : 'var(--danger)' }}>
+                    {calcScore}% Industry Match
+                  </span>
+                </div>
+                <div className="progress" style={{ height: '8px', background: 'var(--bg-surface)', borderRadius: '10px', overflow: 'hidden' }}>
+                  <div 
+                    className="progress-bar" 
+                    style={{ 
+                      width: `${calcScore}%`, 
+                      background: calcScore >= 75 ? 'var(--success)' : calcScore >= 50 ? 'var(--warning)' : 'var(--danger)',
+                      transition: 'width 0.4s ease' 
+                    }}
+                  ></div>
+                </div>
+                
+                <div className="d-flex justify-content-between align-items-center mt-3 text-xxs text-muted flex-wrap gap-2">
+                  <span>Matched ({matchedSkills.length}): <strong className="text-primary">{matchedSkills.join(', ') || 'None'}</strong></span>
+                  {missingSkills.length > 0 && (
+                    <span>Missing Target Skills: <strong style={{ color: 'var(--warning)' }}>{missingSkills.join(', ')}</strong></span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-5">
+              <div className="text-center p-4 rounded-4 position-relative" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+                <div className="mb-2">
+                  <div className="avatar-circle mx-auto font-extrabold" style={{
+                    width: 72,
+                    height: 72,
+                    border: `4px solid ${calcScore >= 75 ? 'var(--success)' : calcScore >= 50 ? 'var(--warning)' : 'var(--danger)'}`,
+                    color: calcScore >= 75 ? 'var(--success)' : calcScore >= 50 ? 'var(--warning)' : 'var(--danger)',
+                    background: 'var(--bg-surface)',
+                    fontSize: '1.5rem',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {calcScore}%
+                  </div>
+                </div>
+                
+                <h4 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
+                  {calcScore >= 75 ? '🔥 High Candidate Match' : calcScore >= 50 ? '⚡ Good Baseline Fit' : '⚠️ Skills Gap Identified'}
+                </h4>
+                <p className="text-xxs text-muted mb-3">
+                  {calcScore >= 75 ? `You satisfy ${matchedSkills.length} out of ${targetRequired.length} key requirements for ${calcRole}!` : `Add ${missingSkills[0] || 'more skills'} to boost match score.`}
+                </p>
+
+                <button 
+                  onClick={onGetStarted} 
+                  className="btn btn-sm btn-primary w-100 py-2.5 font-bold text-xs"
+                >
+                  Parse Full Resume Now <ArrowRight size={14} className="ml-1" />
+                </button>
               </div>
             </div>
           </div>
@@ -354,6 +554,112 @@ const LandingPage = ({ onGetStarted }) => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* 3.5 REAL-TIME SALARY & PLACEMENT CTC ESTIMATOR */}
+      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 5rem auto', padding: '0 1rem' }}>
+        <div 
+          className="glass-card" 
+          style={{ 
+            background: 'var(--bg-surface-elevated)', 
+            border: '1px solid var(--border-color)', 
+            borderRadius: '24px', 
+            padding: '2.5rem',
+            boxShadow: 'var(--shadow-lg)'
+          }}
+        >
+          <div className="text-center mb-4">
+            <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3 py-1.5 rounded-pill d-inline-flex align-items-center gap-1 mb-2">
+              <TrendingUp size={14} /> Live Placement CTC Estimator 2026
+            </span>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#ffffff' }}>
+              Estimate Your Placement Offer Package
+            </h2>
+            <p className="text-xs text-muted" style={{ maxWidth: '600px', margin: '0 auto' }}>
+              Select your academic branch and skill readiness tier to calculate predicted placement CTC and top hiring recruiters:
+            </p>
+          </div>
+
+          <div className="row g-4 align-items-center">
+            <div className="col-md-6">
+              <div className="p-3 rounded-3 mb-3" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+                <label className="text-xs text-muted font-semibold mb-2 d-block">Select Branch:</label>
+                <div className="d-flex flex-wrap gap-2">
+                  {['CSE / IT', 'ECE / EEE', 'Mechanical', 'Civil / Other'].map(b => (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() => setBranch(b)}
+                      style={{
+                        padding: '0.4rem 0.85rem',
+                        borderRadius: '20px',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        background: branch === b ? '#ffffff' : 'transparent',
+                        color: branch === b ? '#0b0f19' : 'var(--text-secondary)',
+                        border: branch === b ? '1px solid #ffffff' : '1px solid var(--border-color)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {b}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-3" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+                <label className="text-xs text-muted font-semibold mb-2 d-block">Skill Preparation Tier:</label>
+                <div className="d-flex flex-wrap gap-2">
+                  {[
+                    { key: 'foundation', label: '🌱 Foundation' },
+                    { key: 'ready', label: '⚡ Interview Ready' },
+                    { key: 'elite', label: '🔥 Top 1% Elite' }
+                  ].map(t => (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setPrepTier(t.key)}
+                      style={{
+                        padding: '0.4rem 0.85rem',
+                        borderRadius: '20px',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        background: prepTier === t.key ? '#ffffff' : 'transparent',
+                        color: prepTier === t.key ? '#0b0f19' : 'var(--text-secondary)',
+                        border: prepTier === t.key ? '1px solid #ffffff' : '1px solid var(--border-color)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-6">
+              <div className="p-4 rounded-4 text-center" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)' }}>
+                <span className="text-xxs text-muted text-uppercase tracking-wider font-semibold">Estimated CTC Range</span>
+                <h3 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#ffffff', margin: '0.5rem 0' }}>
+                  {estimatedCtc.range}
+                </h3>
+                <div className="d-flex justify-content-center gap-2 align-items-center mb-3 flex-wrap">
+                  <span className="badge bg-success-subtle text-success border border-success-subtle text-xs px-2.5 py-1 rounded-pill font-semibold">
+                    Highest Offer: {estimatedCtc.highest}
+                  </span>
+                  <span className="badge bg-primary-glow text-primary text-xs px-2.5 py-1 rounded-pill font-semibold">
+                    {estimatedCtc.recruiters} Hiring Companies
+                  </span>
+                </div>
+                <p className="text-xxs text-muted mb-0">
+                  Key Recruiter Network: <strong className="text-primary">{estimatedCtc.companies}</strong>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
