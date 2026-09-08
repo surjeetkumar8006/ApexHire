@@ -4055,4 +4055,169 @@ body.light-theme .modal-content-custom .form-input:focus {
   min-height: 100px;
 }
 
+/* ==========================================================================
+   COMPREHENSIVE MOBILE & SMALL SCREEN RESPONSIVENESS ENHANCEMENTS
+   ========================================================================== */
+
+/* 1. Universal Layout & Typography Adjustments for Mobile (< 768px) */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+  }
+  
+  .landing-hero {
+    padding-top: 1rem !important;
+    gap: 2.5rem !important;
+    margin-bottom: 3rem !important;
+  }
+
+  .landing-hero-left {
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .landing-hero-left .hero-badge {
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.78rem !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  .landing-hero-left .hero-title {
+    font-size: 2.3rem !important;
+    line-height: 1.25 !important;
+    text-align: center !important;
+    letter-spacing: -0.5px !important;
+  }
+
+  .landing-hero-left .hero-title br {
+    display: none !important;
+  }
+
+  .landing-hero-left .hero-subtitle {
+    font-size: 0.95rem !important;
+    line-height: 1.55 !important;
+    text-align: center !important;
+    padding: 0 0.5rem !important;
+  }
+
+  .landing-hero-left .hero-ctas {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .landing-hero-left .hero-ctas .btn {
+    width: 100% !important;
+    max-width: 320px !important;
+    justify-content: center !important;
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.92rem !important;
+  }
+
+  /* Mockup Container Responsiveness */
+  .hero-mockup-container {
+    max-width: 100% !important;
+    perspective: none !important;
+  }
+
+  .hero-mockup-window {
+    transform: none !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .mockup-body {
+    padding: 1rem !important;
+    gap: 1rem !important;
+  }
+
+  .mockup-score-card {
+    padding: 0.75rem !important;
+    gap: 0.75rem !important;
+  }
+
+  .mockup-pipeline {
+    padding: 0 !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Interactive AI Playground & CTC Estimator Mobile Adjustments */
+  .showcase-display {
+    grid-template-columns: 1fr !important;
+    padding: 1.5rem !important;
+    gap: 1.75rem !important;
+  }
+
+  .logo-marquee-section {
+    margin-bottom: 3rem !important;
+  }
+
+  .logo-marquee-container {
+    padding: 0.65rem 1rem !important;
+    border-radius: 30px !important;
+  }
+
+  .logo-chip {
+    font-size: 0.95rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .metrics-section, 
+  .faq-section, 
+  .showcase-section {
+    margin-bottom: 3rem !important;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .metrics-card {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .metrics-num {
+    font-size: 2.4rem !important;
+  }
+
+  .faq-header-btn {
+    padding: 1rem !important;
+    font-size: 0.92rem !important;
+  }
+
+  .faq-answer-pane p {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* 2. Extra Small Mobile Devices (< 480px) */
+@media (max-width: 480px) {
+  .landing-hero-left .hero-title {
+    font-size: 1.95rem !important;
+  }
+
+  .hero-badge {
+    font-size: 0.72rem !important;
+    padding: 0.3rem 0.65rem !important;
+  }
+
+  .showcase-tab-btn {
+    font-size: 0.82rem !important;
+    padding: 0.55rem 0.85rem !important;
+  }
+
+  /* Table Horizontal Scrolling wrapper */
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Mobile Navbar / Sidebar Adjustments */
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+}
+
 
