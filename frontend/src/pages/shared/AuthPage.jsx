@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { Lock, Mail, User, ArrowLeft, GraduationCap, Shield, Sparkles, CheckCircle, Briefcase } from 'lucide-react';
@@ -14,8 +15,14 @@ const companies = [
 ];
 
 const AuthPage = ({ onBack }) => {
+  const navigate = useNavigate();
   const { login, register } = useAuth();
   const { addToast } = useNotification();
+
+  const handleReturnHome = () => {
+    if (onBack) onBack();
+    navigate('/');
+  };
 
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState('student'); // 'student' or 'admin'
@@ -126,7 +133,7 @@ const AuthPage = ({ onBack }) => {
         <div className="auth-bg-glow"></div>
         <div className="auth-form-container">
           {/* Floating Return Button */}
-          <button onClick={onBack} className="auth-floating-back-btn">
+          <button onClick={handleReturnHome} className="auth-floating-back-btn">
             <ArrowLeft size={16} />
             <span>Return Home</span>
           </button>
