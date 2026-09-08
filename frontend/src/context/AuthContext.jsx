@@ -2,13 +2,13 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 
 const AuthContext = createContext();
 
-export const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:5000/api'
-  : 'https://apexhire.onrender.com/api';
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || (
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000/api'
+    : 'https://apexhire.onrender.com/api'
+);
 
-export const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:5000'
-  : 'https://apexhire.onrender.com';
+export const BACKEND_URL = API_BASE.replace(/\/api\/?$/, '');
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
