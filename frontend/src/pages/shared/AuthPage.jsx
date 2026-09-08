@@ -72,8 +72,13 @@ const AuthPage = ({ onBack }) => {
         <div className="auth-brand-overlay"></div>
         <div className="auth-brand-content">
           <div style={styles.logoBox}>
-            <Sparkles size={24} color="var(--accent)" />
+            <Sparkles size={24} color="#ffffff" />
             <span style={styles.logoText}>ApexHire Portal</span>
+          </div>
+
+          <div className="auth-live-stat-pill">
+            <span className="auth-live-stat-dot"></span>
+            <span>Real-Time AI Resume & ATS Pipeline Active</span>
           </div>
 
           <div style={styles.heroText}>
@@ -85,15 +90,15 @@ const AuthPage = ({ onBack }) => {
 
           <div style={styles.featuresList}>
             <div style={styles.featureItem}>
-              <CheckCircle size={18} color="var(--accent)" />
+              <CheckCircle size={18} color="#ffffff" />
               <span>AI Resume Parser & Assessment</span>
             </div>
             <div style={styles.featureItem}>
-              <CheckCircle size={18} color="var(--accent)" />
+              <CheckCircle size={18} color="#ffffff" />
               <span>Unified Placement Application Pipeline</span>
             </div>
             <div style={styles.featureItem}>
-              <CheckCircle size={18} color="var(--accent)" />
+              <CheckCircle size={18} color="#ffffff" />
               <span>Real-Time Notifications & Announcements</span>
             </div>
           </div>
@@ -338,9 +343,7 @@ const styles = {
     fontSize: '1.45rem',
     fontWeight: '800',
     letterSpacing: '-0.5px',
-    background: 'linear-gradient(135deg, var(--accent), var(--primary))',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: '#ffffff',
   },
   heroText: {
     display: 'flex',
@@ -348,7 +351,7 @@ const styles = {
     gap: '1rem',
   },
   brandQuote: {
-    fontSize: '2.2rem',
+    fontSize: '2.25rem',
     fontWeight: '800',
     lineHeight: '1.25',
     letterSpacing: '-0.75px',
@@ -369,7 +372,8 @@ const styles = {
     alignItems: 'center',
     gap: '0.75rem',
     fontSize: '0.92rem',
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '500',
   },
   brandFooter: {
     marginTop: '2rem',
@@ -380,7 +384,7 @@ const styles = {
   switcherBtn: {
     flex: 1,
     padding: '0.65rem',
-    borderRadius: '8px',
+    borderRadius: '10px',
     fontWeight: '600',
     fontSize: '0.9rem',
     cursor: 'pointer',
@@ -393,7 +397,7 @@ const styles = {
     gap: '0.35rem',
   },
   formTitle: {
-    fontSize: '1.5rem',
+    fontSize: '1.6rem',
     fontWeight: '800',
     color: 'var(--text-primary)',
     letterSpacing: '-0.5px',
@@ -436,8 +440,17 @@ const styles = {
   },
   submitBtn: {
     width: '100%',
-    marginTop: '0.75rem',
-    height: '44px',
+    marginTop: '0.85rem',
+    height: '46px',
+    backgroundColor: '#ffffff',
+    color: '#0b0f19',
+    fontWeight: '800',
+    fontSize: '0.95rem',
+    borderRadius: '12px',
+    border: 'none',
+    boxShadow: '0 6px 20px rgba(255, 255, 255, 0.2)',
+    cursor: 'pointer',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   },
   spinner: {
     width: '18px',
