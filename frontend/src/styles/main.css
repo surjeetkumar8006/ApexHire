@@ -872,6 +872,14 @@ body.light-theme .form-select {
   overflow: hidden;
   padding: 4rem 1.5rem 2rem 1.5rem;
   width: 100%;
+  background-color: var(--bg-base);
+  background-image: 
+    linear-gradient(180deg, rgba(5, 7, 13, 0.78) 0%, rgba(5, 7, 13, 0.92) 100%),
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    url('../assets/home_bg.jpg');
+  background-size: cover, 28px 28px, cover;
+  background-position: center, center, center;
+  background-attachment: fixed, fixed, fixed;
 }
 
 .landing-container .blob1 {
