@@ -156,10 +156,32 @@ const Navbar = ({ onMenuClick }) => {
           <div style={styles.userCard}>
             <div style={styles.avatar}>
               {user.avatar ? (
-                <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }} />
-              ) : (
-                <User size={18} />
-              )}
+                <img 
+                  src={user.avatar} 
+                  alt={user.name} 
+                  style={{ width: '100%', height: '100%', borderRadius: '6px', objectFit: 'cover' }} 
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    const fallback = e.target.parentNode.querySelector('.nav-avatar-fallback');
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <span 
+                className="nav-avatar-fallback" 
+                style={{ 
+                  display: user.avatar ? 'none' : 'flex', 
+                  width: '100%', 
+                  height: '100%', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '0.8rem',
+                  color: '#ffffff'
+                }}
+              >
+                {(user.name || 'U').charAt(0).toUpperCase()}
+              </span>
             </div>
             <div className="nav-hide-mobile" style={styles.userInfo}>
               <span style={styles.userName}>{user.name}</span>

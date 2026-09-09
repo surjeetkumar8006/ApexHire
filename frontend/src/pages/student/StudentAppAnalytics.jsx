@@ -54,7 +54,7 @@ const StudentAppAnalytics = () => {
       <header style={styles.header}>
         <div style={styles.titleRow}>
           <div style={styles.headerIconGlow}>
-            <BarChart2 size={28} color="var(--primary)" />
+            <BarChart2 size={28} color="#3b82f6" />
           </div>
           <h1 style={styles.title}>Application Analytics</h1>
         </div>
@@ -64,8 +64,8 @@ const StudentAppAnalytics = () => {
       {/* Summary Cards */}
       <div className="analytics-grid">
         <div className="premium-card stagger-1" style={styles.summaryCard}>
-          <div style={{ ...styles.iconWrap, background: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}>
-            <Briefcase size={28} color="var(--primary)" />
+          <div style={{ ...styles.iconWrap, background: 'rgba(59, 130, 246, 0.12)', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+            <Briefcase size={28} color="#3b82f6" />
           </div>
           <div>
             <h3 className="summary-val">{total}</h3>
@@ -106,8 +106,8 @@ const StudentAppAnalytics = () => {
         {/* Funnel Chart */}
         <div className="premium-card stagger-5" style={styles.chartCard}>
           <div style={styles.chartHeader}>
-            <div style={{ padding: '0.5rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px' }}>
-              <PieChart size={20} color="var(--primary)" />
+            <div style={{ padding: '0.5rem', background: 'rgba(59, 130, 246, 0.12)', borderRadius: '8px' }}>
+              <PieChart size={20} color="#3b82f6" />
             </div>
             <h3 style={styles.chartTitle}>Conversion Funnel</h3>
           </div>
@@ -118,7 +118,7 @@ const StudentAppAnalytics = () => {
               <div className="funnel-row-hover" style={styles.funnelRow}>
                 <span style={styles.funnelLabel}>Applied</span>
                 <div style={styles.funnelTrack}>
-                  <div className="glow-bar" style={{ width: '100%', background: 'linear-gradient(90deg, #ffffff, #cbd5e1)' }}></div>
+                  <div className="glow-bar" style={{ width: '100%', background: 'linear-gradient(90deg, #3b82f6, #60a5fa)' }}></div>
                 </div>
                 <span style={styles.funnelValue}>{total} <span style={styles.pct}>({getPercent(total)}%)</span></span>
               </div>
@@ -223,30 +223,18 @@ const StudentAppAnalytics = () => {
         .premium-card {
           padding: 1.5rem;
           border-radius: 16px;
-          background: var(--bg-card);
-          border: 1px solid var(--border-color);
-          box-shadow: var(--shadow-sm);
-          transition: border-color 0.3s ease;
+          background: rgba(9, 13, 24, 0.96);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+          transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
           position: relative;
           overflow: hidden;
         }
-        
-        .premium-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0; height: 3px;
-          background: #ffffff;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
 
         .premium-card:hover {
-          border-color: rgba(255, 255, 255, 0.35);
-          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 15px -3px rgba(255, 255, 255, 0.12);
-        }
-        
-        .premium-card:hover::before {
-          opacity: 1;
+          border-color: rgba(59, 130, 246, 0.4);
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 15px -3px rgba(59, 130, 246, 0.2);
+          transform: translateY(-2px);
         }
 
         /* Staggered Animations */
@@ -343,11 +331,12 @@ const styles = {
     display: 'flex', 
     flexDirection: 'column', 
     gap: '2rem',
-    background: 'var(--bg-card)',
+    background: 'rgba(5, 8, 16, 0.96)',
+    backdropFilter: 'blur(16px)',
     padding: '2.5rem',
     borderRadius: '24px',
-    boxShadow: 'var(--shadow-md)',
-    border: '1px solid var(--border-color)'
+    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.6)',
+    border: '1px solid rgba(255, 255, 255, 0.08)'
   },
   header: { display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' },
   titleRow: { display: 'flex', alignItems: 'center', gap: '1rem' },

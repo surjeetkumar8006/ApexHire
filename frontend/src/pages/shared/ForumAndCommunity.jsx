@@ -50,6 +50,36 @@ const ForumAndCommunity = () => {
   // Alumni state
   const [alumni, setAlumni] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAddAlumniModal, setShowAddAlumniModal] = useState(false);
+  const [newAlumni, setNewAlumni] = useState({ name: '', company: '', role: '', batch: '2024', linkedin: '', email: '' });
+
+  const handleCreateAlumni = async (e) => {
+    e.preventDefault();
+    if (!newAlumni.name || !newAlumni.company || !newAlumni.role) {
+      addToast('Please fill in all required fields', 'warning');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/community/alumni`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify(newAlumni)
+      });
+
+      if (res.ok) {
+        addToast('New Alumni registered successfully in database!', 'success');
+        setShowAddAlumniModal(false);
+        setNewAlumni({ name: '', company: '', role: '', batch: '2024', linkedin: '', email: '' });
+        fetchTabData();
+      } else {
+        const data = await res.json();
+        addToast(data.message || 'Failed to add alumni', 'error');
+      }
+    } catch (err) {
+      addToast('Network error registering alumni', 'error');
+    }
+  };
   
   // Referral state
   const [referrals, setReferrals] = useState([]);
@@ -64,15 +94,26 @@ const ForumAndCommunity = () => {
   useEffect(() => {
     fetchTabData();
 
-    if (activeSubTab === 'forum') {
-      const interval = setInterval(() => {
+    const interval = setInterval(() => {
+      if (activeSubTab === 'forum') {
         fetch(`${API_BASE}/community/forum`, { headers: authHeader() })
           .then(res => res.ok ? res.json() : null)
           .then(data => data && setPosts(data))
           .catch(() => {});
-      }, 10000);
-      return () => clearInterval(interval);
-    }
+      } else if (activeSubTab === 'alumni') {
+        fetch(`${API_BASE}/community/alumni`, { headers: authHeader() })
+          .then(res => res.ok ? res.json() : null)
+          .then(data => data && setAlumni(data))
+          .catch(() => {});
+      } else if (activeSubTab === 'referrals') {
+        fetch(`${API_BASE}/community/referrals`, { headers: authHeader() })
+          .then(res => res.ok ? res.json() : null)
+          .then(data => data && setReferrals(data))
+          .catch(() => {});
+      }
+    }, 6000);
+
+    return () => clearInterval(interval);
   }, [activeSubTab]);
 
   const fetchTabData = async () => {
@@ -420,15 +461,31 @@ const ForumAndCommunity = () => {
       {activeSubTab === 'alumni' && (
         <div className="glass-card p-4">
           <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-            <h3 className="h5 font-bold mb-0">Verified Alumni Registry</h3>
-            <div className="search-bar d-flex gap-2" style={{ maxWidth: '400px', width: '100%' }}>
-              <input 
-                type="text" 
-                placeholder="Search alumni by company or role..." 
-                value={searchQuery} 
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="form-input text-sm"
-              />
+            <div>
+              <h3 className="h5 font-bold mb-0" style={{ color: 'var(--text-primary)' }}>Verified Alumni Registry</h3>
+              <span className="text-xs text-muted" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '2px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }}></span>
+                Real-Time MongoDB Sync • {alumni.length} Verified Alumni Records
+              </span>
+            </div>
+            <div className="d-flex gap-2 align-items-center" style={{ maxWidth: '480px', width: '100%' }}>
+              <div className="search-bar flex-grow-1">
+                <input 
+                  type="text" 
+                  placeholder="Search alumni by company or role..." 
+                  value={searchQuery} 
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="form-input text-sm"
+                  style={{ height: '40px', borderRadius: '10px' }}
+                />
+              </div>
+              <button 
+                onClick={() => setShowAddAlumniModal(true)} 
+                className="btn btn-primary"
+                style={{ height: '40px', padding: '0 1.1rem', fontSize: '0.85rem', fontWeight: '700', borderRadius: '10px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}
+              >
+                <Plus size={16} /> Add Alumni
+              </button>
             </div>
           </div>
 
@@ -558,52 +615,84 @@ const ForumAndCommunity = () => {
       {/* Discussion Create Modal */}
       {showPostModal && (
         <div className="modal-overlay-custom" onClick={() => setShowPostModal(false)}>
-          <div className="glass-card modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%' }}>
-            <div className="modal-header-custom p-4 border-bottom border-color">
-              <h3 className="h5 font-bold mb-0">Create Discussion Thread</h3>
+          <div className="modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '540px', width: '92%' }}>
+            <div className="modal-header-custom">
+              <div className="d-flex align-items-center gap-2.5">
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MessageSquare className="text-primary" size={18} />
+                </div>
+                <div>
+                  <h3 className="h5 font-bold mb-0" style={{ color: '#ffffff', fontSize: '1.15rem' }}>Create Discussion Thread</h3>
+                  <p className="text-xs text-muted mb-0" style={{ marginTop: '1px' }}>Share placement updates, prep strategies, or ask questions</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="modal-close-btn" 
+                onClick={() => setShowPostModal(false)}
+                title="Close"
+              >
+                <CloseIcon size={20} />
+              </button>
             </div>
-            <form onSubmit={handleCreatePost} className="modal-body-custom p-4 d-flex flex-column gap-3">
-              <div className="form-group">
-                <label className="form-label">Discussion Title *</label>
+            <form onSubmit={handleCreatePost} className="modal-body-custom">
+              <div className="form-group" style={{ marginBottom: '1.1rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Discussion Title *</label>
                 <input 
                   type="text" 
                   className="form-input" 
-                  placeholder="e.g. Google interview format updates"
+                  placeholder="e.g. Google interview format & coding round updates"
                   value={newPost.title}
                   onChange={(e) => setNewPost({...newPost, title: e.target.value})}
                   required
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Category</label>
+              <div className="form-group" style={{ marginBottom: '1.1rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Category</label>
                 <select 
                   className="form-input"
                   value={newPost.category}
                   onChange={(e) => setNewPost({...newPost, category: e.target.value})}
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                 >
-                  <option value="General">General</option>
+                  <option value="General">General Discussion</option>
                   <option value="Placement">Placement Drives</option>
-                  <option value="Interviews">Interviews Experiences</option>
+                  <option value="Interviews">Interview Experiences</option>
                   <option value="Tech Prep">Technical Prep</option>
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Content Description *</label>
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Content Description *</label>
                 <textarea 
                   className="form-input" 
-                  rows="5" 
-                  placeholder="Ask questions or share details with fellow campus students..."
+                  rows="4" 
+                  placeholder="Ask questions or share helpful details with fellow campus students..."
                   value={newPost.content}
                   onChange={(e) => setNewPost({...newPost, content: e.target.value})}
                   required
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                 ></textarea>
               </div>
 
-              <div className="d-flex justify-content-end gap-2 pt-3 border-top border-color">
-                <button type="button" onClick={() => setShowPostModal(false)} className="btn btn-outline">Cancel</button>
-                <button type="submit" className="btn btn-primary">Post Thread</button>
+              <div className="d-flex justify-content-end gap-2.5 pt-3 border-top" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowPostModal(false)} 
+                  className="btn btn-outline"
+                  style={{ padding: '0.65rem 1.25rem', borderRadius: '12px', fontSize: '0.88rem' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.88rem', boxShadow: '0 4px 16px rgba(255, 255, 255, 0.2)' }}
+                >
+                  Post Thread
+                </button>
               </div>
             </form>
           </div>
@@ -613,23 +702,39 @@ const ForumAndCommunity = () => {
       {/* Referral Request Modal */}
       {showReferralModal && selectedAlumni && (
         <div className="modal-overlay-custom" onClick={() => setShowReferralModal(false)}>
-          <div className="glass-card modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%' }}>
-            <div className="modal-header-custom p-4 border-bottom border-color">
-              <h3 className="h5 font-bold mb-0">Request Referral</h3>
-              <p className="text-muted text-xs mb-0">Alumni: {selectedAlumni.name} at {selectedAlumni.company}</p>
+          <div className="modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '540px', width: '92%' }}>
+            <div className="modal-header-custom">
+              <div className="d-flex align-items-center gap-2.5">
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Send className="text-primary" size={18} />
+                </div>
+                <div>
+                  <h3 className="h5 font-bold mb-0" style={{ color: '#ffffff', fontSize: '1.15rem' }}>Request Referral</h3>
+                  <p className="text-xs text-muted mb-0" style={{ marginTop: '1px' }}>Alumni: {selectedAlumni.name} at {selectedAlumni.company}</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="modal-close-btn" 
+                onClick={() => setShowReferralModal(false)}
+                title="Close"
+              >
+                <CloseIcon size={20} />
+              </button>
             </div>
-            <form onSubmit={handleRequestReferral} className="modal-body-custom p-4 d-flex flex-column gap-3">
-              <div className="form-group">
-                <label className="form-label">Select Target Job Opportunity *</label>
+            <form onSubmit={handleRequestReferral} className="modal-body-custom">
+              <div className="form-group" style={{ marginBottom: '1.1rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Select Target Job Opportunity *</label>
                 {referralJobs.length === 0 ? (
-                  <div className="text-xs text-warning p-2 rounded bg-warning-glow d-flex align-items-center gap-1">
-                    <AlertCircle size={14} /> No active jobs available.
+                  <div className="text-xs text-warning p-3 rounded bg-warning-glow d-flex align-items-center gap-2" style={{ border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                    <AlertCircle size={16} /> No active jobs available for referral at this moment.
                   </div>
                 ) : (
                   <select 
                     value={selectedJobId} 
                     onChange={(e) => setSelectedJobId(e.target.value)} 
                     className="form-input"
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                   >
                     {referralJobs.map(job => (
                       <option key={job._id} value={job._id}>{job.title} - {job.company}</option>
@@ -638,8 +743,8 @@ const ForumAndCommunity = () => {
                 )}
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Personal Note *</label>
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Personal Note *</label>
                 <textarea 
                   className="form-input" 
                   rows="4" 
@@ -647,12 +752,137 @@ const ForumAndCommunity = () => {
                   value={referralNote}
                   onChange={(e) => setReferralNote(e.target.value)}
                   required
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                 ></textarea>
               </div>
 
-              <div className="d-flex justify-content-end gap-2 pt-3 border-top border-color">
-                <button type="button" onClick={() => setShowReferralModal(false)} className="btn btn-outline">Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={referralJobs.length === 0}>Send Request</button>
+              <div className="d-flex justify-content-end gap-2.5 pt-3 border-top" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowReferralModal(false)} 
+                  className="btn btn-outline"
+                  style={{ padding: '0.65rem 1.25rem', borderRadius: '12px', fontSize: '0.88rem' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  disabled={referralJobs.length === 0}
+                  style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.88rem', boxShadow: '0 4px 16px rgba(255, 255, 255, 0.2)' }}
+                >
+                  Send Request
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Add Alumni Modal */}
+      {showAddAlumniModal && (
+        <div className="modal-overlay-custom" onClick={() => setShowAddAlumniModal(false)}>
+          <div className="modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '540px', width: '92%' }}>
+            <div className="modal-header-custom">
+              <div className="d-flex align-items-center gap-2.5">
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Users className="text-primary" size={18} />
+                </div>
+                <div>
+                  <h3 className="h5 font-bold mb-0" style={{ color: '#ffffff', fontSize: '1.15rem' }}>Register Verified Alumni</h3>
+                  <p className="text-xs text-muted mb-0" style={{ marginTop: '1px' }}>Add alumni record to campus network directory in MongoDB</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="modal-close-btn" 
+                onClick={() => setShowAddAlumniModal(false)}
+                title="Close"
+              >
+                <CloseIcon size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleCreateAlumni} className="modal-body-custom">
+              <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.1rem' }}>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Alumni Name *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="e.g. Vikram Singh"
+                    value={newAlumni.name}
+                    onChange={(e) => setNewAlumni({...newAlumni, name: e.target.value})}
+                    required
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
+                  />
+                </div>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Company *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="e.g. Apple / Microsoft"
+                    value={newAlumni.company}
+                    onChange={(e) => setNewAlumni({...newAlumni, company: e.target.value})}
+                    required
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.1rem' }}>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Designation / Role *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="e.g. Senior Software Engineer"
+                    value={newAlumni.role}
+                    onChange={(e) => setNewAlumni({...newAlumni, role: e.target.value})}
+                    required
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
+                  />
+                </div>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Graduation Batch</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="e.g. 2023"
+                    value={newAlumni.batch}
+                    onChange={(e) => setNewAlumni({...newAlumni, batch: e.target.value})}
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>LinkedIn Profile URL</label>
+                <input 
+                  type="url" 
+                  className="form-input" 
+                  placeholder="https://linkedin.com/in/username"
+                  value={newAlumni.linkedin}
+                  onChange={(e) => setNewAlumni({...newAlumni, linkedin: e.target.value})}
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
+                />
+              </div>
+
+              <div className="d-flex justify-content-end gap-2.5 pt-3 border-top" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowAddAlumniModal(false)} 
+                  className="btn btn-outline"
+                  style={{ padding: '0.65rem 1.25rem', borderRadius: '12px', fontSize: '0.88rem' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.88rem', boxShadow: '0 4px 16px rgba(255, 255, 255, 0.2)' }}
+                >
+                  Register Alumni
+                </button>
               </div>
             </form>
           </div>

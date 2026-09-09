@@ -19,7 +19,8 @@ import {
   Phone,
   ExternalLink,
   ChevronRight,
-  Star
+  Star,
+  X
 } from 'lucide-react';
 
 const RecruiterDashboard = ({ view = 'overview' }) => {
@@ -450,19 +451,25 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
         <div className="glass-card p-4">
           <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
             <h3 className="h5 font-bold mb-0">Candidate Resume Database</h3>
-            <div className="search-bar d-flex gap-2" style={{ maxWidth: '400px', width: '100%' }}>
+            <div className="search-bar d-flex gap-2 align-items-center" style={{ maxWidth: '440px', width: '100%' }}>
               <div className="position-relative flex-grow-1">
-                <Search className="position-absolute" size={16} style={{ left: 12, top: 12, color: 'var(--text-muted)' }} />
+                <Search className="position-absolute" size={16} style={{ left: 12, top: 13, color: 'var(--text-muted)' }} />
                 <input 
                   type="text" 
                   placeholder="Search by skill (e.g. React, Node, Python)..." 
                   value={searchSkill} 
                   onChange={(e) => setSearchSkill(e.target.value)}
                   className="form-input text-sm"
-                  style={{ paddingLeft: '2.5rem' }}
+                  style={{ paddingLeft: '2.5rem', height: '42px', borderRadius: '12px' }}
                 />
               </div>
-              <button onClick={fetchDashboardData} className="btn btn-primary btn-sm">Search</button>
+              <button 
+                onClick={fetchDashboardData} 
+                className="btn btn-primary"
+                style={{ height: '42px', padding: '0 1.25rem', fontSize: '0.88rem', fontWeight: '700', borderRadius: '12px', whiteSpace: 'nowrap', flexShrink: 0 }}
+              >
+                Search
+              </button>
             </div>
           </div>
 
@@ -549,50 +556,69 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
       {/* Post Job Modal */}
       {showJobModal && (
         <div className="modal-overlay-custom" onClick={() => setShowJobModal(false)}>
-          <div className="modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%' }}>
-            <div className="modal-header-custom p-4 border-bottom border-color d-flex align-items-center gap-2">
-              <Briefcase className="text-primary" size={20} />
-              <h3 className="h5 font-bold mb-0" style={{ color: 'var(--text-primary)' }}>Post New Career Opportunity</h3>
+          <div className="modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px', width: '92%' }}>
+            <div className="modal-header-custom">
+              <div className="d-flex align-items-center gap-2.5">
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Briefcase className="text-primary" size={18} />
+                </div>
+                <div>
+                  <h3 className="h5 font-bold mb-0" style={{ color: '#ffffff', fontSize: '1.15rem' }}>Post New Career Opportunity</h3>
+                  <p className="text-xs text-muted mb-0" style={{ marginTop: '1px' }}>Publish job or internship listing to candidate directory</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="modal-close-btn" 
+                onClick={() => setShowJobModal(false)}
+                title="Close"
+              >
+                <X size={20} />
+              </button>
             </div>
-            <form onSubmit={handlePostJob} className="modal-body-custom p-4 d-flex flex-column gap-3 overflow-y-auto" style={{ maxHeight: '70vh' }}>
-              <div className="form-group">
-                <label className="form-label">Job Title *</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  placeholder="Software Engineer Trainee"
-                  value={newJob.title}
-                  onChange={(e) => setNewJob({...newJob, title: e.target.value})}
-                  required
-                />
+            <form onSubmit={handlePostJob} className="modal-body-custom">
+              <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.1rem' }}>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Job Title *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="Software Engineer Trainee"
+                    value={newJob.title}
+                    onChange={(e) => setNewJob({...newJob, title: e.target.value})}
+                    required
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
+                  />
+                </div>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Company Name *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="Google Inc."
+                    value={newJob.company}
+                    onChange={(e) => setNewJob({...newJob, company: e.target.value})}
+                    required
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
+                  />
+                </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Company Name *</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  placeholder="Google Inc."
-                  value={newJob.company}
-                  onChange={(e) => setNewJob({...newJob, company: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Job Description *</label>
+              <div className="form-group" style={{ marginBottom: '1.1rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Job Description *</label>
                 <textarea 
                   className="form-input" 
-                  rows="4" 
-                  placeholder="Describe the roles, responsibilities, and expected outcomes..."
+                  rows="3" 
+                  placeholder="Describe the roles, key responsibilities, and expected candidate outcomes..."
                   value={newJob.description}
                   onChange={(e) => setNewJob({...newJob, description: e.target.value})}
                   required
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                 ></textarea>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Requirements (Comma Separated Skills) *</label>
+              <div className="form-group" style={{ marginBottom: '1.1rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Requirements (Comma Separated Skills) *</label>
                 <input 
                   type="text" 
                   className="form-input" 
@@ -600,49 +626,65 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                   value={newJob.requirements}
                   onChange={(e) => setNewJob({...newJob, requirements: e.target.value})}
                   required
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                 />
               </div>
 
-              <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Location *</label>
+              <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Location *</label>
                   <input 
                     type="text" 
                     className="form-input" 
-                    placeholder="Bangalore, IN (Remote)"
+                    placeholder="Bangalore (Remote)"
                     value={newJob.location}
                     onChange={(e) => setNewJob({...newJob, location: e.target.value})}
                     required
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Salary Bracket</label>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Salary Bracket</label>
                   <input 
                     type="text" 
                     className="form-input" 
                     placeholder="e.g. 12 LPA"
                     value={newJob.salary}
                     onChange={(e) => setNewJob({...newJob, salary: e.target.value})}
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                   />
+                </div>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Employment Type</label>
+                  <select 
+                    value={newJob.type} 
+                    onChange={(e) => setNewJob({...newJob, type: e.target.value})}
+                    className="form-input"
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
+                  >
+                    <option value="Full-time">Full-time</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Part-time">Part-time</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Job Type</label>
-                <select 
-                  value={newJob.type} 
-                  onChange={(e) => setNewJob({...newJob, type: e.target.value})}
-                  className="form-input"
+              <div className="d-flex justify-content-end gap-2.5 pt-3 border-top" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowJobModal(false)} 
+                  className="btn btn-outline"
+                  style={{ padding: '0.65rem 1.25rem', borderRadius: '12px', fontSize: '0.88rem' }}
                 >
-                  <option value="Full-time">Full-time</option>
-                  <option value="Internship">Internship</option>
-                  <option value="Part-time">Part-time</option>
-                </select>
-              </div>
-
-              <div className="d-flex justify-content-end gap-2 pt-3 border-top border-color">
-                <button type="button" onClick={() => setShowJobModal(false)} className="btn btn-outline">Cancel</button>
-                <button type="submit" className="btn btn-primary">Post Opportunity</button>
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.88rem', boxShadow: '0 4px 16px rgba(255, 255, 255, 0.2)' }}
+                >
+                  Publish Opportunity
+                </button>
               </div>
             </form>
           </div>
@@ -652,28 +694,41 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
       {/* Schedule Interview Modal */}
       {showInterviewModal && selectedApp && (
         <div className="modal-overlay-custom" onClick={() => setShowInterviewModal(false)}>
-          <div className="modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%' }}>
-            <div className="modal-header-custom p-4 border-bottom border-color">
-              <div className="d-flex align-items-center gap-2 mb-1">
-                <Calendar className="text-primary" size={20} />
-                <h3 className="h5 font-bold mb-0" style={{ color: 'var(--text-primary)' }}>Schedule Interview</h3>
+          <div className="modal-content-custom" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', width: '92%' }}>
+            <div className="modal-header-custom">
+              <div className="d-flex align-items-center gap-2.5">
+                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Calendar className="text-primary" size={18} />
+                </div>
+                <div>
+                  <h3 className="h5 font-bold mb-0" style={{ color: '#ffffff', fontSize: '1.15rem' }}>Schedule Interview</h3>
+                  <p className="text-xs text-muted mb-0" style={{ marginTop: '1px' }}>Candidate: {selectedApp.student?.name}</p>
+                </div>
               </div>
-              <p className="text-muted text-xs mb-0" style={{ paddingLeft: '1.75rem' }}>Candidate: {selectedApp.student.name}</p>
+              <button 
+                type="button" 
+                className="modal-close-btn" 
+                onClick={() => setShowInterviewModal(false)}
+                title="Close"
+              >
+                <X size={20} />
+              </button>
             </div>
-            <form onSubmit={handleScheduleInterview} className="modal-body-custom p-4 d-flex flex-column gap-3">
-              <div className="form-group">
-                <label className="form-label">Date *</label>
+            <form onSubmit={handleScheduleInterview} className="modal-body-custom">
+              <div className="form-group" style={{ marginBottom: '1.1rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date *</label>
                 <input 
                   type="date" 
                   className="form-input" 
                   value={interviewForm.date}
                   onChange={(e) => setInterviewForm({...interviewForm, date: e.target.value})}
                   required
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Time *</label>
+              <div className="form-group" style={{ marginBottom: '1.1rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Time *</label>
                 <input 
                   type="text" 
                   className="form-input" 
@@ -681,15 +736,17 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                   value={interviewForm.time}
                   onChange={(e) => setInterviewForm({...interviewForm, time: e.target.value})}
                   required
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Interview Type</label>
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Interview Type</label>
                 <select 
                   value={interviewForm.type} 
                   onChange={(e) => setInterviewForm({...interviewForm, type: e.target.value})}
                   className="form-input"
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
                 >
                   <option value="Technical Round 1">Technical Round 1</option>
                   <option value="Technical Round 2">Technical Round 2</option>
@@ -698,9 +755,22 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                 </select>
               </div>
 
-              <div className="d-flex justify-content-end gap-2 pt-3 border-top border-color">
-                <button type="button" onClick={() => setShowInterviewModal(false)} className="btn btn-outline">Cancel</button>
-                <button type="submit" className="btn btn-primary">Schedule & Send Link</button>
+              <div className="d-flex justify-content-end gap-2.5 pt-3 border-top" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowInterviewModal(false)} 
+                  className="btn btn-outline"
+                  style={{ padding: '0.65rem 1.25rem', borderRadius: '12px', fontSize: '0.88rem' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.88rem', boxShadow: '0 4px 16px rgba(255, 255, 255, 0.2)' }}
+                >
+                  Schedule & Send Link
+                </button>
               </div>
             </form>
           </div>

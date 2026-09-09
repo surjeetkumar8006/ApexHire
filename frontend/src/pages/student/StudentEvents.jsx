@@ -94,22 +94,28 @@ const StudentEvents = () => {
       ) : (
         <div style={styles.grid}>
           {events.map((evt) => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isPast = (evt.date && evt.date < todayStr) || evt.status === 'Completed' || evt.status === 'Event Ended';
+            const isUpcomingOnly = !isPast && evt.status === 'Upcoming';
+            const isRegistrationOpen = !isPast && evt.status === 'Registration Open';
+            const displayStatus = isPast ? 'Event Ended' : evt.status;
+
             // Check if current user is registered
             const isRegistered = evt.registeredStudents && evt.registeredStudents.some(
               (student) => (student._id || student) === user._id
             );
             
             return (
-              <div key={evt._id} className="glass-card" style={styles.eventCard}>
+              <div key={evt._id} className="glass-card" style={{ ...styles.eventCard, opacity: isPast ? 0.75 : 1 }}>
                 <div style={styles.cardHeader}>
                   <span style={styles.typeBadge}>{evt.type}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {isRegistered && (
+                    {isRegistered && !isPast && (
                       <span style={styles.registeredBadge}>
                         <CheckCircle size={12} /> Registered
                       </span>
                     )}
-                    <span style={styles.statusBadge(evt.status)}>{evt.status}</span>
+                    <span style={styles.statusBadge(displayStatus)}>{displayStatus}</span>
                   </div>
                 </div>
                 
@@ -117,19 +123,19 @@ const StudentEvents = () => {
                 
                 <div style={styles.detailsList}>
                   <div style={styles.detailRow}>
-                    <CalendarIcon size={15} color="var(--primary)" />
+                    <CalendarIcon size={15} color={isPast ? 'var(--text-muted)' : 'var(--primary)'} />
                     <span>{evt.date}</span>
                   </div>
                   <div style={styles.detailRow}>
-                    <Clock size={15} color="var(--warning)" />
+                    <Clock size={15} color={isPast ? 'var(--text-muted)' : 'var(--warning)'} />
                     <span>{evt.time}</span>
                   </div>
                   <div style={styles.detailRow}>
-                    <MapPin size={15} color="var(--danger)" />
+                    <MapPin size={15} color={isPast ? 'var(--text-muted)' : 'var(--danger)'} />
                     <span>{evt.location}</span>
                   </div>
                   <div style={styles.detailRow}>
-                    <Users size={15} color="var(--success)" />
+                    <Users size={15} color={isPast ? 'var(--text-muted)' : 'var(--success)'} />
                     <span>{evt.registeredStudents ? evt.registeredStudents.length : 0} Students Registered</span>
                   </div>
                 </div>
@@ -142,20 +148,40 @@ const StudentEvents = () => {
 
                 <div style={styles.cardActions}>
                   <button 
-                    className={`btn ${isRegistered ? 'btn-outline' : 'btn-primary'}`}
+                    className={`btn ${isPast ? 'btn-secondary' : isUpcomingOnly ? 'btn-outline' : isRegistered ? 'btn-outline' : 'btn-primary'}`}
                     style={{
                       flex: 1, 
                       justifyContent: 'center',
-                      borderColor: isRegistered ? 'var(--danger)' : undefined,
-                      color: isRegistered ? 'var(--danger)' : undefined
+                      borderColor: isPast 
+                        ? 'rgba(255, 255, 255, 0.15)' 
+                        : isUpcomingOnly
+                        ? 'rgba(59, 130, 246, 0.4)'
+                        : isRegistered 
+                        ? 'var(--danger)' 
+                        : undefined,
+                      color: isPast 
+                        ? 'var(--text-muted)' 
+                        : isUpcomingOnly
+                        ? '#3b82f6'
+                        : isRegistered 
+                        ? 'var(--danger)' 
+                        : undefined,
+                      background: isPast 
+                        ? 'rgba(255, 255, 255, 0.04)' 
+                        : isUpcomingOnly
+                        ? 'rgba(59, 130, 246, 0.08)'
+                        : undefined,
+                      cursor: (isPast || isUpcomingOnly) ? 'not-allowed' : 'pointer'
                     }}
-                    onClick={() => handleRegister(evt._id, isRegistered)}
-                    disabled={processingId === evt._id || evt.status === 'Completed'}
+                    onClick={() => isRegistrationOpen && handleRegister(evt._id, isRegistered)}
+                    disabled={processingId === evt._id || isPast || isUpcomingOnly}
                   >
                     {processingId === evt._id ? (
                       <Loader size={14} className="animate-spin" />
-                    ) : evt.status === 'Completed' ? (
+                    ) : isPast ? (
                       'Event Ended'
+                    ) : isUpcomingOnly ? (
+                      'Registration Opening Soon'
                     ) : isRegistered ? (
                       'Leave Event'
                     ) : (
@@ -182,11 +208,27 @@ const styles = {
   cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   typeBadge: { background: 'var(--primary-glow)', color: 'var(--primary)', padding: '0.25rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' },
   registeredBadge: { display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--success-glow)', color: 'var(--success)', padding: '0.25rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' },
-  statusBadge: (status) => ({
-    background: status === 'Registration Open' ? 'var(--success-glow)' : 'var(--primary-glow)',
-    color: status === 'Registration Open' ? 'var(--success)' : 'var(--primary)',
-    padding: '0.25rem 0.6rem', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '600'
-  }),
+  statusBadge: (status) => {
+    if (status === 'Completed' || status === 'Event Ended') {
+      return {
+        background: 'rgba(239, 68, 68, 0.15)',
+        color: '#ef4444',
+        border: '1px solid rgba(239, 68, 68, 0.3)',
+        padding: '0.25rem 0.6rem',
+        borderRadius: '50px',
+        fontSize: '0.75rem',
+        fontWeight: '600'
+      };
+    }
+    return {
+      background: status === 'Registration Open' ? 'var(--success-glow)' : 'var(--primary-glow)',
+      color: status === 'Registration Open' ? 'var(--success)' : 'var(--primary)',
+      padding: '0.25rem 0.6rem',
+      borderRadius: '50px',
+      fontSize: '0.75rem',
+      fontWeight: '600'
+    };
+  },
   eventTitle: { fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)', margin: '0.25rem 0' },
   detailsList: { display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'var(--bg-base)', border: '1px solid var(--border-color)', padding: '0.85rem 1rem', borderRadius: '8px' },
   detailRow: { display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: 'var(--text-secondary)' },

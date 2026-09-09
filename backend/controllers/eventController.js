@@ -7,40 +7,94 @@ import Notification from '../models/Notification.js';
 // @access  Private
 export const getEvents = async (req, res) => {
   try {
-    // Auto-seed if empty to provide a great initial experience
-    const count = await Event.countDocuments({});
-    if (count === 0) {
-      await Event.create([
-        {
-          title: 'Google Pre-Placement Talk',
-          date: '2026-07-15',
-          time: '10:00 AM - 11:30 AM',
-          location: 'Virtual (Zoom)',
-          type: 'Placement Drive',
-          status: 'Upcoming'
-        },
-        {
-          title: 'Global Hackathon 2026',
-          date: '2026-08-01',
-          time: '09:00 AM - 09:00 PM',
-          location: 'Main Auditorium',
-          type: 'Hackathon',
-          status: 'Registration Open'
-        },
-        {
-          title: 'Resume Review Workshop',
-          date: '2026-06-25',
-          time: '02:00 PM - 04:00 PM',
-          location: 'Seminar Hall B',
-          type: 'Workshop',
-          status: 'Upcoming'
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    const defaultEvents = [
+      {
+        title: 'Resume Review & LinkedIn Clinic',
+        date: '2026-06-25',
+        time: '02:00 PM - 04:00 PM',
+        location: 'Seminar Hall B',
+        type: 'Workshop',
+        status: 'Completed',
+        description: 'One-on-one resume critique, ATS keyword optimization, and LinkedIn profile audit.'
+      },
+      {
+        title: 'Summer Code Sprint Hackathon 2026',
+        date: '2026-08-01',
+        time: '09:00 AM - 09:00 PM',
+        location: 'Main Auditorium',
+        type: 'Hackathon',
+        status: 'Completed',
+        description: '12-hour intensive hackathon focused on full-stack web and mobile application development.'
+      },
+      {
+        title: 'Google Pre-Placement & AI Tech Talk',
+        date: '2026-09-25',
+        time: '10:00 AM - 11:30 AM',
+        location: 'Virtual (Zoom)',
+        type: 'Placement Drive',
+        status: 'Registration Open',
+        description: 'Exclusive session with Google tech leads covering System Design, GenAI interview prep, and placement opportunities.'
+      },
+      {
+        title: 'Microsoft Azure & Cloud Systems Hackathon',
+        date: '2026-10-12',
+        time: '09:00 AM - 06:00 PM',
+        location: 'Main Campus Auditorium',
+        type: 'Hackathon',
+        status: 'Registration Open',
+        description: 'Annual campus cloud hackathon sponsored by Microsoft Azure with prizes worth ₹5 Lakhs & direct interview fast-track passes.'
+      },
+      {
+        title: 'Amazon AWS Distributed Microservices Workshop',
+        date: '2026-10-28',
+        time: '02:00 PM - 05:00 PM',
+        location: 'Seminar Hall B',
+        type: 'Workshop',
+        status: 'Upcoming',
+        description: 'Hands-on workshop on AWS Lambda, DynamoDB, API Gateways, and high-throughput backend architecture.'
+      },
+      {
+        title: 'TCS & Infosys National Qualifier Test (NQT) Drive',
+        date: '2026-11-10',
+        time: '09:00 AM - 04:00 PM',
+        location: 'Placement Cell - Lab 3',
+        type: 'Placement Drive',
+        status: 'Registration Open',
+        description: 'Mass recruitment drive for Associate Software Engineer and Systems Engineer roles across top IT services leaders.'
+      },
+      {
+        title: 'Meta React 19 & Web Architecture Summit',
+        date: '2026-11-25',
+        time: '03:00 PM - 05:00 PM',
+        location: 'Virtual (MS Teams)',
+        type: 'Workshop',
+        status: 'Upcoming',
+        description: 'Deep dive into modern web performance, React Server Components, and large-scale UI architecture.'
+      }
+    ];
+
+    const eventsCount = await Event.countDocuments({});
+    const hasUpcoming = await Event.exists({ date: { $gte: todayStr } });
+
+    if (eventsCount === 0 || !hasUpcoming) {
+      await Event.deleteMany({});
+      await Event.create(defaultEvents);
+    } else {
+      const allEvents = await Event.find({});
+      for (const evt of allEvents) {
+        if (evt.date && evt.date < todayStr && evt.status !== 'Completed') {
+          evt.status = 'Completed';
+          await evt.save();
         }
-      ]);
+      }
     }
 
     const events = await Event.find({})
       .populate('registeredStudents', 'name email')
       .sort({ date: 1 });
+
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -116,6 +170,12 @@ export const registerForEvent = async (req, res) => {
 
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.status !== 'Registration Open') {
+      return res.status(400).json({ 
+        message: event.status === 'Completed' ? 'Event has ended' : 'Registration has not opened yet for this event' 
+      });
     }
 
     // Check if student is already registered

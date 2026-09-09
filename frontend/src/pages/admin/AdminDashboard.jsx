@@ -526,7 +526,20 @@ const AdminDashboard = ({ view = 'overview' }) => {
             </button>
             <div style={styles.modalAvatarWrap}>
               <div style={styles.modalAvatar}>
-                {selectedStudent.user?.name ? selectedStudent.user.name.charAt(0).toUpperCase() : 'S'}
+                {selectedStudent.user?.avatar ? (
+                  <img 
+                    src={selectedStudent.user.avatar} 
+                    alt="Avatar" 
+                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <span style={{ display: selectedStudent.user?.avatar ? 'none' : 'flex' }}>
+                  {(selectedStudent.user?.name || 'S').charAt(0).toUpperCase()}
+                </span>
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
@@ -2328,8 +2341,8 @@ const styles = {
     fontSize: '0.8rem',
   },
   modalBanner: {
-    background: 'linear-gradient(135deg, var(--primary-glow) 0%, var(--secondary-glow) 100%)',
-    borderBottom: '1px solid var(--border-color)',
+    background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
     padding: '1.75rem 2rem 1.5rem',
     display: 'flex',
     flexDirection: 'column',
@@ -2340,8 +2353,8 @@ const styles = {
     position: 'absolute',
     top: '1rem',
     right: '1rem',
-    background: 'var(--bg-surface-elevated)',
-    border: '1px solid var(--border-color)',
+    background: 'rgba(255, 255, 255, 0.08)',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
     color: 'var(--text-muted)',
     cursor: 'pointer',
     padding: '6px',
@@ -2377,16 +2390,20 @@ const styles = {
     paddingBottom: '1.25rem',
   },
   modalAvatar: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '14px',
-    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+    width: '60px',
+    height: '60px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '1.5rem',
+    fontSize: '1.6rem',
     fontWeight: '800',
-    color: '#fff',
+    color: '#ffffff',
+    overflow: 'hidden',
+    border: '2px solid rgba(255, 255, 255, 0.25)',
+    boxShadow: '0 4px 16px rgba(99, 102, 241, 0.35)',
+    flexShrink: 0,
   },
   modalName: {
     fontSize: '1.35rem',

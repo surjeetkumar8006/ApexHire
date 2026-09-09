@@ -456,10 +456,7 @@ const StudentDashboard = () => {
     return 'var(--danger)';
   };
 
-  const displayProfileViews = Math.max(
-    profile?.profileViews || 0,
-    applications.length * 3 + (profile?.isVerified ? 5 : 2)
-  );
+  const displayProfileViews = profile?.profileViews ?? 0;
 
   const stats = [
     { label: 'Active Applications', value: applications.filter(a => a.status !== 'Rejected').length, icon: <Briefcase />, colorClass: 'primary' },

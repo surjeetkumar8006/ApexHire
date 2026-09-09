@@ -108,15 +108,16 @@ export const updateSettings = async (req, res) => {
   }
 };
 
-// @desc    Get student profile by user ID (for Admin review)
+// @desc    Get student profile by user ID (for Admin & Recruiter review)
 // @route   GET /api/profile/user/:id
-// @access  Private (Admin)
+// @access  Private (Admin & Recruiter)
 export const getProfileByUserId = async (req, res) => {
   try {
-    const profile = await Profile.findOne({ user: req.params.id }).populate(
-      'user',
-      'name email role'
-    );
+    const profile = await Profile.findOneAndUpdate(
+      { user: req.params.id },
+      { $inc: { profileViews: 1 } },
+      { new: true }
+    ).populate('user', 'name email role phone avatar');
 
     if (!profile) {
       return res.status(404).json({ message: 'Profile not found' });

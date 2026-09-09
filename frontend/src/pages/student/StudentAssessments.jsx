@@ -392,7 +392,7 @@ const StudentAssessments = () => {
                 {/* Progress Stats */}
                 <div style={{ display: 'flex', gap: '1rem', background: 'var(--bg-surface-elevated)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
                   <div style={{ flex: 1, textAlign: 'center' }}>
-                    <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)' }}>
+                    <span style={{ fontSize: '1.25rem', fontWeight: '800', color: '#3b82f6' }}>
                       {answeredCount}
                     </span>
                     <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', margin: 0, textTransform: 'uppercase', fontWeight: 600 }}>Answered</p>
@@ -638,7 +638,7 @@ const styles = {
   progressBarFill: (percent) => ({
     width: `${percent}%`,
     height: '100%',
-    background: 'linear-gradient(90deg, var(--primary), var(--secondary))',
+    background: 'linear-gradient(90deg, #3b82f6, #60a5fa)',
     transition: 'width 0.3s ease'
   }),
   questionBox: {
@@ -663,26 +663,26 @@ const styles = {
     alignItems: 'center',
     gap: '1.25rem',
     padding: '1.25rem',
-    border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--border-color)'}`,
+    border: `1.5px solid ${isSelected ? '#3b82f6' : 'var(--border-color)'}`,
     borderRadius: '12px',
-    background: isSelected ? 'var(--primary-glow)' : 'var(--bg-surface)',
+    background: isSelected ? 'rgba(59, 130, 246, 0.12)' : 'var(--bg-surface)',
     cursor: 'pointer',
     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     width: '100%',
     textAlign: 'left',
-    boxShadow: isSelected ? '0 0 15px -3px var(--primary-glow)' : 'none'
+    boxShadow: isSelected ? '0 0 18px rgba(59, 130, 246, 0.3)' : 'none'
   }),
   optionIndicator: (isSelected) => ({
-    width: '28px',
-    height: '28px',
+    width: '30px',
+    height: '30px',
     borderRadius: '50%',
-    border: `1.5px solid ${isSelected ? 'var(--primary)' : 'var(--text-muted)'}`,
-    background: isSelected ? 'var(--primary)' : 'transparent',
-    color: isSelected ? '#fff' : 'var(--text-secondary)',
+    border: `2px solid ${isSelected ? '#3b82f6' : 'rgba(255, 255, 255, 0.2)'}`,
+    background: isSelected ? '#3b82f6' : 'rgba(255, 255, 255, 0.05)',
+    color: isSelected ? '#ffffff' : 'var(--text-secondary)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '0.85rem',
+    fontSize: '0.88rem',
     fontWeight: '700',
     flexShrink: 0
   }),
@@ -694,18 +694,18 @@ const styles = {
   },
   navigatorSquare: (isCurrent, isAnswered) => ({
     aspectRatio: '1',
-    borderRadius: '8px',
+    borderRadius: '10px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '0.9rem',
-    fontWeight: '600',
+    fontSize: '0.92rem',
+    fontWeight: '700',
     cursor: 'pointer',
-    transition: 'all 0.2s',
-    border: isCurrent ? '2px solid var(--primary)' : '1px solid var(--border-color)',
-    background: isAnswered ? 'var(--primary)' : isCurrent ? 'var(--primary-glow)' : 'var(--bg-surface-elevated)',
-    color: isAnswered ? '#fff' : isCurrent ? 'var(--primary)' : 'var(--text-secondary)',
-    boxShadow: isCurrent ? '0 0 8px var(--primary-glow)' : 'none'
+    transition: 'all 0.2s ease',
+    border: isCurrent ? '2px solid #3b82f6' : isAnswered ? '1px solid #3b82f6' : '1px solid var(--border-color)',
+    background: isAnswered ? '#3b82f6' : isCurrent ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-surface-elevated)',
+    color: isAnswered ? '#ffffff' : isCurrent ? '#60a5fa' : 'var(--text-secondary)',
+    boxShadow: isCurrent ? '0 0 12px rgba(59, 130, 246, 0.45)' : isAnswered ? '0 4px 12px rgba(59, 130, 246, 0.25)' : 'none'
   }),
   navigatorActions: {
     display: 'flex',

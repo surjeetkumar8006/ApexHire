@@ -23,37 +23,65 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || 'Login failed');
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Invalid email or password');
+      }
+
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      setUser(data);
+      return data;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error('Connection timed out. Please check your internet or try again.');
+      }
+      throw err;
     }
-
-    localStorage.setItem('userInfo', JSON.stringify(data));
-    setUser(data);
-    return data;
   };
 
   const register = async (name, email, password, role) => {
-    const res = await fetch(`${API_BASE}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, role }),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || 'Registration failed');
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), email: email.trim().toLowerCase(), password, role }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      setUser(data);
+      return data;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error('Connection timed out. Please check your internet or try again.');
+      }
+      throw err;
     }
-
-    localStorage.setItem('userInfo', JSON.stringify(data));
-    setUser(data);
-    return data;
   };
 
   const logout = () => {

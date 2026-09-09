@@ -289,42 +289,47 @@ const AdminEvents = () => {
         </div>
       ) : (
         <div style={styles.grid}>
-          {events.map((evt) => (
-            <div key={evt._id} className="glass-card" style={styles.eventCard}>
-              <div style={styles.cardHeader}>
-                <span style={styles.typeBadge}>{evt.type}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={styles.statusBadge(evt.status)}>{evt.status}</span>
-                  <button 
-                    className="delete-btn-card"
-                    onClick={() => handleDeleteEvent(evt._id, evt.title)}
-                    title="Delete Event"
-                  >
-                    <Trash2 size={15} />
-                  </button>
+          {events.map((evt) => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isPast = (evt.date && evt.date < todayStr) || evt.status === 'Completed' || evt.status === 'Event Ended';
+            const displayStatus = isPast ? 'Event Ended' : evt.status;
+
+            return (
+              <div key={evt._id} className="glass-card" style={{ ...styles.eventCard, opacity: isPast ? 0.8 : 1 }}>
+                <div style={styles.cardHeader}>
+                  <span style={styles.typeBadge}>{evt.type}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={styles.statusBadge(displayStatus)}>{displayStatus}</span>
+                    <button 
+                      className="delete-btn-card"
+                      onClick={() => handleDeleteEvent(evt._id, evt.title)}
+                      title="Delete Event"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-              
-              <h2 style={styles.eventTitle}>{evt.title}</h2>
-              
-              <div style={styles.detailsList}>
-                <div style={styles.detailRow}>
-                  <CalendarIcon size={15} color="var(--primary)" />
-                  <span>{evt.date}</span>
+                
+                <h2 style={styles.eventTitle}>{evt.title}</h2>
+                
+                <div style={styles.detailsList}>
+                  <div style={styles.detailRow}>
+                    <CalendarIcon size={15} color={isPast ? 'var(--text-muted)' : 'var(--primary)'} />
+                    <span>{evt.date}</span>
+                  </div>
+                  <div style={styles.detailRow}>
+                    <Clock size={15} color={isPast ? 'var(--text-muted)' : 'var(--warning)'} />
+                    <span>{evt.time}</span>
+                  </div>
+                  <div style={styles.detailRow}>
+                    <MapPin size={15} color={isPast ? 'var(--text-muted)' : 'var(--danger)'} />
+                    <span>{evt.location}</span>
+                  </div>
+                  <div style={styles.detailRow}>
+                    <Users size={15} color={isPast ? 'var(--text-muted)' : 'var(--success)'} />
+                    <span>{evt.registeredStudents ? evt.registeredStudents.length : 0} Registered Students</span>
+                  </div>
                 </div>
-                <div style={styles.detailRow}>
-                  <Clock size={15} color="var(--warning)" />
-                  <span>{evt.time}</span>
-                </div>
-                <div style={styles.detailRow}>
-                  <MapPin size={15} color="var(--danger)" />
-                  <span>{evt.location}</span>
-                </div>
-                <div style={styles.detailRow}>
-                  <Users size={15} color="var(--success)" />
-                  <span>{evt.registeredStudents ? evt.registeredStudents.length : 0} Registered Students</span>
-                </div>
-              </div>
 
               {evt.description && (
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
@@ -342,9 +347,10 @@ const AdminEvents = () => {
                 </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
+    )}
 
       {/* Responsive Glassmorphic Create Event Modal */}
       {isModalOpen && (
@@ -524,11 +530,27 @@ const styles = {
   eventCard: { display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' },
   cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   typeBadge: { background: 'var(--primary-glow)', color: 'var(--primary)', padding: '0.25rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' },
-  statusBadge: (status) => ({
-    background: status === 'Registration Open' ? 'var(--success-glow)' : 'var(--primary-glow)',
-    color: status === 'Registration Open' ? 'var(--success)' : 'var(--primary)',
-    padding: '0.25rem 0.6rem', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '600'
-  }),
+  statusBadge: (status) => {
+    if (status === 'Completed' || status === 'Event Ended') {
+      return {
+        background: 'rgba(239, 68, 68, 0.15)',
+        color: '#ef4444',
+        border: '1px solid rgba(239, 68, 68, 0.3)',
+        padding: '0.25rem 0.6rem',
+        borderRadius: '50px',
+        fontSize: '0.75rem',
+        fontWeight: '600'
+      };
+    }
+    return {
+      background: status === 'Registration Open' ? 'var(--success-glow)' : 'var(--primary-glow)',
+      color: status === 'Registration Open' ? 'var(--success)' : 'var(--primary)',
+      padding: '0.25rem 0.6rem',
+      borderRadius: '50px',
+      fontSize: '0.75rem',
+      fontWeight: '600'
+    };
+  },
   eventTitle: { fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)', margin: '0.25rem 0' },
   detailsList: { display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'var(--bg-base)', border: '1px solid var(--border-color)', padding: '0.85rem 1rem', borderRadius: '8px' },
   detailRow: { display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: 'var(--text-secondary)' },

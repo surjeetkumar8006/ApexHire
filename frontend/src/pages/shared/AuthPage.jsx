@@ -31,26 +31,36 @@ const AuthPage = ({ onBack }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
 
     if (!email || !password) {
-      addToast('Please fill in all required fields', 'warning');
+      const msg = 'Please fill in all required fields';
+      setFormError(msg);
+      addToast(msg, 'warning');
       return;
     }
 
     if (!isLogin) {
       if (!name) {
-        addToast('Please enter your name', 'warning');
+        const msg = 'Please enter your name';
+        setFormError(msg);
+        addToast(msg, 'warning');
         return;
       }
       if (password !== confirmPassword) {
-        addToast('Passwords do not match', 'error');
+        const msg = 'Passwords do not match';
+        setFormError(msg);
+        addToast(msg, 'error');
         return;
       }
       if (password.length < 6) {
-        addToast('Password must be at least 6 characters', 'warning');
+        const msg = 'Password must be at least 6 characters';
+        setFormError(msg);
+        addToast(msg, 'warning');
         return;
       }
     }
@@ -66,7 +76,9 @@ const AuthPage = ({ onBack }) => {
         addToast('Account created successfully!', 'success');
       }
     } catch (err) {
-      addToast(err.message || 'Authentication failed', 'error');
+      const errMsg = err.message || 'Authentication failed. Please check your credentials.';
+      setFormError(errMsg);
+      addToast(errMsg, 'error');
     } finally {
       setLoading(false);
     }
@@ -143,7 +155,7 @@ const AuthPage = ({ onBack }) => {
           <div className="auth-capsule-switcher">
             <button
               type="button"
-              onClick={() => setIsLogin(true)}
+              onClick={() => { setIsLogin(true); setFormError(''); }}
               style={{
                 ...styles.switcherBtn,
                 color: isLogin ? '#0b0f19' : 'var(--text-secondary)',
@@ -155,7 +167,7 @@ const AuthPage = ({ onBack }) => {
             </button>
             <button
               type="button"
-              onClick={() => setIsLogin(false)}
+              onClick={() => { setIsLogin(false); setFormError(''); }}
               style={{
                 ...styles.switcherBtn,
                 color: !isLogin ? '#0b0f19' : 'var(--text-secondary)',
@@ -175,6 +187,12 @@ const AuthPage = ({ onBack }) => {
                 : 'Fill in your details to join the placement portal'}
             </p>
           </div>
+
+          {formError && (
+            <div style={styles.errorBanner}>
+              <span>⚠️ {formError}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="auth-form-fields" style={styles.form}>
             {/* Name & Email Field - Row styling for register, single column for login */}
@@ -330,7 +348,14 @@ const AuthPage = ({ onBack }) => {
 
             {/* Submit Button */}
             <button type="submit" className="btn btn-primary" style={styles.submitBtn} disabled={loading}>
-              {loading ? <span className="spinner" style={styles.spinner}></span> : (isLogin ? 'Sign In' : 'Sign Up')}
+              {loading ? (
+                <>
+                  <span className="spinner" style={styles.spinner}></span>
+                  <span>{isLogin ? 'Signing in...' : 'Creating account...'}</span>
+                </>
+              ) : (
+                isLogin ? 'Sign In' : 'Sign Up'
+              )}
             </button>
           </form>
         </div>
@@ -341,6 +366,19 @@ const AuthPage = ({ onBack }) => {
 };
 
 const styles = {
+  errorBanner: {
+    padding: '0.75rem 1rem',
+    borderRadius: '10px',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    border: '1px solid rgba(239, 68, 68, 0.35)',
+    color: '#f87171',
+    fontSize: '0.88rem',
+    fontWeight: '600',
+    marginBottom: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
   logoBox: {
     display: 'flex',
     alignItems: 'center',

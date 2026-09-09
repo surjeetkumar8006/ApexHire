@@ -289,13 +289,7 @@ export const sendMessage = async (req, res) => {
 
 export const getUsersList = async (req, res) => {
   try {
-    let query = {};
-    if (req.user.role === 'student') {
-      query = { role: { $in: ['recruiter', 'admin'] } };
-    } else {
-      query = { _id: { $ne: req.user._id } };
-    }
-    const users = await User.find(query).select('name email role avatar');
+    const users = await User.find({ _id: { $ne: req.user._id } }).select('name email role avatar');
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });

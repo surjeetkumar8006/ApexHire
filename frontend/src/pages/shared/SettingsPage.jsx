@@ -310,7 +310,7 @@ const SettingsPage = () => {
 
       <div style={styles.layout}>
         {/* Settings Sidebar */}
-        <div className="glass-card p-3" style={{ width: '260px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+        <div style={styles.sidebar}>
           {tabs.map(tab => {
             const isActive = activeTab === tab.id;
             return (
@@ -336,14 +336,36 @@ const SettingsPage = () => {
                 <div style={styles.avatarSection}>
                   <div style={styles.avatarPreview}>
                     {formData.avatar ? (
-                      <img src={formData.avatar} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                    ) : (
-                      user?.name?.charAt(0)
-                    )}
+                      <img 
+                        src={formData.avatar} 
+                        alt="Avatar" 
+                        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          const fallback = e.target.parentNode.querySelector('.avatar-fallback');
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <span 
+                      className="avatar-fallback"
+                      style={{ 
+                        display: formData.avatar ? 'none' : 'flex', 
+                        width: '100%', 
+                        height: '100%', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '1.8rem', 
+                        fontWeight: 'bold', 
+                        color: '#ffffff' 
+                      }}
+                    >
+                      {(formData.name || user?.name || 'U').charAt(0).toUpperCase()}
+                    </span>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>Profile Picture</h3>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>PNG, JPG or GIF up to 2MB.</p>
+                    <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: '600' }}>Profile Picture</h3>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.65rem' }}>PNG, JPG or GIF up to 2MB.</p>
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -359,19 +381,35 @@ const SettingsPage = () => {
                           const reader = new FileReader();
                           reader.onloadend = () => {
                             setFormData(prev => ({ ...prev, avatar: reader.result }));
+                            addToast('Avatar uploaded! Click "Save Profile" to apply changes.', 'info');
                           };
                           reader.readAsDataURL(file);
                         }
                       }} 
                     />
-                    <button 
-                      type="button" 
-                      className="btn btn-outline" 
-                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
-                      onClick={() => document.getElementById('avatar-upload').click()}
-                    >
-                      Upload New
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.6rem' }}>
+                      <button 
+                        type="button" 
+                        className="btn btn-outline" 
+                        style={{ padding: '0.45rem 1rem', fontSize: '0.85rem', fontWeight: '600' }}
+                        onClick={() => document.getElementById('avatar-upload').click()}
+                      >
+                        Upload New
+                      </button>
+                      {formData.avatar && (
+                        <button
+                          type="button"
+                          className="btn btn-outline"
+                          style={{ padding: '0.45rem 1rem', fontSize: '0.85rem', borderColor: 'rgba(239, 68, 68, 0.4)', color: '#f87171' }}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, avatar: '' }));
+                            addToast('Avatar removed', 'info');
+                          }}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -746,21 +784,20 @@ const SettingsPage = () => {
 const styles = {
   container: { display: 'flex', flexDirection: 'column', gap: '2rem' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  title: { fontSize: '2rem', fontWeight: '700', color: 'var(--text-primary)' },
-  subtitle: { fontSize: '1rem', color: 'var(--text-secondary)' },
+  title: { fontSize: '2rem', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.5px' },
+  subtitle: { fontSize: '1rem', color: 'var(--text-secondary)', maxWidth: '600px' },
   layout: { display: 'flex', gap: '2rem', alignItems: 'flex-start' },
-  sidebar: { width: '250px', display: 'flex', flexDirection: 'column', padding: '1rem 0', flexShrink: 0 },
-  tabBtn: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.5rem', border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '500', transition: 'all 0.2s' },
-  contentArea: { flex: 1, padding: '2.5rem', minHeight: '500px' },
-  sectionTitle: { fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' },
-  form: { display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '600px' },
-  avatarSection: { display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1rem' },
-  avatarPreview: { width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 'bold', color: '#fff' },
-  saveBtn: { alignSelf: 'flex-start', marginTop: '1rem', padding: '0.75rem 2rem' },
-  securityBox: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', background: 'var(--bg-base)', border: '1px solid var(--border-color)', borderRadius: '12px', marginTop: '0.5rem' },
-  toggleRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0', borderBottom: '1px solid hsla(217, 20%, 60%, 0.1)' },
-  toggleTitle: { fontSize: '1rem', fontWeight: '500', color: 'var(--text-primary)' },
-  toggleDesc: { fontSize: '0.85rem', color: 'var(--text-secondary)' }
+  sidebar: { width: '270px', display: 'flex', flexDirection: 'column', padding: '0.75rem', flexShrink: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '16px', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)' },
+  contentArea: { flex: 1, padding: '2.5rem', minHeight: '520px', background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '20px', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)' },
+  sectionTitle: { fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', letterSpacing: '-0.3px' },
+  form: { display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '640px' },
+  avatarSection: { display: 'flex', alignItems: 'center', gap: '1.75rem', marginBottom: '1.25rem', padding: '1.25rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.06)' },
+  avatarPreview: { width: '88px', height: '88px', borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem', fontWeight: 'bold', color: '#fff', overflow: 'hidden', border: '3px solid rgba(59, 130, 246, 0.5)', boxShadow: '0 0 25px rgba(59, 130, 246, 0.35)', position: 'relative' },
+  saveBtn: { alignSelf: 'flex-start', marginTop: '1rem', padding: '0.8rem 2.25rem', background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', border: 'none', borderRadius: '10px', color: '#ffffff', fontWeight: '600', boxShadow: '0 4px 16px rgba(59, 130, 246, 0.35)', cursor: 'pointer', transition: 'all 0.2s ease' },
+  securityBox: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(59, 130, 246, 0.25)', borderRadius: '14px', marginTop: '0.5rem' },
+  toggleRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 0', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' },
+  toggleTitle: { fontSize: '1rem', fontWeight: '600', color: 'var(--text-primary)' },
+  toggleDesc: { fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }
 };
 
 export default SettingsPage;

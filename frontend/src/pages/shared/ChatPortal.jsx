@@ -285,16 +285,17 @@ const ChatPortal = () => {
                   </div>
                 ) : (
                   messages.map((msg, idx) => {
-                    const isMine = msg.sender.toString() === user._id.toString();
+                    const senderId = typeof msg.sender === 'object' ? (msg.sender?._id || msg.sender?.id) : msg.sender;
+                    const isMine = senderId?.toString() === user?._id?.toString();
                     return (
                       <div 
-                        key={idx} 
+                        key={msg._id || idx} 
                         className={`chat-bubble-container ${isMine ? 'mine' : 'theirs'}`}
                       >
                         <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
-                          <p className="mb-1">{msg.text}</p>
-                          <span className="text-xxs text-muted d-block text-right" style={{ fontSize: '0.65rem', opacity: 0.7 }}>
-                            {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          <p className="mb-1" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.text}</p>
+                          <span className="text-xxs text-muted d-block text-right" style={{ fontSize: '0.65rem', opacity: 0.8 }}>
+                            {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'}
                           </span>
                         </div>
                       </div>
