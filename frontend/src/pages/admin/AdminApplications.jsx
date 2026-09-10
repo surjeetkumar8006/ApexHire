@@ -504,25 +504,31 @@ const AdminApplications = () => {
         {/* View Mode Toggle Switch */}
         <div style={styles.viewToggleContainer}>
           <button
+            type="button"
             onClick={() => setViewMode('kanban')}
             style={{
               ...styles.viewToggleBtn,
-              backgroundColor: viewMode === 'kanban' ? 'var(--primary)' : 'transparent',
-              color: viewMode === 'kanban' ? '#fff' : 'var(--text-secondary)',
+              backgroundColor: viewMode === 'kanban' ? '#ffffff' : 'transparent',
+              color: viewMode === 'kanban' ? '#0b0f19' : 'var(--text-secondary)',
+              fontWeight: viewMode === 'kanban' ? '800' : '600',
+              boxShadow: viewMode === 'kanban' ? '0 2px 8px rgba(0, 0, 0, 0.4)' : 'none'
             }}
           >
-            <Kanban size={14} style={{ marginRight: '4px' }} />
+            <Kanban size={14} style={{ marginRight: '6px', color: viewMode === 'kanban' ? '#0b0f19' : 'var(--text-secondary)' }} />
             <span>Kanban Board</span>
           </button>
           <button
+            type="button"
             onClick={() => setViewMode('table')}
             style={{
               ...styles.viewToggleBtn,
-              backgroundColor: viewMode === 'table' ? 'var(--primary)' : 'transparent',
-              color: viewMode === 'table' ? '#fff' : 'var(--text-secondary)',
+              backgroundColor: viewMode === 'table' ? '#ffffff' : 'transparent',
+              color: viewMode === 'table' ? '#0b0f19' : 'var(--text-secondary)',
+              fontWeight: viewMode === 'table' ? '800' : '600',
+              boxShadow: viewMode === 'table' ? '0 2px 8px rgba(0, 0, 0, 0.4)' : 'none'
             }}
           >
-            <Table size={14} style={{ marginRight: '4px' }} />
+            <Table size={14} style={{ marginRight: '6px', color: viewMode === 'table' ? '#0b0f19' : 'var(--text-secondary)' }} />
             <span>Table List</span>
           </button>
         </div>
