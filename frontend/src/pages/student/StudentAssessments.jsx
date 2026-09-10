@@ -335,7 +335,7 @@ const StudentAssessments = () => {
                       placeholder="// Write your code solution here (e.g. JavaScript, Python, SQL)&#10;function solve() {&#10;  // Your optimal logic here&#10;}"
                       style={{ 
                         backgroundColor: '#090d16', 
-                        color: '#38bdf8', 
+                        color: '#ffffff', 
                         borderColor: 'var(--border-color)', 
                         lineHeight: 1.5,
                         fontFamily: 'Consolas, Courier New, monospace',
@@ -392,7 +392,7 @@ const StudentAssessments = () => {
                 {/* Progress Stats */}
                 <div style={{ display: 'flex', gap: '1rem', background: 'var(--bg-surface-elevated)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
                   <div style={{ flex: 1, textAlign: 'center' }}>
-                    <span style={{ fontSize: '1.25rem', fontWeight: '800', color: '#3b82f6' }}>
+                    <span style={{ fontSize: '1.25rem', fontWeight: '800', color: '#ffffff' }}>
                       {answeredCount}
                     </span>
                     <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', margin: 0, textTransform: 'uppercase', fontWeight: 600 }}>Answered</p>
@@ -638,7 +638,7 @@ const styles = {
   progressBarFill: (percent) => ({
     width: `${percent}%`,
     height: '100%',
-    background: 'linear-gradient(90deg, #3b82f6, #60a5fa)',
+    background: 'linear-gradient(90deg, #ffffff, #94a3b8)',
     transition: 'width 0.3s ease'
   }),
   questionBox: {
@@ -663,22 +663,22 @@ const styles = {
     alignItems: 'center',
     gap: '1.25rem',
     padding: '1.25rem',
-    border: `1.5px solid ${isSelected ? '#3b82f6' : 'var(--border-color)'}`,
+    border: `1.5px solid ${isSelected ? '#ffffff' : 'var(--border-color)'}`,
     borderRadius: '12px',
-    background: isSelected ? 'rgba(59, 130, 246, 0.12)' : 'var(--bg-surface)',
+    background: isSelected ? 'rgba(255, 255, 255, 0.1)' : 'var(--bg-surface)',
     cursor: 'pointer',
     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     width: '100%',
     textAlign: 'left',
-    boxShadow: isSelected ? '0 0 18px rgba(59, 130, 246, 0.3)' : 'none'
+    boxShadow: isSelected ? '0 0 18px rgba(255, 255, 255, 0.25)' : 'none'
   }),
   optionIndicator: (isSelected) => ({
     width: '30px',
     height: '30px',
     borderRadius: '50%',
-    border: `2px solid ${isSelected ? '#3b82f6' : 'rgba(255, 255, 255, 0.2)'}`,
-    background: isSelected ? '#3b82f6' : 'rgba(255, 255, 255, 0.05)',
-    color: isSelected ? '#ffffff' : 'var(--text-secondary)',
+    border: `2px solid ${isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.2)'}`,
+    background: isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.05)',
+    color: isSelected ? '#0b0f19' : 'var(--text-secondary)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -702,10 +702,10 @@ const styles = {
     fontWeight: '700',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    border: isCurrent ? '2px solid #3b82f6' : isAnswered ? '1px solid #3b82f6' : '1px solid var(--border-color)',
-    background: isAnswered ? '#3b82f6' : isCurrent ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-surface-elevated)',
-    color: isAnswered ? '#ffffff' : isCurrent ? '#60a5fa' : 'var(--text-secondary)',
-    boxShadow: isCurrent ? '0 0 12px rgba(59, 130, 246, 0.45)' : isAnswered ? '0 4px 12px rgba(59, 130, 246, 0.25)' : 'none'
+    border: isCurrent ? '2px solid #ffffff' : isAnswered ? '1px solid #ffffff' : '1px solid var(--border-color)',
+    background: isAnswered ? '#ffffff' : isCurrent ? 'rgba(255, 255, 255, 0.15)' : 'var(--bg-surface-elevated)',
+    color: isAnswered ? '#0b0f19' : isCurrent ? '#ffffff' : 'var(--text-secondary)',
+    boxShadow: isCurrent ? '0 0 12px rgba(255, 255, 255, 0.3)' : isAnswered ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none'
   }),
   navigatorActions: {
     display: 'flex',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Lock, Bell, Shield, Smartphone, Globe, CheckCircle, Users, Trash, Pencil, Plus, X, Loader } from 'lucide-react';
+import { User, Lock, Bell, Shield, Smartphone, Globe, CheckCircle, Users, Trash, Pencil, Plus, X, Loader, Camera } from 'lucide-react';
 import { useAuth, API_BASE } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 
@@ -334,7 +334,11 @@ const SettingsPage = () => {
               <h2 style={styles.sectionTitle}>Profile Information</h2>
               <form onSubmit={handleSave} style={styles.form}>
                 <div style={styles.avatarSection}>
-                  <div style={styles.avatarPreview}>
+                  <div 
+                    style={styles.avatarPreview} 
+                    onClick={() => document.getElementById('avatar-upload').click()}
+                    title="Click to upload profile picture"
+                  >
                     {formData.avatar ? (
                       <img 
                         src={formData.avatar} 
@@ -355,13 +359,43 @@ const SettingsPage = () => {
                         height: '100%', 
                         alignItems: 'center', 
                         justifyContent: 'center', 
-                        fontSize: '1.8rem', 
-                        fontWeight: 'bold', 
-                        color: '#ffffff' 
+                        fontSize: '2.4rem', 
+                        fontWeight: '800', 
+                        color: '#ffffff',
+                        letterSpacing: '1px',
+                        textShadow: '0 2px 12px rgba(0, 0, 0, 0.7)'
                       }}
                     >
                       {(formData.name || user?.name || 'U').charAt(0).toUpperCase()}
                     </span>
+
+                    {/* Camera Upload Badge Overlay */}
+                    <button 
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        document.getElementById('avatar-upload').click();
+                      }}
+                      style={{
+                        position: 'absolute',
+                        bottom: '2px',
+                        right: '2px',
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        background: '#ffffff',
+                        border: '2px solid #080c16',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.6)',
+                        zIndex: 5
+                      }}
+                      title="Upload Profile Picture"
+                    >
+                      <Camera size={14} color="#0b0f19" />
+                    </button>
                   </div>
                   <div style={{ flex: 1 }}>
                     <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: '600' }}>Profile Picture</h3>
@@ -787,14 +821,14 @@ const styles = {
   title: { fontSize: '2rem', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.5px' },
   subtitle: { fontSize: '1rem', color: 'var(--text-secondary)', maxWidth: '600px' },
   layout: { display: 'flex', gap: '2rem', alignItems: 'flex-start' },
-  sidebar: { width: '270px', display: 'flex', flexDirection: 'column', padding: '0.75rem', flexShrink: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '16px', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)' },
-  contentArea: { flex: 1, padding: '2.5rem', minHeight: '520px', background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '20px', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)' },
+  sidebar: { width: '270px', display: 'flex', flexDirection: 'column', padding: '0.75rem', flexShrink: 0, background: 'rgba(8, 12, 22, 0.96)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255, 255, 255, 0.09)', borderRadius: '16px', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' },
+  contentArea: { flex: 1, padding: '2.5rem', minHeight: '520px', background: 'rgba(8, 12, 22, 0.96)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255, 255, 255, 0.09)', borderRadius: '20px', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' },
   sectionTitle: { fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', letterSpacing: '-0.3px' },
   form: { display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '640px' },
-  avatarSection: { display: 'flex', alignItems: 'center', gap: '1.75rem', marginBottom: '1.25rem', padding: '1.25rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.06)' },
-  avatarPreview: { width: '88px', height: '88px', borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem', fontWeight: 'bold', color: '#fff', overflow: 'hidden', border: '3px solid rgba(59, 130, 246, 0.5)', boxShadow: '0 0 25px rgba(59, 130, 246, 0.35)', position: 'relative' },
-  saveBtn: { alignSelf: 'flex-start', marginTop: '1rem', padding: '0.8rem 2.25rem', background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', border: 'none', borderRadius: '10px', color: '#ffffff', fontWeight: '600', boxShadow: '0 4px 16px rgba(59, 130, 246, 0.35)', cursor: 'pointer', transition: 'all 0.2s ease' },
-  securityBox: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(59, 130, 246, 0.25)', borderRadius: '14px', marginTop: '0.5rem' },
+  avatarSection: { display: 'flex', alignItems: 'center', gap: '1.75rem', marginBottom: '1.25rem', padding: '1.25rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' },
+  avatarPreview: { width: '92px', height: '92px', borderRadius: '50%', background: 'linear-gradient(145deg, #111827 0%, #030712 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.4rem', fontWeight: '800', color: '#ffffff', border: '2.5px solid rgba(255, 255, 255, 0.6)', boxShadow: '0 8px 25px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.05), 0 0 20px rgba(255, 255, 255, 0.2)', position: 'relative', cursor: 'pointer' },
+  saveBtn: { alignSelf: 'flex-start', marginTop: '1rem', padding: '0.8rem 2.25rem', background: '#ffffff', border: 'none', borderRadius: '10px', color: '#0b0f19', fontWeight: '800', boxShadow: '0 4px 16px rgba(255, 255, 255, 0.25)', cursor: 'pointer', transition: 'all 0.2s ease' },
+  securityBox: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '14px', marginTop: '0.5rem' },
   toggleRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 0', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' },
   toggleTitle: { fontSize: '1rem', fontWeight: '600', color: 'var(--text-primary)' },
   toggleDesc: { fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }

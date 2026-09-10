@@ -118,7 +118,7 @@ const StudentAppAnalytics = () => {
               <div className="funnel-row-hover" style={styles.funnelRow}>
                 <span style={styles.funnelLabel}>Applied</span>
                 <div style={styles.funnelTrack}>
-                  <div className="glow-bar" style={{ width: '100%', background: 'linear-gradient(90deg, #3b82f6, #60a5fa)' }}></div>
+                  <div className="glow-bar" style={{ width: '100%', background: 'linear-gradient(90deg, #ffffff, #cbd5e1)' }}></div>
                 </div>
                 <span style={styles.funnelValue}>{total} <span style={styles.pct}>({getPercent(total)}%)</span></span>
               </div>
@@ -232,8 +232,8 @@ const StudentAppAnalytics = () => {
         }
 
         .premium-card:hover {
-          border-color: rgba(59, 130, 246, 0.4);
-          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 15px -3px rgba(59, 130, 246, 0.2);
+          border-color: rgba(255, 255, 255, 0.4);
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 15px -3px rgba(255, 255, 255, 0.15);
           transform: translateY(-2px);
         }
 

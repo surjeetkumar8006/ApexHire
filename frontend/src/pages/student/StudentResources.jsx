@@ -13,9 +13,9 @@ const StudentResources = () => {
       id: 1,
       title: 'Data Structures & Algorithms',
       description: 'Master core computer science fundamentals, algorithmic paradigms, and problem-solving strategies for coding rounds.',
-      icon: <Code size={24} color="#3b82f6" />,
-      color: 'rgba(59,130,246,0.1)',
-      borderColor: '#3b82f6',
+      icon: <Code size={24} color="#ffffff" />,
+      color: 'rgba(255, 255, 255, 0.08)',
+      borderColor: 'rgba(255, 255, 255, 0.25)',
       resources: [
         { name: 'NeetCode 150 - Blind 75 Extension', link: 'https://neetcode.io/practice', type: 'Practice', platform: 'NeetCode' },
         { name: 'Striver SDE Sheet', link: 'https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/', type: 'Practice', platform: 'takeUforward' },

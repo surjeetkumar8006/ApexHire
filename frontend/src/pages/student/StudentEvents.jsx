@@ -155,21 +155,21 @@ const StudentEvents = () => {
                       borderColor: isPast 
                         ? 'rgba(255, 255, 255, 0.15)' 
                         : isUpcomingOnly
-                        ? 'rgba(59, 130, 246, 0.4)'
+                        ? 'rgba(255, 255, 255, 0.3)'
                         : isRegistered 
                         ? 'var(--danger)' 
                         : undefined,
                       color: isPast 
                         ? 'var(--text-muted)' 
                         : isUpcomingOnly
-                        ? '#3b82f6'
+                        ? '#ffffff'
                         : isRegistered 
                         ? 'var(--danger)' 
                         : undefined,
                       background: isPast 
                         ? 'rgba(255, 255, 255, 0.04)' 
                         : isUpcomingOnly
-                        ? 'rgba(59, 130, 246, 0.08)'
+                        ? 'rgba(255, 255, 255, 0.08)'
                         : undefined,
                       cursor: (isPast || isUpcomingOnly) ? 'not-allowed' : 'pointer'
                     }}
