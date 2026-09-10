@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, API_BASE } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { 
@@ -52,11 +53,50 @@ const EVALUATION_STEPS = [
 const StudentMockInterviews = () => {
   const { authHeader } = useAuth();
   const { addToast } = useNotification();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [stage, setStage] = useState('setup'); // 'setup', 'interview', 'evaluating', 'result'
+  const [stage, setStage] = useState('setup'); // 'setup', 'lobby', 'interview', 'evaluating', 'result'
   const [role, setRole] = useState('Full Stack Developer');
   const [company, setCompany] = useState('Google');
   const [type, setType] = useState('Technical');
+
+  const changeStage = (newStage) => {
+    setStage(newStage);
+    switch (newStage) {
+      case 'lobby':
+        navigate('/student/mock-interviews/lobby');
+        break;
+      case 'interview':
+        navigate('/student/mock-interviews/room');
+        break;
+      case 'evaluating':
+        navigate('/student/mock-interviews/evaluating');
+        break;
+      case 'result':
+        navigate('/student/mock-interviews/report');
+        break;
+      case 'setup':
+      default:
+        navigate('/student/mock-interviews');
+        break;
+    }
+  };
+
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes('/student/mock-interviews/lobby')) {
+      setStage('lobby');
+    } else if (path.includes('/student/mock-interviews/room')) {
+      setStage('interview');
+    } else if (path.includes('/student/mock-interviews/evaluating')) {
+      setStage('evaluating');
+    } else if (path.includes('/student/mock-interviews/report')) {
+      setStage('result');
+    } else if (path === '/student/mock-interviews' || path === '/student/mock-interviews/') {
+      setStage('setup');
+    }
+  }, [location.pathname]);
 
   // Media Config States
   const [useCamera, setUseCamera] = useState(true);
@@ -121,7 +161,7 @@ const StudentMockInterviews = () => {
             clearInterval(interval);
             if (tempResultRef.current) {
               setEvalResult(tempResultRef.current);
-              setStage('result');
+              changeStage('result');
             }
             return prev;
           }
@@ -316,7 +356,7 @@ const StudentMockInterviews = () => {
         setAnswers(new Array(data.questions.length).fill(''));
         setCurrentIdx(0);
         setCurrentAnswer('');
-        setStage('lobby'); // Open pre-interview waiting lobby screen
+        changeStage('lobby'); // Open pre-interview waiting lobby screen
       } else {
         addToast('Failed to generate interview questions. Try again.', 'error');
       }
@@ -328,7 +368,7 @@ const StudentMockInterviews = () => {
   };
 
   const launchInterviewFromLobby = () => {
-    setStage('interview');
+    changeStage('interview');
     if (useCamera) startWebcam();
     if (questions.length > 0) {
       const qObj = questions[0];
@@ -369,7 +409,7 @@ const StudentMockInterviews = () => {
   };
 
   const handleSubmitInterview = async (finalAnswers) => {
-    setStage('evaluating');
+    changeStage('evaluating');
     tempResultRef.current = null;
     try {
       const questionTexts = questions.map(q => q.question);
@@ -392,15 +432,15 @@ const StudentMockInterviews = () => {
         // If sequential grading steps are already completed, transition immediately
         if (evalStepRef.current >= EVALUATION_STEPS.length - 1) {
           setEvalResult(data);
-          setStage('result');
+          changeStage('result');
         }
       } else {
         addToast('Evaluation grading failed', 'error');
-        setStage('interview');
+        changeStage('interview');
       }
     } catch (err) {
       addToast('Network error evaluating interview', 'error');
-      setStage('interview');
+      changeStage('interview');
     }
   };
 
@@ -540,7 +580,7 @@ const StudentMockInterviews = () => {
                             }}
                             onClick={() => {
                               setEvalResult(item);
-                              setStage('result');
+                              changeStage('result');
                             }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.transform = 'translateY(-3px)';
@@ -669,7 +709,7 @@ const StudentMockInterviews = () => {
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1.5rem' }}>
                 <button 
                   className="btn btn-outline" 
-                  onClick={() => setStage('setup')}
+                  onClick={() => changeStage('setup')}
                   style={{ padding: '0.8rem 1.75rem', borderRadius: '10px' }}
                 >
                   ← Back to Roles
@@ -1039,7 +1079,7 @@ const StudentMockInterviews = () => {
               <div className="d-flex justify-content-center gap-3 mt-5 flex-wrap">
                 <button 
                   onClick={() => {
-                    setStage('setup');
+                    changeStage('setup');
                     setEvalResult(null);
                   }} 
                   className="btn btn-outline d-flex align-items-center gap-2"

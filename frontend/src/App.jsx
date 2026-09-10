@@ -93,7 +93,7 @@ function App() {
               <Route path="/student/jobs" element={<ProtectedRoute allowedRoles={['student']}><JobBoard /></ProtectedRoute>} />
               <Route path="/student/applications" element={<ProtectedRoute allowedRoles={['student']}><StudentApplications /></ProtectedRoute>} />
               <Route path="/student/ai-coach" element={<Navigate to="/student/dashboard" replace />} />
-              <Route path="/student/mock-interviews" element={<ProtectedRoute allowedRoles={['student']}><StudentMockInterviews /></ProtectedRoute>} />
+              <Route path="/student/mock-interviews/*" element={<ProtectedRoute allowedRoles={['student']}><StudentMockInterviews /></ProtectedRoute>} />
               <Route path="/student/assessments" element={<ProtectedRoute allowedRoles={['student']}><StudentAssessments /></ProtectedRoute>} />
               
               <Route path="/student/interviews" element={<ProtectedRoute allowedRoles={['student']}><StudentInterviews /></ProtectedRoute>} />
