@@ -130,7 +130,7 @@ const LandingPage = ({ onGetStarted }) => {
     },
     {
       id: 'mock',
-      tabLabel: 'AI Voice Mock Interview',
+      tabLabel: 'AI Mock Interview',
       title: 'Real-Time Voice Mock Interviews',
       desc: 'Simulate full technical and HR rounds with Ava, our AI interviewer. Experience human-like calm speech pace (0.88x) and instant grading.',
       icon: <Cpu size={18} />,
@@ -154,7 +154,7 @@ const LandingPage = ({ onGetStarted }) => {
     },
     {
       id: 'admin',
-      tabLabel: 'Admin Portal Intelligence',
+      tabLabel: 'Admin Portal',
       title: 'Recruitment Coordination Engine',
       desc: 'Enable placement coordinators to post vacancies, track real-time active users, review candidate profiles, and schedule interviews.',
       icon: <Shield size={18} />,
@@ -624,9 +624,10 @@ const LandingPage = ({ onGetStarted }) => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`showcase-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+              style={{ whiteSpace: 'nowrap' }}
             >
               {tab.icon}
-              <span>{tab.tabLabel}</span>
+              <span style={{ whiteSpace: 'nowrap' }}>{tab.tabLabel}</span>
             </button>
           ))}
         </div>
