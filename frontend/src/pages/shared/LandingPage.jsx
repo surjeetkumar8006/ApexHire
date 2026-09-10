@@ -84,6 +84,18 @@ const LandingPage = ({ onGetStarted }) => {
 
   const estimatedCtc = ctcMatrix[branch]?.[prepTier] || ctcMatrix['CSE / IT']['ready'];
 
+  const defaultJobs = [
+    { title: 'Software Development Engineer (SDE-1)', company: 'Google', ctc: '₹32 - ₹45 LPA', location: 'Bangalore / Remote', tags: ['React', 'Node.js', 'DSA', 'System Design'] },
+    { title: 'Frontend Engineering Specialist', company: 'Microsoft', ctc: '₹28 - ₹38 LPA', location: 'Hyderabad', tags: ['React', 'TypeScript', 'CSS', 'Performance'] },
+    { title: 'Cloud & Infrastructure Engineer', company: 'Amazon', ctc: '₹26 - ₹36 LPA', location: 'Gurugram / Hybrid', tags: ['AWS', 'NodeJS', 'Docker', 'Kubernetes'] },
+    { title: 'AI & ML Research Specialist', company: 'NVIDIA', ctc: '₹35 - ₹52 LPA', location: 'Pune / Remote', tags: ['Python', 'PyTorch', 'LLMs', 'Neural Nets'] },
+    { title: 'Full Stack Product Engineer', company: 'Meta', ctc: '₹38 - ₹55 LPA', location: 'Bangalore', tags: ['MERN', 'GraphQL', 'Next.js', 'System Design'] },
+    { title: 'DevOps & Systems Engineer', company: 'Netflix', ctc: '₹30 - ₹48 LPA', location: 'Remote', tags: ['Docker', 'K8s', 'CI/CD', 'Linux'] }
+  ];
+
+  const [liveJobs, setLiveJobs] = useState(defaultJobs);
+  const [onlineUsers, setOnlineUsers] = useState(1);
+
   const [stats, setStats] = useState({
     placementRate: 95,
     activeJobsCount: 1200,
@@ -97,18 +109,49 @@ const LandingPage = ({ onGetStarted }) => {
   });
 
   useEffect(() => {
-    const fetchLandingStats = async () => {
+    const fetchRealTimeData = async () => {
       try {
-        const res = await fetch(`${API_BASE}/analytics/public`);
-        if (res.ok) {
-          const data = await res.json();
+        // 1. Fetch public stats & placements from DB
+        const statsRes = await fetch(`${API_BASE}/analytics/public`);
+        if (statsRes.ok) {
+          const data = await statsRes.json();
           setStats(data);
         }
+
+        // 2. Fetch live job openings from DB
+        const jobsRes = await fetch(`${API_BASE}/jobs`);
+        if (jobsRes.ok) {
+          const dbJobs = await jobsRes.json();
+          if (Array.isArray(dbJobs) && dbJobs.length > 0) {
+            const formatted = dbJobs.map(j => ({
+              title: j.title || 'Software Engineer',
+              company: j.company || 'Tech Enterprise',
+              ctc: j.salary || '₹18 - ₹30 LPA',
+              location: j.location || 'Remote',
+              tags: Array.isArray(j.requirements)
+                ? j.requirements.slice(0, 4)
+                : (typeof j.requirements === 'string' ? j.requirements.split(',').map(s => s.trim()).filter(Boolean).slice(0, 4) : ['React', 'Node.js', 'System Design'])
+            }));
+            setLiveJobs(formatted);
+          }
+        }
+
+        // 3. Fetch real-time online active count
+        const onlineRes = await fetch(`${API_BASE}/analytics/online-count`);
+        if (onlineRes.ok) {
+          const onlineData = await onlineRes.json();
+          if (onlineData.onlineCount) {
+            setOnlineUsers(onlineData.onlineCount);
+          }
+        }
       } catch (err) {
-        console.error('Failed to fetch public stats:', err);
+        console.error('Failed to fetch real-time landing page data:', err);
       }
     };
-    fetchLandingStats();
+
+    fetchRealTimeData();
+    const interval = setInterval(fetchRealTimeData, 8000); // Live poll every 8 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const toggleFaq = (index) => {
@@ -250,14 +293,14 @@ const LandingPage = ({ onGetStarted }) => {
             <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#ffffff' }}>Real-Time Placement & AI Career Engine 2026</span>
           </div>
 
-          <h1 className="hero-title" style={{ fontWeight: 900, letterSpacing: '-1.5px', lineHeight: 1.15 }}>
+          <h1 className="hero-title" style={{ fontSize: '2.75rem', fontWeight: 900, letterSpacing: '-0.8px', lineHeight: 1.2 }}>
             Elevate Your Career Path With <br />
             <span className="gradient-text" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               AI-Powered Precision
             </span>
           </h1>
 
-          <p className="hero-subtitle" style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.65, maxWidth: '620px' }}>
+          <p className="hero-subtitle" style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: '600px' }}>
             A unified placement portal featuring Gemini AI resume parsing, voice mock interviews with calm speech rate, live 5-stage application pipelines, and real-time active user session pings.
           </p>
 
@@ -273,20 +316,25 @@ const LandingPage = ({ onGetStarted }) => {
           </div>
 
           {/* Quick Metrics Bar */}
-          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '1.25rem', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', flexWrap: 'wrap', alignItems: 'center' }}>
             <div>
-              <h4 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>₹65 LPA</h4>
+              <h4 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>₹65 LPA</h4>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Highest Package 2026</p>
             </div>
-            <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)' }} />
+            <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.1)' }} />
             <div>
-              <h4 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>1,200+</h4>
+              <h4 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>{stats.activeJobsCount || liveJobs.length || 12}+</h4>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Active Drive Vacancies</p>
             </div>
-            <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)' }} />
+            <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.1)' }} />
             <div>
-              <h4 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>95%</h4>
+              <h4 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>{stats.placementRate || 95}%</h4>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Verified Placement Rate</p>
+            </div>
+            <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.1)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', background: 'rgba(52, 211, 153, 0.08)', padding: '0.35rem 0.75rem', borderRadius: '20px', border: '1px solid rgba(52, 211, 153, 0.25)' }}>
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399', display: 'inline-block' }} />
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#34d399' }}>{onlineUsers} Online Active</span>
             </div>
           </div>
         </div>
@@ -874,7 +922,7 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
-          {featuredJobs.map((job, idx) => (
+          {liveJobs.map((job, idx) => (
             <div 
               key={idx}
               className="glass-card"

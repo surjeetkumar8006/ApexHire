@@ -981,10 +981,10 @@ body.light-theme .form-select {
 }
 
 .landing-hero-left .hero-title {
-  font-size: 3.8rem;
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -1.5px;
+  font-size: 3.1rem;
+  font-weight: 850;
+  line-height: 1.18;
+  letter-spacing: -1px;
   color: #ffffff;
   text-align: left;
 }
@@ -992,18 +992,19 @@ body.light-theme .form-select {
 @media (max-width: 992px) {
   .landing-hero-left .hero-title {
     text-align: center;
+    font-size: 2.7rem;
   }
 }
 
 @media (max-width: 768px) {
   .landing-hero-left .hero-title {
-    font-size: 2.8rem;
+    font-size: 2.3rem;
   }
 }
 
 @media (max-width: 480px) {
   .landing-hero-left .hero-title {
-    font-size: 2.2rem;
+    font-size: 1.9rem;
   }
 }
 
