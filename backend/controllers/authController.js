@@ -15,15 +15,29 @@ export const registerUser = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
-    const userExists = await User.findOne({ email });
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+    const cleanName = name ? name.trim() : '';
+
+    if (!cleanEmail || !password || !cleanName) {
+      return res.status(400).json({ message: 'Name, email, and password are required fields.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long.' });
+    }
+
+    // Check if user already exists (case-insensitive email check)
+    const userExists = await User.findOne({ email: cleanEmail });
 
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(409).json({ 
+        message: 'An account with this email address already exists. Please sign in instead.' 
+      });
     }
 
     const user = await User.create({
-      name,
-      email,
+      name: cleanName,
+      email: cleanEmail,
       password,
       role: role || 'student',
     });
@@ -47,9 +61,14 @@ export const registerUser = async (req, res) => {
         token: generateToken(user._id),
       });
     } else {
-      res.status(400).json({ message: 'Invalid user data' });
+      res.status(400).json({ message: 'Invalid user data provided.' });
     }
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ 
+        message: 'An account with this email address already exists. Please sign in instead.' 
+      });
+    }
     res.status(500).json({ message: error.message });
   }
 };

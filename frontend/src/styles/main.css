@@ -89,22 +89,44 @@ button, input, textarea, select {
   }
 }
 
-/* Glassmorphic Cards */
-.glass-card {
-  background: rgba(12, 16, 26, 0.65) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: var(--border-radius-lg);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+/* Glassmorphic & Universal Pitch-Black Cards */
+.glass-card,
+.premium-card,
+.stat-card,
+.dashboard-card,
+.job-card,
+.forum-card,
+.event-card,
+.assessment-card,
+.interview-card,
+.application-card,
+.profile-card,
+.card {
+  background: rgba(8, 12, 22, 0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
   padding: 1.5rem;
-  transition: border-color var(--transition-normal);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease !important;
   position: relative;
 }
 
-.glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  box-shadow: none !important;
+.glass-card:hover,
+.premium-card:hover,
+.stat-card:hover,
+.dashboard-card:hover,
+.job-card:hover,
+.forum-card:hover,
+.event-card:hover,
+.assessment-card:hover,
+.interview-card:hover,
+.application-card:hover,
+.profile-card:hover,
+.card:hover {
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 16px rgba(59, 130, 246, 0.15) !important;
 }
 
 /* Buttons */

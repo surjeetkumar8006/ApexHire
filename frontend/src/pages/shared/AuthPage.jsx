@@ -35,9 +35,12 @@ const AuthPage = ({ onBack }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     setFormError('');
 
-    if (!email || !password) {
+    const cleanEmail = email ? email.trim() : '';
+
+    if (!cleanEmail || !password) {
       const msg = 'Please fill in all required fields';
       setFormError(msg);
       addToast(msg, 'warning');
@@ -45,8 +48,8 @@ const AuthPage = ({ onBack }) => {
     }
 
     if (!isLogin) {
-      if (!name) {
-        const msg = 'Please enter your name';
+      if (!name || !name.trim()) {
+        const msg = 'Please enter your full name';
         setFormError(msg);
         addToast(msg, 'warning');
         return;
@@ -58,7 +61,7 @@ const AuthPage = ({ onBack }) => {
         return;
       }
       if (password.length < 6) {
-        const msg = 'Password must be at least 6 characters';
+        const msg = 'Password must be at least 6 characters long';
         setFormError(msg);
         addToast(msg, 'warning');
         return;
@@ -69,11 +72,11 @@ const AuthPage = ({ onBack }) => {
 
     try {
       if (isLogin) {
-        await login(email, password);
+        await login(cleanEmail, password);
         addToast('Logged in successfully!', 'success');
       } else {
-        await register(name, email, password, role);
-        addToast('Account created successfully!', 'success');
+        await register(name.trim(), cleanEmail, password, role);
+        addToast('Account created successfully! Welcome to ApexHire.', 'success');
       }
     } catch (err) {
       const errMsg = err.message || 'Authentication failed. Please check your credentials.';
@@ -190,7 +193,33 @@ const AuthPage = ({ onBack }) => {
 
           {formError && (
             <div style={styles.errorBanner}>
-              <span>⚠️ {formError}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                <span style={{ fontSize: '1rem' }}>⚠️</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{formError}</span>
+              </div>
+              {formError.includes('already exists') && !isLogin && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLogin(true);
+                    setFormError('');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    color: '#0b0f19',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '0.35rem 0.75rem',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    marginLeft: '0.5rem'
+                  }}
+                >
+                  Sign In Now →
+                </button>
+              )}
             </div>
           )}
 
