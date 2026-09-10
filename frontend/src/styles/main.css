@@ -125,8 +125,8 @@ button, input, textarea, select {
 .application-card:hover,
 .profile-card:hover,
 .card:hover {
-  border-color: rgba(59, 130, 246, 0.4) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 16px rgba(59, 130, 246, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 18px rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Buttons */

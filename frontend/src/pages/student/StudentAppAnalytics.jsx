@@ -54,7 +54,7 @@ const StudentAppAnalytics = () => {
       <header style={styles.header}>
         <div style={styles.titleRow}>
           <div style={styles.headerIconGlow}>
-            <BarChart2 size={28} color="#3b82f6" />
+            <BarChart2 size={28} color="#ffffff" />
           </div>
           <h1 style={styles.title}>Application Analytics</h1>
         </div>
@@ -64,8 +64,8 @@ const StudentAppAnalytics = () => {
       {/* Summary Cards */}
       <div className="analytics-grid">
         <div className="premium-card stagger-1" style={styles.summaryCard}>
-          <div style={{ ...styles.iconWrap, background: 'rgba(59, 130, 246, 0.12)', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
-            <Briefcase size={28} color="#3b82f6" />
+          <div style={{ ...styles.iconWrap, background: 'rgba(255, 255, 255, 0.08)', borderColor: 'rgba(255, 255, 255, 0.15)' }}>
+            <Briefcase size={28} color="#ffffff" />
           </div>
           <div>
             <h3 className="summary-val">{total}</h3>
@@ -106,8 +106,8 @@ const StudentAppAnalytics = () => {
         {/* Funnel Chart */}
         <div className="premium-card stagger-5" style={styles.chartCard}>
           <div style={styles.chartHeader}>
-            <div style={{ padding: '0.5rem', background: 'rgba(59, 130, 246, 0.12)', borderRadius: '8px' }}>
-              <PieChart size={20} color="#3b82f6" />
+            <div style={{ padding: '0.5rem', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '8px' }}>
+              <PieChart size={20} color="#ffffff" />
             </div>
             <h3 style={styles.chartTitle}>Conversion Funnel</h3>
           </div>
