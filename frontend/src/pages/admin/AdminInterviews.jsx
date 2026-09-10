@@ -518,14 +518,17 @@ const AdminInterviews = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(5, 8, 18, 0.75)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            zIndex: 1200,
+            background: 'rgba(5, 8, 18, 0.8)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            zIndex: 99999,
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
-            padding: '1.5rem 1rem',
+            paddingTop: '85px',
+            paddingBottom: '2rem',
+            paddingLeft: '1rem',
+            paddingRight: '1rem',
             overflowY: 'auto'
           }}
         >
@@ -534,12 +537,12 @@ const AdminInterviews = () => {
             onClick={e => e.stopPropagation()}
             style={{
               width: '100%',
-              maxWidth: '540px',
-              maxHeight: '90vh',
+              maxWidth: '680px',
+              maxHeight: 'calc(100vh - 110px)',
               background: 'var(--bg-surface-elevated)',
               border: '1px solid var(--border-color)',
               borderRadius: '20px',
-              boxShadow: '0 24px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1)',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
@@ -552,36 +555,38 @@ const AdminInterviews = () => {
             {/* Header */}
             <div 
               style={{
-                padding: '1.25rem 1.5rem',
+                padding: '1.25rem 1.75rem',
                 borderBottom: '1px solid var(--border-color)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                background: 'rgba(255, 255, 255, 0.02)'
+                background: 'rgba(255, 255, 255, 0.02)',
+                flexShrink: 0
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div 
                   style={{ 
-                    width: '42px', 
-                    height: '42px', 
+                    width: '44px', 
+                    height: '44px', 
                     borderRadius: '12px', 
                     background: 'rgba(255, 255, 255, 0.08)', 
-                    border: '1px solid rgba(255, 255, 255, 0.15)', 
+                    border: '1px solid rgba(255, 255, 255, 0.18)', 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center', 
                     color: '#ffffff',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
                   }}
                 >
-                  <Calendar size={20} color="#ffffff" />
+                  <Calendar size={22} color="#ffffff" />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.18rem', fontWeight: '800', color: '#ffffff', margin: 0, letterSpacing: '-0.2px', lineHeight: 1.25 }}>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#ffffff', margin: 0, letterSpacing: '-0.3px', lineHeight: 1.25 }}>
                     {isEditing ? 'Edit Interview Details' : 'Schedule Interview'}
                   </h3>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '3px 0 0 0' }}>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '3px 0 0 0' }}>
                     {isEditing ? 'Update student interview pipeline round details' : 'Organize and schedule a new interview for a student'}
                   </p>
                 </div>
@@ -594,8 +599,8 @@ const AdminInterviews = () => {
                   background: 'rgba(255, 255, 255, 0.06)',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '50%',
-                  width: '34px',
-                  height: '34px',
+                  width: '36px',
+                  height: '36px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -614,7 +619,7 @@ const AdminInterviews = () => {
                 }}
                 title="Close Modal"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
@@ -622,38 +627,47 @@ const AdminInterviews = () => {
             <form 
               onSubmit={handleSchedule} 
               style={{
-                padding: '1.5rem',
+                padding: '1.75rem',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1.25rem',
+                gap: '1.35rem',
                 overflowY: 'auto',
                 flexGrow: 1
               }}
             >
               {/* Select Student */}
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'block' }}>
+                <label className="form-label font-bold" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.45rem', display: 'block' }}>
                   Select Student *
                 </label>
-                <div style={{ position: 'relative' }}>
-                  <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'var(--bg-base)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '12px',
+                  padding: '0 0.85rem',
+                  height: '46px',
+                  width: '100%'
+                }}>
+                  <User size={18} style={{ color: 'var(--text-muted)', flexShrink: 0, marginRight: '0.65rem' }} />
                   <select
-                    className="form-select"
                     style={{ 
-                      paddingLeft: '2.6rem',
-                      background: 'var(--bg-base)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '10px',
+                      background: 'transparent',
+                      border: 'none',
                       color: 'var(--text-primary)',
                       fontSize: '0.9rem',
-                      height: '44px'
+                      outline: 'none',
+                      width: '100%',
+                      height: '100%',
+                      cursor: 'pointer'
                     }}
                     value={studentId}
                     onChange={e => setStudentId(e.target.value)}
                     required
                   >
                     {students.map(std => (
-                      <option key={std.user?._id} value={std.user?._id}>
+                      <option key={std.user?._id} value={std.user?._id} style={{ background: '#0d111c', color: '#ffffff' }}>
                         {std.user?.name} ({std.user?.email})
                       </option>
                     ))}
@@ -664,209 +678,341 @@ const AdminInterviews = () => {
               {/* Optional Job Applications Dropdown */}
               {studentApps.length > 0 && (
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'block' }}>
+                  <label className="form-label font-bold" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.45rem', display: 'block' }}>
                     Select Applied Position (Auto-fills Details)
                   </label>
-                  <select
-                    className="form-select"
-                    style={{ 
-                      background: 'var(--bg-base)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '10px',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                      height: '44px'
-                    }}
-                    value={selectedAppId}
-                    onChange={e => {
-                      const appId = e.target.value;
-                      setSelectedAppId(appId);
-                      const selectedApp = applications.find(app => app._id === appId);
-                      if (selectedApp) {
-                        setCompany(selectedApp.job?.company || '');
-                        setRole(selectedApp.job?.title || '');
-                      }
-                    }}
-                  >
-                    {studentApps.map(app => (
-                      <option key={app._id} value={app._id}>
-                        {app.job?.title} at {app.job?.company} ({app.status})
-                      </option>
-                    ))}
-                  </select>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'var(--bg-base)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '0 0.85rem',
+                    height: '46px',
+                    width: '100%'
+                  }}>
+                    <select
+                      style={{ 
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.9rem',
+                        outline: 'none',
+                        width: '100%',
+                        height: '100%',
+                        cursor: 'pointer'
+                      }}
+                      value={selectedAppId}
+                      onChange={e => {
+                        const appId = e.target.value;
+                        setSelectedAppId(appId);
+                        const selectedApp = applications.find(app => app._id === appId);
+                        if (selectedApp) {
+                          setCompany(selectedApp.job?.company || '');
+                          setRole(selectedApp.job?.title || '');
+                        }
+                      }}
+                    >
+                      {studentApps.map(app => (
+                        <option key={app._id} value={app._id} style={{ background: '#0d111c', color: '#ffffff' }}>
+                          {app.job?.title} at {app.job?.company} ({app.status})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               )}
 
               {/* Company & Role */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'block' }}>
+                  <label className="form-label font-bold" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.45rem', display: 'block' }}>
                     Company Name *
                   </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. Google"
-                    value={company}
-                    onChange={e => setCompany(e.target.value)}
-                    required
-                    style={{
-                      background: 'var(--bg-base)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '10px',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                      padding: '0.65rem 0.9rem',
-                      height: '44px'
-                    }}
-                  />
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'var(--bg-base)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '0 0.85rem',
+                    height: '46px',
+                    width: '100%'
+                  }}>
+                    <input
+                      type="text"
+                      placeholder="e.g. Google"
+                      value={company}
+                      onChange={e => setCompany(e.target.value)}
+                      required
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.9rem',
+                        outline: 'none',
+                        width: '100%',
+                        height: '100%'
+                      }}
+                    />
+                  </div>
                 </div>
+
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'block' }}>
+                  <label className="form-label font-bold" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.45rem', display: 'block' }}>
                     Role Title *
                   </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. Frontend Engineer"
-                    value={role}
-                    onChange={e => setRole(e.target.value)}
-                    required
-                    style={{
-                      background: 'var(--bg-base)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '10px',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                      padding: '0.65rem 0.9rem',
-                      height: '44px'
-                    }}
-                  />
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'var(--bg-base)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '0 0.85rem',
+                    height: '46px',
+                    width: '100%'
+                  }}>
+                    <input
+                      type="text"
+                      placeholder="e.g. Frontend Engineer"
+                      value={role}
+                      onChange={e => setRole(e.target.value)}
+                      required
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.9rem',
+                        outline: 'none',
+                        width: '100%',
+                        height: '100%'
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Date & Time */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'block' }}>
+                  <label className="form-label font-bold" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.45rem', display: 'block' }}>
                     Date *
                   </label>
-                  <div style={{ position: 'relative' }}>
-                    <Calendar size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'var(--bg-base)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '0 0.85rem',
+                    height: '46px',
+                    width: '100%'
+                  }}>
+                    <Calendar size={18} style={{ color: 'var(--text-muted)', flexShrink: 0, marginRight: '0.65rem' }} />
                     <input 
                       type="date" 
-                      className="form-input" 
-                      style={{ 
-                        paddingLeft: '2.6rem',
-                        background: 'var(--bg-base)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '10px',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.9rem',
-                        height: '44px'
-                      }} 
                       value={date} 
                       onChange={e => setDate(e.target.value)} 
                       required 
+                      style={{ 
+                        background: 'transparent', 
+                        border: 'none', 
+                        color: 'var(--text-primary)', 
+                        fontSize: '0.9rem', 
+                        outline: 'none', 
+                        width: '100%', 
+                        height: '100%',
+                        colorScheme: 'dark'
+                      }} 
                     />
                   </div>
+
+                  {/* Quick Date Select Presets */}
+                  <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.45rem', flexWrap: 'wrap' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => setDate(new Date().toISOString().split('T')[0])}
+                      style={{ fontSize: '0.7rem', padding: '0.2rem 0.55rem', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                      Today
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setDate(new Date(Date.now() + 86400000).toISOString().split('T')[0])}
+                      style={{ fontSize: '0.7rem', padding: '0.2rem 0.55rem', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                      Tomorrow
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setDate(new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0])}
+                      style={{ fontSize: '0.7rem', padding: '0.2rem 0.55rem', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                      +7 Days
+                    </button>
+                  </div>
                 </div>
+
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'block' }}>
+                  <label className="form-label font-bold" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.45rem', display: 'block' }}>
                     Time *
                   </label>
-                  <div style={{ position: 'relative' }}>
-                    <Clock size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'var(--bg-base)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '0 0.85rem',
+                    height: '46px',
+                    width: '100%'
+                  }}>
+                    <Clock size={18} style={{ color: 'var(--text-muted)', flexShrink: 0, marginRight: '0.65rem' }} />
                     <input 
                       type="text" 
-                      className="form-input" 
                       placeholder="e.g. 10:00 AM" 
-                      style={{ 
-                        paddingLeft: '2.6rem',
-                        background: 'var(--bg-base)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '10px',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.9rem',
-                        height: '44px'
-                      }} 
                       value={time} 
                       onChange={e => setTime(e.target.value)} 
                       required 
+                      style={{ 
+                        background: 'transparent', 
+                        border: 'none', 
+                        color: 'var(--text-primary)', 
+                        fontSize: '0.9rem', 
+                        outline: 'none', 
+                        width: '100%', 
+                        height: '100%'
+                      }} 
                     />
+                  </div>
+
+                  {/* Quick Time Select Presets */}
+                  <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.45rem', flexWrap: 'wrap' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => setTime('10:00 AM')}
+                      style={{ fontSize: '0.7rem', padding: '0.2rem 0.55rem', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                      10:00 AM
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setTime('02:00 PM')}
+                      style={{ fontSize: '0.7rem', padding: '0.2rem 0.55rem', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                      02:00 PM
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setTime('04:00 PM')}
+                      style={{ fontSize: '0.7rem', padding: '0.2rem 0.55rem', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                      04:00 PM
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Round Type & Status */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'block' }}>
+                  <label className="form-label font-bold" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.45rem', display: 'block' }}>
                     Round Type
                   </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. Technical Round 1"
-                    value={type}
-                    onChange={e => setType(e.target.value)}
-                    style={{
-                      background: 'var(--bg-base)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '10px',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                      padding: '0.65rem 0.9rem',
-                      height: '44px'
-                    }}
-                  />
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'var(--bg-base)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '0 0.85rem',
+                    height: '46px',
+                    width: '100%'
+                  }}>
+                    <input
+                      type="text"
+                      placeholder="e.g. Technical Round 1"
+                      value={type}
+                      onChange={e => setType(e.target.value)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.9rem',
+                        outline: 'none',
+                        width: '100%',
+                        height: '100%'
+                      }}
+                    />
+                  </div>
                 </div>
+
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'block' }}>
+                  <label className="form-label font-bold" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.45rem', display: 'block' }}>
                     Status
                   </label>
-                  <select
-                    className="form-select"
-                    style={{
-                      background: 'var(--bg-base)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '10px',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                      height: '44px'
-                    }}
-                    value={status}
-                    onChange={e => setStatus(e.target.value)}
-                  >
-                    <option value="Scheduled">Scheduled</option>
-                    <option value="Requested">Requested</option>
-                    <option value="Completed">Completed</option>
-                  </select>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    background: 'var(--bg-base)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '0 0.85rem',
+                    height: '46px',
+                    width: '100%'
+                  }}>
+                    <select
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.9rem',
+                        outline: 'none',
+                        width: '100%',
+                        height: '100%',
+                        cursor: 'pointer'
+                      }}
+                      value={status}
+                      onChange={e => setStatus(e.target.value)}
+                    >
+                      <option value="Scheduled" style={{ background: '#0d111c', color: '#ffffff' }}>Scheduled</option>
+                      <option value="Requested" style={{ background: '#0d111c', color: '#ffffff' }}>Requested</option>
+                      <option value="Completed" style={{ background: '#0d111c', color: '#ffffff' }}>Completed</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
               {/* Meeting URL */}
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', display: 'block' }}>
+                <label className="form-label font-bold" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.45rem', display: 'block' }}>
                   Meeting URL
                 </label>
-                <div style={{ position: 'relative' }}>
-                  <Video size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'var(--bg-base)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '12px',
+                  padding: '0 0.85rem',
+                  height: '46px',
+                  width: '100%'
+                }}>
+                  <Video size={18} style={{ color: 'var(--text-muted)', flexShrink: 0, marginRight: '0.65rem' }} />
                   <input 
                     type="url" 
-                    className="form-input" 
                     placeholder="https://zoom.us/j/123456789" 
-                    style={{ 
-                      paddingLeft: '2.6rem',
-                      background: 'var(--bg-base)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '10px',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                      height: '44px'
-                    }} 
                     value={link} 
                     onChange={e => setLink(e.target.value)} 
+                    style={{ 
+                      background: 'transparent', 
+                      border: 'none', 
+                      color: 'var(--text-primary)', 
+                      fontSize: '0.9rem', 
+                      outline: 'none', 
+                      width: '100%', 
+                      height: '100%'
+                    }} 
                   />
                 </div>
               </div>
@@ -877,25 +1023,25 @@ const AdminInterviews = () => {
                 className="btn" 
                 style={{ 
                   width: '100%', 
-                  marginTop: '0.5rem', 
-                  padding: '0.8rem 1rem', 
-                  fontSize: '0.92rem', 
+                  marginTop: '0.75rem', 
+                  padding: '0.85rem 1rem', 
+                  fontSize: '0.95rem', 
                   fontWeight: '800',
                   background: '#ffffff',
                   color: '#0b0f19',
                   borderRadius: '12px',
                   border: 'none',
-                  boxShadow: '0 4px 16px rgba(255, 255, 255, 0.25)',
+                  boxShadow: '0 4px 20px rgba(255, 255, 255, 0.3)',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 255, 255, 0.35)';
+                  e.currentTarget.style.boxShadow = '0 6px 24px rgba(255, 255, 255, 0.4)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 255, 255, 0.25)';
+                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 255, 255, 0.3)';
                 }}
               >
                 {isEditing ? 'Save Changes' : 'Confirm Schedule & Send Invite'}
