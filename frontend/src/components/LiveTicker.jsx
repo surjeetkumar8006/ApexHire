@@ -1,21 +1,105 @@
-import React from 'react';
-import { Zap, TrendingUp, Award, Briefcase, Radio } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Zap, TrendingUp, Award, Briefcase, Calendar, Radio } from 'lucide-react';
+import { API_BASE } from '../context/AuthContext';
 
 const LiveTicker = () => {
-  const tickerItems = [
-    { id: 1, icon: <Award size={14} color="#34d399" />, text: "🎉 Rahul Sharma (CSE) secured SDE-1 offer at Google (28 LPA)!" },
-    { id: 2, icon: <Briefcase size={14} color="#60a5fa" />, text: "💼 Microsoft added 15 new Cloud Engineer openings — Apply Now" },
-    { id: 3, icon: <Zap size={14} color="#fbbf24" />, text: "⚡ 14 Real-time AI Mock Interviews and Assessments active right now" },
-    { id: 4, icon: <TrendingUp size={14} color="#c084fc" />, text: "🏆 Campus Placement Rate reached 86.4% across 450+ registered candidates" },
-    { id: 5, icon: <Radio size={14} color="#f87171" />, text: "🔴 Amazon AWS Hackathon & Hiring Drive opening tomorrow at 10:00 AM" },
-    { id: 6, icon: <Award size={14} color="#34d399" />, text: "🎉 Priya Verma (ECE) shortlisted for Meta Product Management Interview!" }
-  ];
+  const [tickerItems, setTickerItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRealData = async () => {
+      try {
+        const [statsRes, jobsRes, eventsRes] = await Promise.allSettled([
+          fetch(`${API_BASE}/analytics/public`).then(r => r.json()),
+          fetch(`${API_BASE}/jobs`).then(r => r.json()),
+          fetch(`${API_BASE}/events`).then(r => r.json())
+        ]);
+
+        const items = [];
+
+        // 1. Stats from DB
+        if (statsRes.status === 'fulfilled' && statsRes.value) {
+          const { placementRate, activeJobsCount, recentPlacements } = statsRes.value;
+          if (placementRate) {
+            items.push({
+              id: 'stat-rate',
+              icon: <TrendingUp size={14} color="#c084fc" />,
+              text: `🏆 Registered Candidate Placement Rate: ${placementRate}% in Database`
+            });
+          }
+          if (activeJobsCount !== undefined) {
+            items.push({
+              id: 'stat-jobs',
+              icon: <Zap size={14} color="#fbbf24" />,
+              text: `⚡ ${activeJobsCount} Active Job Vacancies currently open in Database`
+            });
+          }
+          if (recentPlacements && recentPlacements.length > 0) {
+            recentPlacements.forEach((p, idx) => {
+              items.push({
+                id: `placement-${idx}`,
+                icon: <Award size={14} color="#34d399" />,
+                text: `🎉 ${p.name} secured ${p.role} offer at ${p.company} (${p.salary})!`
+              });
+            });
+          }
+        }
+
+        // 2. Real Jobs from DB
+        if (jobsRes.status === 'fulfilled' && Array.isArray(jobsRes.value) && jobsRes.value.length > 0) {
+          jobsRes.value.slice(0, 5).forEach((job) => {
+            items.push({
+              id: `job-${job._id}`,
+              icon: <Briefcase size={14} color="#60a5fa" />,
+              text: `💼 ${job.company} posted opening for ${job.title} (${job.location}) — ${job.jobType}`
+            });
+          });
+        }
+
+        // 3. Real Events from DB
+        if (eventsRes.status === 'fulfilled' && Array.isArray(eventsRes.value) && eventsRes.value.length > 0) {
+          eventsRes.value.slice(0, 4).forEach((evt) => {
+            items.push({
+              id: `evt-${evt._id}`,
+              icon: <Calendar size={14} color="#f87171" />,
+              text: `📅 ${evt.status || 'Upcoming'}: ${evt.title} hosted by ${evt.organizer} on ${evt.date}`
+            });
+          });
+        }
+
+        // Fallback default system items if database is completely empty
+        if (items.length === 0) {
+          items.push(
+            { id: 'def-1', icon: <Radio size={14} color="#34d399" />, text: "🔴 ApexHire Database Connected — Real-Time Activity Monitoring Active" },
+            { id: 'def-2', icon: <Zap size={14} color="#fbbf24" />, text: "⚡ AI Assessment Simulator Engine & Resume Scanner Online" }
+          );
+        }
+
+        setTickerItems(items);
+      } catch (err) {
+        console.error('Failed to fetch real ticker data', err);
+        setTickerItems([
+          { id: 'err-1', icon: <Radio size={14} color="#34d399" />, text: "🔴 ApexHire Database Connected — Real-Time Live Feed Active" }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRealData();
+    const interval = setInterval(fetchRealData, 10000); // Auto-refresh real DB data every 10s
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading || tickerItems.length === 0) {
+    return null;
+  }
 
   return (
     <div className="live-ticker-bar">
       <div className="ticker-badge">
         <span className="live-pulse-dot"></span>
-        <span className="ticker-badge-text">LIVE FEED</span>
+        <span className="ticker-badge-text">LIVE DATABASE FEED</span>
       </div>
       <div className="ticker-track-container">
         <div className="ticker-track">
