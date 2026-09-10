@@ -8,13 +8,49 @@ const Navbar = ({ onMenuClick }) => {
   const { addToast } = useNotification();
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [onlineCount, setOnlineCount] = useState(1);
   const dropdownRef = useRef(null);
+
+  // Generate or retrieve persistent browser session ID for accurate online counting
+  const getSessionId = () => {
+    try {
+      let sid = sessionStorage.getItem('apex_session_id');
+      if (!sid) {
+        sid = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+        sessionStorage.setItem('apex_session_id', sid);
+      }
+      return sid;
+    } catch (e) {
+      return 'sess_fallback_' + Date.now();
+    }
+  };
 
   useEffect(() => {
     // Enforce dark mode permanently
     document.body.classList.remove('light-theme');
     localStorage.setItem('theme', 'dark');
   }, []);
+
+  const sendHeartbeatAndFetchCount = async () => {
+    try {
+      const sessionId = getSessionId();
+      // 1. Send active heartbeat ping
+      fetch(`${API_BASE}/analytics/heartbeat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+      }).catch(() => {});
+
+      // 2. Fetch real-time online count
+      const res = await fetch(`${API_BASE}/analytics/online-count`);
+      if (res.ok) {
+        const data = await res.json();
+        setOnlineCount(data.onlineCount || 1);
+      }
+    } catch (err) {
+      console.error('Failed to update online count', err);
+    }
+  };
 
   const fetchNotifications = async () => {
     if (!user) return;
@@ -33,9 +69,13 @@ const Navbar = ({ onMenuClick }) => {
 
   useEffect(() => {
     fetchNotifications();
+    sendHeartbeatAndFetchCount();
 
-    // Poll for notifications every 4 seconds for real-time responsiveness
-    const interval = setInterval(fetchNotifications, 4000);
+    // Poll for notifications and active online count every 3 seconds for 100% real-time accuracy
+    const interval = setInterval(() => {
+      fetchNotifications();
+      sendHeartbeatAndFetchCount();
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [user]);
@@ -112,7 +152,7 @@ const Navbar = ({ onMenuClick }) => {
             color: 'var(--text-secondary)'
           }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399', display: 'inline-block' }}></span>
-            <span>Online</span>
+            <span>{onlineCount} {onlineCount === 1 ? 'User' : 'Users'} Online</span>
           </div>
           {/* Notification Icon */}
           <div style={styles.navIconContainer} ref={dropdownRef}>

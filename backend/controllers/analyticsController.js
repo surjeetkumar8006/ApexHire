@@ -201,3 +201,49 @@ export const getPublicStats = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// In-memory active session tracker for real-time online count
+const activeSessions = new Map();
+
+// @desc    Register heartbeat ping for online active session
+// @route   POST /api/analytics/heartbeat
+// @access  Public
+export const recordHeartbeat = async (req, res) => {
+  try {
+    const sessionId = req.body?.sessionId || req.headers['x-session-id'] || req.ip || 'session-default';
+    activeSessions.set(sessionId, Date.now());
+
+    // Clean up stale sessions inactive for more than 12 seconds
+    const now = Date.now();
+    for (const [id, lastSeen] of activeSessions.entries()) {
+      if (now - lastSeen > 12000) {
+        activeSessions.delete(id);
+      }
+    }
+
+    res.json({ success: true, onlineCount: activeSessions.size });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get real-time online count
+// @route   GET /api/analytics/online-count
+// @access  Public
+export const getOnlineCount = async (req, res) => {
+  try {
+    const now = Date.now();
+    let activeCount = 0;
+    for (const [id, lastSeen] of activeSessions.entries()) {
+      if (now - lastSeen <= 12000) {
+        activeCount++;
+      } else {
+        activeSessions.delete(id);
+      }
+    }
+
+    res.json({ onlineCount: Math.max(1, activeCount) });
+  } catch (error) {
+    res.status(500).json({ message: error.message, onlineCount: 1 });
+  }
+};
