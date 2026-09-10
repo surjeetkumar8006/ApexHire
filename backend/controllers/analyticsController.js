@@ -163,7 +163,10 @@ export const getPublicStats = async (req, res) => {
       ? Math.round((placedStudents.length / totalStudents) * 100) 
       : 95;
 
-    const activeJobsCount = await Job.countDocuments({ status: 'active' });
+    // Count all active or total job openings in DB
+    const activeJobsCount = await Job.countDocuments({ status: { $ne: 'closed' } });
+    const totalJobs = await Job.countDocuments({});
+    const realJobsCount = activeJobsCount > 0 ? activeJobsCount : totalJobs;
 
     const profiles = await Profile.find({});
     const scoredProfiles = profiles.filter(p => p.aiFeedback?.score > 0);
@@ -193,7 +196,7 @@ export const getPublicStats = async (req, res) => {
 
     res.json({
       placementRate: placementRate > 0 ? placementRate : 95,
-      activeJobsCount: activeJobsCount > 0 ? activeJobsCount : 12,
+      activeJobsCount: realJobsCount,
       avgResumeScore: avgScore > 0 ? avgScore : 88,
       recentPlacements: recentPlacements.length > 0 ? recentPlacements : fallbackPlacements
     });

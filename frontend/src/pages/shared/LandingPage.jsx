@@ -908,20 +908,20 @@ const LandingPage = ({ onGetStarted }) => {
       </section>
 
       {/* 3.8 FEATURED LIVE PLACEMENT DRIVES (NEW SECTION) */}
-      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 4.5rem auto', padding: '0 1rem' }}>
-        <div className="text-center mb-5">
-          <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3 py-1.5 rounded-pill d-inline-flex align-items-center gap-1 mb-2">
+      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 6rem auto', padding: '0 1rem' }}>
+        <div className="text-center" style={{ marginBottom: '3rem' }}>
+          <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3.5 py-2 rounded-pill d-inline-flex align-items-center gap-1.5" style={{ marginBottom: '1.25rem' }}>
             <Briefcase size={14} /> Active Campus Hiring Drives 2026
           </span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#ffffff', margin: '0 0 0.85rem 0' }}>
             Featured Placement Openings
           </h2>
-          <p className="text-xs text-muted mt-2" style={{ maxWidth: '600px', margin: '0.5rem auto 0 auto' }}>
+          <p className="text-xs text-muted" style={{ maxWidth: '600px', margin: '0 auto' }}>
             Top tech companies hiring active candidates with real-time match scoring:
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.75rem' }}>
           {liveJobs.map((job, idx) => (
             <div 
               key={idx}
@@ -973,20 +973,20 @@ const LandingPage = ({ onGetStarted }) => {
       </section>
 
       {/* 3.9 VERIFIED STUDENT SUCCESS TESTIMONIALS (NEW SECTION) */}
-      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 4.5rem auto', padding: '0 1rem' }}>
-        <div className="text-center mb-5">
-          <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3 py-1.5 rounded-pill d-inline-flex align-items-center gap-1 mb-2">
+      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 6rem auto', padding: '0 1rem' }}>
+        <div className="text-center" style={{ marginBottom: '3rem' }}>
+          <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3.5 py-2 rounded-pill d-inline-flex align-items-center gap-1.5" style={{ marginBottom: '1.25rem' }}>
             <Star size={14} fill="#ffffff" color="#ffffff" /> Alumni Placement Success Stories
           </span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#ffffff', margin: '0 0 0.85rem 0' }}>
             Hear From Our Placed Graduates
           </h2>
-          <p className="text-xs text-muted mt-2" style={{ maxWidth: '600px', margin: '0.5rem auto 0 auto' }}>
+          <p className="text-xs text-muted" style={{ maxWidth: '600px', margin: '0 auto' }}>
             Real candidates placed at leading global technology companies:
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.75rem' }}>
           {studentTestimonials.map((item, idx) => (
             <div 
               key={idx}
