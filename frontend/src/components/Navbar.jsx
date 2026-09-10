@@ -112,7 +112,7 @@ const Navbar = ({ onMenuClick }) => {
             color: 'var(--text-secondary)'
           }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399', display: 'inline-block' }}></span>
-            <span>18 Users Online</span>
+            <span>Online</span>
           </div>
           {/* Notification Icon */}
           <div style={styles.navIconContainer} ref={dropdownRef}>
