@@ -1325,10 +1325,10 @@ body.light-theme .form-select {
   display: flex;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-color);
-  padding: 5px;
+  padding: 6px;
   border-radius: 50px;
-  gap: 0.35rem;
-  max-width: 860px;
+  gap: 0.4rem;
+  max-width: 960px !important;
   width: 100%;
 }
 
@@ -1336,7 +1336,7 @@ body.light-theme .form-select {
   .showcase-tabs {
     flex-direction: column;
     border-radius: 16px;
-    max-width: 100%;
+    max-width: 100% !important;
     padding: 8px;
     gap: 0.5rem;
   }
@@ -1350,18 +1350,24 @@ body.light-theme .form-select {
 
 .showcase-tab-btn {
   flex: 1;
-  padding: 0.65rem 1rem;
+  padding: 0.65rem 1rem !important;
   border-radius: 50px;
-  font-size: 0.86rem;
-  font-weight: 700;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.45rem !important;
   white-space: nowrap !important;
+}
+
+.showcase-tab-btn span {
+  white-space: nowrap !important;
+  display: inline-block !important;
+  text-align: center;
 }
 
 .showcase-tab-btn:hover {
