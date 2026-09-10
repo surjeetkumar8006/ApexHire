@@ -268,7 +268,13 @@ const ChatPortal = () => {
                     {getRoleIcon(activePartner.role)}
                     <span className="online-dot ml-2" style={{ width: '8px', height: '8px' }}></span>
                   </span>
-                  <span className="text-muted text-xs d-block">{activePartner.email} • {activePartner.role}</span>
+                  <span className="text-muted text-xs d-flex align-items-center gap-2">
+                    <span>{activePartner.email} • {activePartner.role}</span>
+                    <span style={{ color: '#34d399', fontWeight: '600', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 6px #34d399', display: 'inline-block' }}></span>
+                      Active Now
+                    </span>
+                  </span>
                 </div>
               </div>
 

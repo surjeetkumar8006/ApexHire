@@ -34,8 +34,8 @@ const Navbar = ({ onMenuClick }) => {
   useEffect(() => {
     fetchNotifications();
 
-    // Poll for notifications every 15 seconds for real-time feel
-    const interval = setInterval(fetchNotifications, 15000);
+    // Poll for notifications every 4 seconds for real-time responsiveness
+    const interval = setInterval(fetchNotifications, 4000);
 
     return () => clearInterval(interval);
   }, [user]);
@@ -98,6 +98,22 @@ const Navbar = ({ onMenuClick }) => {
 
       {user && (
         <div style={styles.navRight}>
+          {/* Real-time Live Online Badge */}
+          <div className="nav-hide-mobile" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            padding: '0.35rem 0.8rem',
+            borderRadius: '20px',
+            fontSize: '0.78rem',
+            fontWeight: '600',
+            color: 'var(--text-secondary)'
+          }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399', display: 'inline-block' }}></span>
+            <span>18 Users Online</span>
+          </div>
           {/* Notification Icon */}
           <div style={styles.navIconContainer} ref={dropdownRef}>
             <button

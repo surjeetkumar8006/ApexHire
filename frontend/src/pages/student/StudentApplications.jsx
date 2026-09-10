@@ -2,6 +2,88 @@ import React, { useState, useEffect } from 'react';
 import { useAuth, API_BASE } from '../../context/AuthContext';
 import { FileCheck, Clock, CheckCircle2, AlertCircle, Building, MapPin, Briefcase } from 'lucide-react';
 
+const ApplicationStepper = ({ status }) => {
+  const steps = [
+    { label: 'Applied', key: 'Applied' },
+    { label: 'Reviewing', key: 'Reviewing' },
+    { label: 'Shortlisted', key: 'Shortlisted' },
+    { label: 'Interview', key: 'Interviewing' },
+    { label: 'Offered', key: 'Offered' }
+  ];
+
+  const getStepState = (stepKey, index) => {
+    if (status === 'Rejected') {
+      return index === 0 ? 'completed' : 'rejected';
+    }
+    const order = ['Applied', 'Reviewing', 'Shortlisted', 'Interviewing', 'Offered'];
+    const currentIdx = order.indexOf(status);
+    if (index < currentIdx) return 'completed';
+    if (index === currentIdx) return 'active';
+    return 'pending';
+  };
+
+  return (
+    <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: '50%', left: '5%', right: '5%', height: '2px', background: 'rgba(255, 255, 255, 0.12)', zIndex: 1, transform: 'translateY(-12px)' }}></div>
+        
+        {steps.map((step, idx) => {
+          const state = getStepState(step.key, idx);
+          const isDone = state === 'completed';
+          const isActive = state === 'active';
+          const isRejected = state === 'rejected';
+
+          return (
+            <div key={step.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2, position: 'relative' }}>
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.75rem',
+                fontWeight: '800',
+                background: isActive 
+                  ? '#ffffff' 
+                  : isDone 
+                  ? 'rgba(16, 185, 129, 0.2)' 
+                  : isRejected 
+                  ? 'rgba(239, 68, 68, 0.1)' 
+                  : 'rgba(255, 255, 255, 0.06)',
+                color: isActive 
+                  ? '#0b0f19' 
+                  : isDone 
+                  ? '#34d399' 
+                  : isRejected 
+                  ? '#f87171' 
+                  : 'var(--text-muted)',
+                border: isActive 
+                  ? '2px solid #ffffff' 
+                  : isDone 
+                  ? '1.5px solid #34d399' 
+                  : '1.5px solid rgba(255, 255, 255, 0.15)',
+                boxShadow: isActive ? '0 0 14px rgba(255, 255, 255, 0.4)' : 'none',
+                transition: 'all 0.3s ease'
+              }}>
+                {isDone ? '✓' : idx + 1}
+              </div>
+              <span style={{
+                fontSize: '0.72rem',
+                fontWeight: isActive ? '700' : '500',
+                color: isActive ? '#ffffff' : isDone ? '#34d399' : 'var(--text-muted)',
+                marginTop: '0.4rem'
+              }}>
+                {step.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const StudentApplications = () => {
   const { authHeader } = useAuth();
   const [applications, setApplications] = useState([]);
@@ -76,19 +158,8 @@ const StudentApplications = () => {
                 </div>
               </div>
 
-              <div style={styles.pipeline}>
-                <div style={{ ...styles.pipelineProgress, width: getPipelineWidth(app.status) }}></div>
-                <span style={{ ...styles.pipelineNode, ...(app.status !== 'Rejected' ? styles.nodeActive : styles.nodeRejected) }} title="Applied"></span>
-                <span style={{ ...styles.pipelineNode, ...(['Reviewing', 'Shortlisted', 'Interviewing', 'Offered'].includes(app.status) ? styles.nodeActive : {}) }} title="Reviewing"></span>
-                <span style={{ ...styles.pipelineNode, ...(['Shortlisted', 'Interviewing', 'Offered'].includes(app.status) ? styles.nodeActive : {}) }} title="Shortlisted"></span>
-                <span style={{ ...styles.pipelineNode, ...(['Offered'].includes(app.status) ? styles.nodeActive : {}) }} title="Offered"></span>
-              </div>
-              <div style={styles.pipelineLabels}>
-                <span>Applied</span>
-                <span>Reviewing</span>
-                <span>Shortlisted</span>
-                <span>Offered</span>
-              </div>
+              {/* Interactive 5-Stage Live Application Pipeline Stepper */}
+              <ApplicationStepper status={app.status} />
 
               {app.feedback && (
                 <div style={styles.feedbackBox}>

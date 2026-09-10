@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload, Sparkles, BookOpen, GraduationCap, CheckCircle2, AlertCircle, Plus, Trash, Briefcase, Eye, Target, Activity, Clock, Code } from 'lucide-react';
 import { useAuth, API_BASE, BACKEND_URL } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
+import LiveTicker from '../../components/LiveTicker';
 
 const StudentDashboard = () => {
   const { user, authHeader } = useAuth();
@@ -472,6 +473,9 @@ const StudentDashboard = () => {
         <h1 style={styles.title}>Hello, {user.name} 👋</h1>
         <p style={styles.subtitle}>Unlock opportunities, optimize your resume, and monitor job matching progress.</p>
       </header>
+
+      {/* Real-time Live Ticker Marquee */}
+      <LiveTicker />
 
       {/* Verification status banner */}
       {profile && (

@@ -3,6 +3,59 @@ import { Calendar, Clock, Video, FileText, CheckCircle, ExternalLink } from 'luc
 import { useAuth, API_BASE } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 
+const InterviewCountdownBadge = ({ dateStr, timeStr }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+  const [isActiveNow, setIsActiveNow] = useState(false);
+
+  useEffect(() => {
+    const calculateTime = () => {
+      if (!dateStr) return;
+      const now = new Date();
+      let targetDate = new Date(`${dateStr} ${timeStr || '10:00 AM'}`);
+      if (isNaN(targetDate.getTime())) {
+        targetDate = new Date(dateStr);
+      }
+      const diffMs = targetDate - now;
+
+      if (diffMs <= 0 && diffMs >= -3600000) {
+        setIsActiveNow(true);
+        setTimeLeft('LIVE ROOM ACTIVE 🟢');
+      } else if (diffMs < -3600000) {
+        setIsActiveNow(false);
+        setTimeLeft('Interview Passed');
+      } else {
+        setIsActiveNow(false);
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diffMs % (1000 * 60)) / 1000);
+        setTimeLeft(`⏱️ Starts in: ${String(hours).padStart(2, '0')}h : ${String(mins).padStart(2, '0')}m : ${String(secs).padStart(2, '0')}s`);
+      }
+    };
+
+    calculateTime();
+    const interval = setInterval(calculateTime, 1000);
+    return () => clearInterval(interval);
+  }, [dateStr, timeStr]);
+
+  return (
+    <div style={{
+      fontSize: '0.75rem',
+      fontWeight: '700',
+      color: isActiveNow ? '#34d399' : '#ffffff',
+      background: isActiveNow ? 'rgba(52, 211, 153, 0.15)' : 'rgba(255, 255, 255, 0.08)',
+      border: `1px solid ${isActiveNow ? 'rgba(52, 211, 153, 0.4)' : 'rgba(255, 255, 255, 0.2)'}`,
+      padding: '0.35rem 0.75rem',
+      borderRadius: '20px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '0.35rem',
+      margin: '0.5rem 0'
+    }}>
+      <span>{timeLeft || 'Calculating...'}</span>
+    </div>
+  );
+};
+
 const StudentInterviews = () => {
   const { authHeader } = useAuth();
   const { addToast } = useNotification();
@@ -132,6 +185,10 @@ const StudentInterviews = () => {
                       <span>{interview.type}</span>
                     </div>
                   </div>
+
+                  {!isPastDate(interview.date) && (
+                    <InterviewCountdownBadge dateStr={interview.date} timeStr={interview.time} />
+                  )}
 
                   {isPastDate(interview.date) ? (
                     <button 
