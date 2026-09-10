@@ -387,18 +387,29 @@ const StudentMockInterviews = () => {
                 boxShadow: 'var(--shadow-sm)'
               }}
             >
-              <div className="d-flex align-items-center gap-2.5 mb-3 pb-3 border-bottom border-color w-100">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', width: '100%' }}>
                 <div 
-                  className="d-flex align-items-center justify-content-center rounded bg-primary-glow text-primary animate-pulse" 
-                  style={{ width: '40px', height: '40px', flexShrink: 0 }}
+                  style={{ 
+                    width: '42px', 
+                    height: '42px', 
+                    borderRadius: '12px', 
+                    background: 'rgba(255, 255, 255, 0.08)', 
+                    border: '1px solid rgba(255, 255, 255, 0.2)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    color: '#ffffff', 
+                    flexShrink: 0,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                  }}
                 >
-                  <Cpu size={20} />
+                  <Cpu size={22} color="#ffffff" />
                 </div>
                 <div>
-                  <h1 style={{ fontWeight: 600, fontSize: '1.25rem', letterSpacing: '-0.2px', margin: 0, color: 'var(--text-primary)' }}>
+                  <h1 style={{ fontWeight: '800', fontSize: '1.35rem', letterSpacing: '-0.3px', margin: 0, color: 'var(--text-primary)' }}>
                     AI Mock Interview Room
                   </h1>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: 0 }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: '4px 0 0 0' }}>
                     Select a target role below to start a simulated interview with real-time feedback and grading.
                   </p>
                 </div>
