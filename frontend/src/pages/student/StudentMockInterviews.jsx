@@ -190,11 +190,35 @@ const StudentMockInterviews = () => {
     }
   };
 
+  const [isPaused, setIsPaused] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const silenceTimerRef = useRef(null);
+
+  // Inactivity / Silence Detection (Prompt user after 15s if quiet)
+  useEffect(() => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+    }
+
+    if (stage === 'interview' && !interviewerSpeaking && !isPaused && !currentAnswer.trim()) {
+      silenceTimerRef.current = setTimeout(() => {
+        if (!currentAnswer.trim() && stage === 'interview' && !isPaused) {
+          const promptText = "Are you still there? Take your time to think, or click Repeat Question if you'd like me to read it again.";
+          addToast("Ava: Are you still there? Take your time!", "info");
+          speakQuestion(promptText);
+        }
+      }, 15000);
+    }
+
+    return () => {
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+    };
+  }, [stage, currentIdx, interviewerSpeaking, isPaused, currentAnswer]);
+
   // Conversational Voice System - Text to Speech (TTS)
   const speakQuestion = (text) => {
     window.speechSynthesis.cancel(); // Stop any pending speech
     if (isMuted) {
-      // If muted, wait 1.5 seconds to simulate a question being asked, then auto-record
       setTimeout(() => {
         if (useVoiceMode && stage === 'interview') {
           startSpeechRecognition();
@@ -204,6 +228,8 @@ const StudentMockInterviews = () => {
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.88; // Calm, clear, professional human pace ("aaram aaram se bole")
+    utterance.pitch = 1.0;
     utterance.onstart = () => setInterviewerSpeaking(true);
     utterance.onend = () => {
       setInterviewerSpeaking(false);
@@ -290,7 +316,7 @@ const StudentMockInterviews = () => {
         setAnswers(new Array(data.questions.length).fill(''));
         setCurrentIdx(0);
         setCurrentAnswer('');
-        setStage('interview');
+        setStage('lobby'); // Open pre-interview waiting lobby screen
       } else {
         addToast('Failed to generate interview questions. Try again.', 'error');
       }
@@ -298,6 +324,16 @@ const StudentMockInterviews = () => {
       addToast('Network error during interview setup.', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const launchInterviewFromLobby = () => {
+    setStage('interview');
+    if (useCamera) startWebcam();
+    if (questions.length > 0) {
+      const qObj = questions[0];
+      const qText = typeof qObj === 'string' ? qObj : qObj.question;
+      speakQuestion(`Welcome! Let's begin your ${type} interview for ${role} at ${company}. Here is your first question: ${qText}`);
     }
   };
 
@@ -581,6 +617,76 @@ const StudentMockInterviews = () => {
         </div>
       )}
 
+      {/* Pre-Interview Waiting Lobby */}
+      {stage === 'lobby' && (
+        <div className="row justify-content-center">
+          <div className="col-xl-9 col-lg-10">
+            <div className="glass-card p-4 text-center">
+              <div style={{ padding: '0.4rem 1.2rem', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }}></span>
+                <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#ffffff' }}>Pre-Interview Preparation Lobby</span>
+              </div>
+
+              <h2 style={{ fontSize: '1.65rem', fontWeight: '800', color: '#ffffff', marginBottom: '0.4rem' }}>
+                Ready for your {type} Interview for {role}?
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '600px', margin: '0 auto 1.5rem auto' }}>
+                Target Company: <strong style={{ color: '#ffffff' }}>{company}</strong> • 5 Industry-Level Questions • Calm Speech Rate (0.88x)
+              </p>
+
+              {/* Instructions Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', margin: '1.5rem 0', textAlign: 'left' }}>
+                <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.25rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: '700', color: '#ffffff', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Camera size={18} color="#ffffff" /> Media & Audio Checklist
+                  </h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <CheckCircle size={14} color="#34d399" /> <span>Microphone & Voice STT Engine Ready</span>
+                    </li>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <CheckCircle size={14} color="#34d399" /> <span>AI Voice (Ava) set to Calm & Steady Pace (0.88x)</span>
+                    </li>
+                    <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <CheckCircle size={14} color="#34d399" /> <span>Webcam Video Preview Enabled</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.25rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: '700', color: '#ffffff', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <HelpCircle size={18} color="#ffffff" /> Real-Time Interview Rules
+                  </h4>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                    • Ava will speak each question at a slow, clear pace.<br />
+                    • If you need time to think, click <strong>"Pause / Think"</strong>.<br />
+                    • If you're quiet for 15s, Ava will prompt: <em>"Are you still there?"</em>.<br />
+                    • Click <strong>"Start Interview"</strong> when you are ready.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1.5rem' }}>
+                <button 
+                  className="btn btn-outline" 
+                  onClick={() => setStage('setup')}
+                  style={{ padding: '0.8rem 1.75rem', borderRadius: '10px' }}
+                >
+                  ← Back to Roles
+                </button>
+                <button 
+                  className="btn btn-primary" 
+                  onClick={launchInterviewFromLobby}
+                  style={{ padding: '0.8rem 2.5rem', borderRadius: '10px', background: '#ffffff', color: '#0b0f19', fontWeight: '800', boxShadow: '0 4px 16px rgba(255, 255, 255, 0.3)' }}
+                >
+                  🚀 Start Technical Interview Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Active simulation console */}
       {stage === 'interview' && questions.length > 0 && (
         <div className="row justify-content-center">
@@ -595,18 +701,51 @@ const StudentMockInterviews = () => {
                   <span className="text-xs text-muted">
                     Question {currentIdx + 1} of {questions.length}
                   </span>
-                  {/* Speech volume / Mute indicator */}
-                  <button 
-                    onClick={() => {
-                      setIsMuted(!isMuted);
-                      window.speechSynthesis.cancel();
-                    }}
-                    className="p-2 rounded bg-surface-elevated text-muted hover:text-primary"
-                    style={{ display: 'inline-flex' }}
-                    title={isMuted ? "Unmute AI Voice" : "Mute AI Voice"}
-                  >
-                    {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                  </button>
+                  
+                  {/* Control Toolbar: Pause, Repeat, Hint */}
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                    <button 
+                      type="button"
+                      onClick={() => setIsPaused(!isPaused)}
+                      className={`btn btn-xs ${isPaused ? 'btn-warning' : 'btn-outline'}`}
+                      style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem' }}
+                      title={isPaused ? "Resume Interview" : "Pause Interview Timer"}
+                    >
+                      {isPaused ? '▶ Resume' : '⏸ Pause / Think'}
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => speakQuestion(questions[currentIdx]?.question || questions[currentIdx])}
+                      className="btn btn-xs btn-outline"
+                      style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem' }}
+                      title="Re-speak question at calm pace"
+                    >
+                      🔄 Repeat Question
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => setShowHint(!showHint)}
+                      className="btn btn-xs btn-outline"
+                      style={{ fontSize: '0.75rem', padding: '0.35rem 0.7rem' }}
+                      title="Show Technical Hint"
+                    >
+                      💡 Hint
+                    </button>
+
+                    <button 
+                      onClick={() => {
+                        setIsMuted(!isMuted);
+                        window.speechSynthesis.cancel();
+                      }}
+                      className="p-2 rounded bg-surface-elevated text-muted hover:text-primary"
+                      style={{ display: 'inline-flex' }}
+                      title={isMuted ? "Unmute AI Voice" : "Mute AI Voice"}
+                    >
+                      {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
