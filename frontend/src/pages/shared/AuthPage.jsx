@@ -6,8 +6,8 @@ import { Lock, Mail, User, ArrowLeft, GraduationCap, Shield, Sparkles, CheckCirc
 
 const companies = [
   { name: 'Google', icon: 'G' },
-  { name: 'Microsoft', icon: 'M' },
-  { name: 'Amazon', icon: 'A' },
+  { name: 'Microsoft', icon: 'ms' },
+  { name: 'Amazon', icon: 'a' },
   { name: 'Meta', icon: '∞' },
   { name: 'Netflix', icon: 'N' },
   { name: 'Adobe', icon: 'A' },
@@ -93,52 +93,125 @@ const AuthPage = ({ onBack }) => {
       <div className="auth-brand-side">
         <div className="auth-brand-overlay"></div>
         <div className="auth-brand-content">
-          <div style={styles.logoBox}>
-            <Sparkles size={24} color="#ffffff" />
-            <span style={styles.logoText}>ApexHire Portal</span>
+
+
+          <div className="auth-live-stat-pill" style={{
+            background: 'rgba(15, 23, 42, 0.75)',
+            border: '1px solid rgba(245, 158, 11, 0.45)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '50px',
+            padding: '0.35rem 0.95rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.55rem',
+            width: 'fit-content',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.6)'
+          }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#84cc16', boxShadow: '0 0 8px #84cc16' }}></span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ffffff', letterSpacing: '0.1px' }}>Gemini AI Resume & Voice Mock Pipeline Active</span>
           </div>
 
-          <div className="auth-live-stat-pill">
-            <span className="auth-live-stat-dot"></span>
-            <span>Real-Time AI Resume & ATS Pipeline Active</span>
-          </div>
-
-          <div style={styles.heroText}>
-            <h2 style={styles.brandQuote}>Connecting Talent with Enterprise Opportunities</h2>
-            <p style={styles.brandSub}>
-              A comprehensive campus placement ecosystem powered by AI analysis, dynamic application mapping, and real-time coordinator review channels.
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <h2 style={{ fontSize: '2.15rem', fontWeight: '800', lineHeight: '1.25', letterSpacing: '-0.5px', color: '#ffffff', margin: 0, textShadow: '0 2px 12px rgba(0, 0, 0, 0.9)' }}>
+              Accelerate Your Placement Career With <br />
+              AI-Powered Intelligence
+            </h2>
+            <p style={{ fontSize: '0.92rem', color: 'rgba(255, 255, 255, 0.85)', lineHeight: '1.55', margin: 0, textShadow: '0 1px 8px rgba(0, 0, 0, 0.8)' }}>
+              Experience the next generation of campus recruitment: Gemini AI resume feedback, realistic voice mock interviews with calm speech rate, 5-stage live application tracking, and direct recruiter connections.
             </p>
           </div>
 
-          <div style={styles.featuresList}>
-            <div style={styles.featureItem}>
-              <CheckCircle size={18} color="#ffffff" />
-              <span>AI Resume Parser & Assessment</span>
+          {/* Quick Stats Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginTop: '0.1rem', marginBottom: '0.1rem' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(16, 28, 48, 0.85) 0%, rgba(9, 17, 32, 0.92) 100%)',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
+              boxShadow: '0 8px 20px rgba(0, 0, 0, 0.4)',
+              padding: '0.75rem 1rem',
+              borderRadius: '12px',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <svg style={{ position: 'absolute', right: '-10px', top: '-10px', height: '110%', width: '110px', opacity: 0.45, pointerEvents: 'none' }} viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0 80 Q 40 10, 100 50 T 200 20" fill="none" stroke="#f59e0b" strokeWidth="1.5" />
+                <path d="M0 60 Q 50 90, 100 30 T 200 70" fill="none" stroke="#38bdf8" strokeWidth="1.5" />
+                <path d="M0 40 Q 30 70, 100 20 T 200 90" fill="none" stroke="#f59e0b" strokeWidth="1.2" />
+              </svg>
+              <h4 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#ffffff', margin: 0, letterSpacing: '-0.5px' }}>₹65 LPA</h4>
+              <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.65)', margin: '3px 0 0 0', fontWeight: '500' }}>Highest Placement Offer</p>
             </div>
-            <div style={styles.featureItem}>
-              <CheckCircle size={18} color="#ffffff" />
-              <span>Unified Placement Application Pipeline</span>
-            </div>
-            <div style={styles.featureItem}>
-              <CheckCircle size={18} color="#ffffff" />
-              <span>Real-Time Notifications & Announcements</span>
+
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(16, 28, 48, 0.85) 0%, rgba(9, 17, 32, 0.92) 100%)',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
+              boxShadow: '0 8px 20px rgba(0, 0, 0, 0.4)',
+              padding: '0.75rem 1rem',
+              borderRadius: '12px',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <svg style={{ position: 'absolute', right: '-10px', top: '-10px', height: '110%', width: '110px', opacity: 0.45, pointerEvents: 'none' }} viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0 80 Q 40 10, 100 50 T 200 20" fill="none" stroke="#f59e0b" strokeWidth="1.5" />
+                <path d="M0 60 Q 50 90, 100 30 T 200 70" fill="none" stroke="#38bdf8" strokeWidth="1.5" />
+                <path d="M0 40 Q 30 70, 100 20 T 200 90" fill="none" stroke="#f59e0b" strokeWidth="1.2" />
+              </svg>
+              <h4 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#ffffff', margin: 0, letterSpacing: '-0.5px' }}>95%</h4>
+              <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.65)', margin: '3px 0 0 0', fontWeight: '500' }}>Verified Student Success</p>
             </div>
           </div>
 
-          <div className="auth-companies-section">
-            <span className="auth-companies-title">Trusted By Recruiting Teams At</span>
-            <div className="auth-companies-grid">
-              {companies.map((c, i) => (
-                <div key={i} className="auth-company-chip">
-                  <span className="auth-company-icon">{c.icon}</span>
-                  <span className="auth-company-name">{c.name}</span>
-                </div>
-              ))}
+          {/* Feature Highlights */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.88rem', color: 'rgba(255, 255, 255, 0.95)', fontWeight: '500', textShadow: '0 1px 6px rgba(0, 0, 0, 0.8)' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '1.5px solid #22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'rgba(34, 197, 94, 0.2)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+              </div>
+              <span><strong style={{ color: '#ffffff', fontWeight: '700' }}>Gemini AI Resume Parser:</strong> <span style={{ color: 'rgba(255, 255, 255, 0.88)' }}>Instant ATS match score & gap analysis</span></span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.88rem', color: 'rgba(255, 255, 255, 0.95)', fontWeight: '500', textShadow: '0 1px 6px rgba(0, 0, 0, 0.8)' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '1.5px solid #22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'rgba(34, 197, 94, 0.2)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+              </div>
+              <span><strong style={{ color: '#ffffff', fontWeight: '700' }}>Voice AI Mock Room:</strong> <span style={{ color: 'rgba(255, 255, 255, 0.88)' }}>Calm 0.88x speed tech & HR interview practice</span></span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.88rem', color: 'rgba(255, 255, 255, 0.95)', fontWeight: '500', textShadow: '0 1px 6px rgba(0, 0, 0, 0.8)' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '1.5px solid #22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'rgba(34, 197, 94, 0.2)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+              </div>
+              <span><strong style={{ color: '#ffffff', fontWeight: '700' }}>5-Stage Live Pipeline:</strong> <span style={{ color: 'rgba(255, 255, 255, 0.88)' }}>Track applications from Reviewing to Offer</span></span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.88rem', color: 'rgba(255, 255, 255, 0.95)', fontWeight: '500', textShadow: '0 1px 6px rgba(0, 0, 0, 0.8)' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '1.5px solid #22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'rgba(34, 197, 94, 0.2)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+              </div>
+              <span><strong style={{ color: '#ffffff', fontWeight: '700' }}>Instant Coordinator Pings:</strong> <span style={{ color: 'rgba(255, 255, 255, 0.88)' }}>Real-time session status & announcements</span></span>
             </div>
           </div>
 
-          <div style={styles.brandFooter}>
-            <span>ApexHire Platform 2026</span>
+          <div className="auth-companies-section" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: '0.5rem' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'rgba(255, 255, 255, 0.45)' }}>TRUSTED BY TOP GLOBAL HIRING PARTNERS</span>
+            <div className="auth-companies-ticker-wrap">
+              <div className="auth-companies-ticker-track">
+                {[...companies, ...companies].map((c, i) => (
+                  <div key={i} className="auth-company-chip">
+                    {c.icon === 'ms' ? (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#0f172a" style={{ flexShrink: 0 }}>
+                        <rect x="1" y="1" width="10" height="10"/>
+                        <rect x="13" y="1" width="10" height="10"/>
+                        <rect x="1" y="13" width="10" height="10"/>
+                        <rect x="13" y="13" width="10" height="10"/>
+                      </svg>
+                    ) : (
+                      <span className="auth-company-icon">{c.icon}</span>
+                    )}
+                    <span className="auth-company-name">{c.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -319,6 +392,14 @@ const AuthPage = ({ onBack }) => {
                     style={styles.inputWithIcon}
                   />
                 </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.35rem' }}>
+                  <span
+                    onClick={() => addToast('Password reset instructions sent to your email!', 'info')}
+                    style={{ fontSize: '0.78rem', color: '#38bdf8', textDecoration: 'underline', cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    Forgot Password?
+                  </span>
+                </div>
               </div>
             )}
 
@@ -422,36 +503,36 @@ const styles = {
   heroText: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem',
+    gap: '0.85rem',
   },
   brandQuote: {
-    fontSize: '2.25rem',
+    fontSize: '2rem',
     fontWeight: '800',
     lineHeight: '1.25',
-    letterSpacing: '-0.75px',
+    letterSpacing: '-0.5px',
     color: '#ffffff',
   },
   brandSub: {
-    fontSize: '1rem',
-    color: 'rgba(255, 255, 255, 0.7)',
-    lineHeight: '1.65',
+    fontSize: '0.95rem',
+    color: 'rgba(255, 255, 255, 0.75)',
+    lineHeight: '1.6',
   },
   featuresList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem',
+    gap: '0.85rem',
   },
   featureItem: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.75rem',
-    fontSize: '0.92rem',
+    fontSize: '0.88rem',
     color: 'rgba(255, 255, 255, 0.9)',
     fontWeight: '500',
   },
   brandFooter: {
-    marginTop: '2rem',
-    fontSize: '0.85rem',
+    marginTop: '0.85rem',
+    fontSize: '0.8rem',
     color: 'rgba(255, 255, 255, 0.45)',
     fontWeight: '500',
   },

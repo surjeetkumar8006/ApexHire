@@ -575,26 +575,28 @@ body.light-theme .form-select {
 .auth-wrapper {
   min-height: 100vh;
   display: flex;
-  background-color: var(--bg-base);
-  overflow: hidden;
+  background-color: #030509;
+  overflow-y: auto;
+  position: relative;
 }
 
 .auth-brand-side {
   flex: 1.1;
   position: relative;
-  background: var(--bg-base);
   background-image: 
-    linear-gradient(135deg, rgba(5, 7, 13, 0.82) 0%, rgba(5, 7, 13, 0.92) 100%),
-    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    url('../assets/dashboard_bg.jpg');
-  background-size: cover, 28px 28px, cover;
-  background-position: center, center, center;
+    radial-gradient(ellipse at 30% 30%, rgba(5, 9, 18, 0.45) 0%, rgba(2, 4, 9, 0.72) 100%),
+    url('../assets/auth_bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 4rem;
+  padding: 2.25rem 3rem;
   color: #fff;
-  border-right: 1px solid var(--border-color);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  min-height: 100vh;
+  overflow-y: auto;
 }
 
 @media (max-width: 900px) {
@@ -609,7 +611,7 @@ body.light-theme .form-select {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -618,19 +620,19 @@ body.light-theme .form-select {
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
-  max-width: 520px;
+  gap: 1rem;
+  max-width: 500px;
 }
 
 .auth-live-stat-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 0.4rem 1rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 50px;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #ffffff;
   width: fit-content;
@@ -638,31 +640,28 @@ body.light-theme .form-select {
 }
 
 .auth-live-stat-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #22c55e;
   box-shadow: 0 0 10px #22c55e;
 }
 
 .auth-form-side {
-  flex: 0.9;
+  flex: 0.95;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 0 1.5rem;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
   position: relative;
-  background: var(--bg-base);
   background-image: 
-    linear-gradient(180deg, rgba(5, 7, 13, 0.85) 0%, rgba(5, 7, 13, 0.94) 100%),
-    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    url('../assets/dashboard_bg.jpg');
-  background-size: cover, 28px 28px, cover;
-  background-position: center, center, center;
-  background-attachment: fixed, fixed, fixed;
-  overflow-y: auto;
+    linear-gradient(135deg, rgba(8, 12, 22, 0.3) 0%, rgba(3, 5, 9, 0.55) 100%),
+    url('../assets/login_office_bg.jpg');
+  background-size: cover;
+  background-position: center;
   min-height: 100vh;
+  overflow-y: auto;
 }
 
 .auth-bg-glow {
@@ -670,9 +669,9 @@ body.light-theme .form-select {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
   border-radius: 50%;
   z-index: 0;
   pointer-events: none;
@@ -680,29 +679,26 @@ body.light-theme .form-select {
 
 .auth-form-container {
   width: 100%;
-  max-width: 500px;
+  max-width: 450px;
   display: flex;
   flex-direction: column;
-  margin-top: auto;
-  margin-bottom: auto;
-  padding: 2.5rem 0;
   position: relative;
   z-index: 1;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 500px;
-  padding: 2.5rem;
+  max-width: 450px;
+  padding: 2.25rem 2.25rem !important;
   display: flex;
   flex-direction: column;
-  gap: 1.35rem;
-  background: rgba(12, 16, 26, 0.95) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  border-radius: 24px !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.04) !important;
-  margin-top: auto;
-  margin-bottom: auto;
+  gap: 1.25rem !important;
+  background: rgba(12, 18, 28, 0.88) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.22) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.12) !important;
 }
 
 @media (max-width: 580px) {
@@ -837,39 +833,64 @@ body.light-theme .form-select {
   color: rgba(255, 255, 255, 0.4);
 }
 
-.auth-companies-grid {
+.auth-companies-ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.auth-companies-ticker-track {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: 0.75rem;
+  width: max-content;
+  animation: authCompanyScroll 18s linear infinite;
+}
+
+.auth-companies-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes authCompanyScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .auth-company-chip {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.4rem 0.85rem;
-  border-radius: 50px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  gap: 0.5rem;
+  background: linear-gradient(180deg, rgba(240, 243, 248, 0.95) 0%, rgba(195, 202, 212, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 0.45rem 0.95rem;
+  border-radius: 9px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all var(--transition-fast);
   cursor: default;
 }
 
 .auth-company-chip:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
   border-color: #ffffff;
-  color: #fff;
+  color: #020617;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 16px rgba(255, 255, 255, 0.25);
 }
 
 .auth-company-icon {
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: #0f172a;
 }
 
 /* Auth form fields spacing and override */
@@ -933,10 +954,11 @@ body.light-theme .form-select {
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
   width: 100%;
-  max-width: 1240px;
+  max-width: 1200px;
   align-items: center;
-  margin-bottom: 5rem;
-  padding-top: 2rem;
+  margin: 0 auto 5rem auto;
+  padding: 2rem 1rem 0 1rem;
+  box-sizing: border-box;
 }
 
 @media (max-width: 992px) {
@@ -1243,6 +1265,8 @@ body.light-theme .form-select {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto 5rem auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
   text-align: center;
 }
 
@@ -1308,6 +1332,8 @@ body.light-theme .form-select {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto 5rem auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1563,6 +1589,8 @@ body.light-theme .form-select {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto 5rem auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1717,6 +1745,8 @@ body.light-theme .form-select {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto 5rem auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
