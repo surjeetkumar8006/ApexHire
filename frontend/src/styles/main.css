@@ -930,10 +930,10 @@ body.light-theme .form-select {
 
 .landing-hero {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 1fr 1fr;
   gap: 3rem;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1240px;
   align-items: center;
   margin-bottom: 5rem;
   padding-top: 2rem;
@@ -1052,7 +1052,7 @@ body.light-theme .form-select {
 
 .hero-mockup-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 580px;
   perspective: 1000px;
 }
 

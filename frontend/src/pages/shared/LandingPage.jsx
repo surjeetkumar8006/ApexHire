@@ -303,24 +303,24 @@ const LandingPage = ({ onGetStarted }) => {
                 </div>
               </div>
 
-              <div className="mockup-body" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div className="mockup-body" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.4rem' }}>
                 {/* Candidate Info */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', textAlign: 'left' }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', textAlign: 'left' }}>
+                    <div style={{ width: '50px', height: '50px', borderRadius: '14px', background: 'rgba(255, 255, 255, 0.12)', border: '1px solid rgba(255, 255, 255, 0.25)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.15rem' }}>
                       SK
                     </div>
                     <div>
-                      <h4 style={{ fontSize: '0.95rem', fontWeight: '800', color: '#ffffff', margin: 0 }}>Surjeet Kumar</h4>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Full Stack SDE • Candidate #9042</p>
+                      <h4 style={{ fontSize: '1.05rem', fontWeight: '800', color: '#ffffff', margin: 0 }}>Surjeet Kumar</h4>
+                      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>Full Stack SDE • Candidate #9042</p>
                     </div>
                   </div>
-                  <span className="badge bg-success-glow text-success text-xxs font-bold" style={{ padding: '4px 10px', borderRadius: '20px' }}>Verified ✓</span>
+                  <span className="badge bg-success-glow text-success font-bold" style={{ padding: '5px 12px', borderRadius: '20px', fontSize: '0.78rem' }}>Verified ✓</span>
                 </div>
 
                 {/* Score Widget */}
-                <div className="mockup-score-card" style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div className="score-circle-wrap" style={{ position: 'relative', width: 54, height: 54, flexShrink: 0 }}>
+                <div className="mockup-score-card" style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                  <div className="score-circle-wrap" style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
                     <svg className="score-circle-svg" viewBox="0 0 36 36">
                       <path
                         className="circle-bg"
@@ -339,19 +339,19 @@ const LandingPage = ({ onGetStarted }) => {
                         strokeLinecap="round"
                       />
                     </svg>
-                    <span className="score-number" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontWeight: '800', fontSize: '0.85rem', color: '#ffffff' }}>92%</span>
+                    <span className="score-number" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontWeight: '800', fontSize: '0.98rem', color: '#ffffff' }}>92%</span>
                   </div>
                   <div className="score-info" style={{ textAlign: 'left' }}>
-                    <h4 style={{ color: '#ffffff', fontSize: '0.88rem', fontWeight: '700', margin: 0 }}>Gemini AI Match: Elite Tier</h4>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>Aligned for Google, Meta & Microsoft Drives</p>
+                    <h4 style={{ color: '#ffffff', fontSize: '0.98rem', fontWeight: '700', margin: 0 }}>Gemini AI Match: Elite Tier</h4>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>Aligned for Google, Meta & Microsoft Drives</p>
                   </div>
                 </div>
 
                 {/* Pipeline */}
-                <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.85rem 1rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#ffffff' }}>Google | SDE-1 Selection Phase</span>
-                    <span style={{ fontSize: '0.7rem', color: '#34d399', fontWeight: 700 }}>Stage 4/5</span>
+                <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1rem 1.15rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#ffffff' }}>Google | SDE-1 Selection Phase</span>
+                    <span style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 700 }}>Stage 4/5</span>
                   </div>
                   <div className="mockup-pipeline" style={{ margin: 0 }}>
                     <div className="pipeline-line">
