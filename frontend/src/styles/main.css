@@ -150,17 +150,18 @@ button, input, textarea, select {
 }
 
 .btn-primary {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  box-shadow: none !important;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
   font-weight: 700;
 }
 
 .btn-primary:hover {
-  background: #e2e8f0 !important;
-  color: #0f172a !important;
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
+  color: #ffffff !important;
   transform: translateY(-2px);
-  box-shadow: none !important;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5) !important;
 }
 
 .btn-secondary {
