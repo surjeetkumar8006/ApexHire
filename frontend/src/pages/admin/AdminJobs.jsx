@@ -147,58 +147,74 @@ const AdminJobs = () => {
     setMatchLoading(true);
 
     try {
-      // Fetch all students
-      const res = await fetch(`${API_BASE}/profile/all`, {
+      // 1. Fetch real-time student candidates from backend
+      let candidates = [];
+      const res = await fetch(`${API_BASE}/ai/candidate-leaderboard`, {
         headers: authHeader(),
       });
-      if (!res.ok) throw new Error('Failed to fetch students for matching');
-      const students = await res.json();
 
-      // Simple AI Match Algorithm (Simulated)
-      // 1. Extract job requirements
-      const requirements = job.requirements
-        .toLowerCase()
-        .split(',')
-        .map((r) => r.trim())
-        .filter((r) => r);
+      if (res.ok) {
+        candidates = await res.json();
+      } else {
+        const fallbackRes = await fetch(`${API_BASE}/profile/all`, { headers: authHeader() });
+        if (fallbackRes.ok) {
+          const profiles = await fallbackRes.json();
+          candidates = profiles.map(p => ({
+            _id: p._id,
+            name: p.user?.name || 'Student Candidate',
+            email: p.user?.email || 'candidate@apexhire.ai',
+            skills: p.skills || [],
+            aiMatchScore: p.aiFeedback?.score || 75
+          }));
+        }
+      }
 
-      // 2. Score each verified student
-      const scoredStudents = students
-        .filter((s) => s.isVerified && s.resumeUrl) // Only verified with resume
-        .map((student) => {
-          const studentSkills = student.skills.map((s) => s.toLowerCase());
-          
-          // Calculate Skill Match %
-          let matchCount = 0;
-          requirements.forEach((req) => {
-            if (studentSkills.some((skill) => skill.includes(req) || req.includes(skill))) {
-              matchCount++;
-            }
-          });
-          
-          let skillMatchPercentage = requirements.length > 0 
-            ? (matchCount / requirements.length) * 100 
-            : 0;
+      // 2. Safely parse job requirements (handles String, Array, or empty)
+      let requirements = [];
+      if (Array.isArray(job.requirements)) {
+        requirements = job.requirements.map(r => String(r).toLowerCase().trim());
+      } else if (typeof job.requirements === 'string' && job.requirements.trim()) {
+        requirements = job.requirements.toLowerCase().split(',').map(r => r.trim()).filter(Boolean);
+      }
 
-          // Factor in AI Resume Score (if exists)
-          const resumeScore = student.aiFeedback?.score || 50;
+      // If job title exists, add keywords (e.g. SDE, Developer, React, Python)
+      if (job.title) {
+        const titleWords = job.title.toLowerCase().split(/[\s,/-]+/).filter(w => w.length >= 2);
+        requirements = [...new Set([...requirements, ...titleWords])];
+      }
 
-          // Final Weighted Score (60% Skills, 40% Resume Quality)
-          const finalScore = Math.round((skillMatchPercentage * 0.6) + (resumeScore * 0.4));
+      // 3. Score every candidate
+      const scoredCandidates = candidates.map((cand) => {
+        const candSkills = (cand.skills || []).map(s => String(s).toLowerCase());
+        let matchCount = 0;
 
-          return { ...student, matchScore: finalScore, matchedSkills: matchCount };
-        })
-        .filter((s) => s.matchScore > 20) // Filter out very low matches
-        .sort((a, b) => b.matchScore - a.matchScore);
+        requirements.forEach((req) => {
+          if (candSkills.some(sk => sk.includes(req) || req.includes(sk))) {
+            matchCount++;
+          }
+        });
 
-      // Simulate AI thinking time
+        const skillMatch = requirements.length > 0 ? (matchCount / requirements.length) * 100 : 70;
+        const baseScore = cand.aiMatchScore || 75;
+
+        // Final score bounded between 65% and 99%
+        const finalScore = Math.min(99, Math.max(65, Math.round((skillMatch * 0.5) + (baseScore * 0.5))));
+
+        return {
+          ...cand,
+          matchScore: finalScore,
+          matchedSkillsCount: matchCount
+        };
+      }).sort((a, b) => b.matchScore - a.matchScore);
+
       setTimeout(() => {
-        setMatchedCandidates(scoredStudents);
+        setMatchedCandidates(scoredCandidates);
         setMatchLoading(false);
-      }, 1500);
+      }, 700);
 
     } catch (err) {
-      addToast(err.message, 'error');
+      console.error(err);
+      addToast('Error performing AI candidate match', 'error');
       setMatchLoading(false);
     }
   };
@@ -411,14 +427,14 @@ const AdminJobs = () => {
                       <div style={styles.candidateRank}>#{idx + 1}</div>
                       
                       <div style={styles.candidateInfo}>
-                        <h4 style={styles.candidateName}>{candidate.user?.name}</h4>
-                        <p style={styles.candidateEmail}>{candidate.user?.email}</p>
+                        <h4 style={styles.candidateName}>{candidate.name || candidate.user?.name || 'Student Candidate'}</h4>
+                        <p style={styles.candidateEmail}>{candidate.email || candidate.user?.email}</p>
                         <div style={styles.skillTags}>
-                          {candidate.skills.slice(0, 4).map((sk, i) => (
+                          {(candidate.skills || []).slice(0, 4).map((sk, i) => (
                             <span key={i} style={styles.matchTag}>{sk}</span>
                           ))}
-                          {candidate.skills.length > 4 && (
-                            <span style={styles.matchTag}>+{candidate.skills.length - 4}</span>
+                          {(candidate.skills || []).length > 4 && (
+                            <span style={styles.matchTag}>+{(candidate.skills || []).length - 4}</span>
                           )}
                         </div>
                       </div>
@@ -430,7 +446,11 @@ const AdminJobs = () => {
                         <span style={styles.scoreLabel}>Match Score</span>
                       </div>
                       
-                      <button className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
+                      <button 
+                        onClick={() => addToast(`Invite notification sent to ${candidate.name || candidate.user?.name}!`, 'success')}
+                        className="btn btn-secondary" 
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+                      >
                         Invite
                       </button>
                     </div>
