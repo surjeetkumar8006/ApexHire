@@ -90,7 +90,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         />
       )}
       <aside className={`app-sidebar ${isOpen ? 'open' : ''}`} style={styles.sidebar}>
-      <div style={styles.mobileHeader}>
+      <div className="sidebar-mobile-header" style={styles.mobileHeader}>
         <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>Menu</span>
         <button className="sidebar-close-btn" onClick={onClose}><X size={20} /></button>
       </div>

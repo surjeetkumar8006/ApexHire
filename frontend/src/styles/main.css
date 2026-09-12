@@ -500,7 +500,7 @@ body.light-theme .form-select {
   -webkit-backdrop-filter: blur(24px);
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
   z-index: 1000;
-  padding: 1.25rem 0.85rem;
+  padding: 0.85rem;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
@@ -510,6 +510,10 @@ body.light-theme .form-select {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
+}
+
+.sidebar-mobile-header {
+  display: none !important;
 }
 
 /* Hide scrollbar completely inside sidebar */
