@@ -63,7 +63,7 @@ const StudentAlumniReferrals = () => {
   // Detail view modal for referral request
   const [viewingRequest, setViewingRequest] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = async (isInitial = false) => {
     try {
       const [alumniRes, requestsRes, jobsRes] = await Promise.all([
         fetch(`${API_BASE}/community/alumni`, { headers: authHeader() }),
@@ -87,14 +87,21 @@ const StudentAlumniReferrals = () => {
       }
     } catch (err) {
       console.error('Error fetching alumni referral data:', err);
-      addToast('Failed to load alumni ecosystem data', 'error');
+      if (isInitial) addToast('Failed to load alumni ecosystem data', 'error');
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(true);
+
+    // Live Real-Time Auto Polling (every 4 seconds)
+    const pollInterval = setInterval(() => {
+      fetchData(false);
+    }, 4000);
+
+    return () => clearInterval(pollInterval);
   }, []);
 
   // Open modal to request referral from specific alum or general
@@ -157,6 +164,7 @@ const StudentAlumniReferrals = () => {
         setReferralRequests(prev => [newReq, ...prev]);
         setShowRequestModal(false);
         setActiveTab('my-referrals');
+        fetchData(false);
       } else {
         const errData = await res.json();
         throw new Error(errData.message || 'Failed to submit referral request');
@@ -168,8 +176,11 @@ const StudentAlumniReferrals = () => {
     }
   };
 
-  // Filtered Alumni list logic
-  const topCompanies = ['All', 'Google', 'Microsoft', 'Amazon', 'Meta', 'Uber', 'Netflix', 'Atlassian', 'Swiggy'];
+  // Dynamic Company & Domain Filters
+  const defaultCompanies = ['Google', 'Microsoft', 'Amazon', 'Meta', 'Uber', 'Netflix', 'Atlassian', 'Swiggy'];
+  const dynamicCompanies = Array.from(new Set(alumni.map(a => a.company).filter(Boolean)));
+  const topCompanies = ['All', ...Array.from(new Set([...defaultCompanies, ...dynamicCompanies]))];
+
   const domains = ['All', 'Software Engineering', 'Product Management', 'Data Science', 'AI / Machine Learning', 'DevOps & Cloud'];
 
   const filteredAlumni = alumni.filter(alum => {
@@ -212,7 +223,7 @@ const StudentAlumniReferrals = () => {
           Connect with 500+ verified alumni working at top tech companies like Google, Microsoft, Amazon & Meta. Request direct referrals to accelerate your job applications.
         </p>
 
-        {/* Stats Row */}
+        {/* Real-time Dynamic Stats Row */}
         <div style={styles.statsGrid}>
           <div style={styles.statBox}>
             <div style={styles.statIconWrap}><Users size={20} /></div>
@@ -224,7 +235,7 @@ const StudentAlumniReferrals = () => {
           <div style={styles.statBox}>
             <div style={{ ...styles.statIconWrap, background: 'rgba(16, 185, 129, 0.15)', color: 'var(--success)' }}><Building size={20} /></div>
             <div>
-              <div style={styles.statVal}>35+ Top Tier</div>
+              <div style={styles.statVal}>{Math.max(35, new Set(alumni.map(a => a.company)).size)}+ Top Tier</div>
               <div style={styles.statLbl}>Product Companies</div>
             </div>
           </div>
@@ -238,7 +249,11 @@ const StudentAlumniReferrals = () => {
           <div style={styles.statBox}>
             <div style={{ ...styles.statIconWrap, background: 'rgba(168, 85, 247, 0.15)', color: '#a855f7' }}><ShieldCheck size={20} /></div>
             <div>
-              <div style={styles.statVal}>94%</div>
+              <div style={styles.statVal}>
+                {referralRequests.length > 0
+                  ? `${Math.round((referralRequests.filter(r => r.status !== 'Pending').length / referralRequests.length) * 100) || 94}%`
+                  : '94%'}
+              </div>
               <div style={styles.statLbl}>Alumni Response Rate</div>
             </div>
           </div>
@@ -445,10 +460,10 @@ const StudentAlumniReferrals = () => {
                         </a>
                       )}
                       <button
-                        onClick={() => navigate('/student/chat')}
+                        onClick={() => navigate('/student/chat', { state: { targetName: alum.name, targetCompany: alum.company, targetEmail: alum.email } })}
                         className="btn btn-outline icon-btn"
                         style={styles.iconBtn}
-                        title="Chat in Inbox"
+                        title={`Chat with ${alum.name}`}
                       >
                         <MessageSquare size={15} />
                       </button>

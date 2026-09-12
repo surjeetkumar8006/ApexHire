@@ -33,7 +33,7 @@ const AdminAlumni = () => {
   // Referral review notes modal
   const [selectedReferral, setSelectedReferral] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = async (isInitial = false) => {
     try {
       const [alumniRes, referralsRes] = await Promise.all([
         fetch(`${API_BASE}/community/alumni`, { headers: authHeader() }),
@@ -48,14 +48,20 @@ const AdminAlumni = () => {
       }
     } catch (err) {
       console.error('Failed to load alumni ecosystem data', err);
-      addToast('Failed to fetch alumni directory details', 'error');
+      if (isInitial) addToast('Failed to fetch alumni directory details', 'error');
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(true);
+
+    const pollInterval = setInterval(() => {
+      fetchData(false);
+    }, 4000);
+
+    return () => clearInterval(pollInterval);
   }, []);
 
   const handleAddAlumni = async (e) => {
