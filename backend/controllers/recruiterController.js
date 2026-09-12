@@ -112,6 +112,8 @@ export const scheduleInterview = async (req, res) => {
   }
 };
 
+export const scheduleRecruiterInterview = scheduleInterview;
+
 // @desc    Get hiring funnel analytics for recruiter
 // @route   GET /api/recruiter/analytics
 // @access  Private (Recruiter)
