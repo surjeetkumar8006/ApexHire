@@ -18,7 +18,8 @@ import {
   Award,
   MessageSquare,
   MessagesSquare,
-  GraduationCap
+  GraduationCap,
+  Dumbbell
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { X } from 'lucide-react';
@@ -32,6 +33,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const studentLinks = [
     { path: '/student/dashboard', name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+    { path: '/student/gym', name: 'Gym', icon: <Dumbbell size={20} /> },
     { path: '/student/jobs', name: 'Job Board', icon: <Briefcase size={20} /> },
     { path: '/student/applications', name: 'My Applications', icon: <FileCheck size={20} /> },
     { path: '/student/mock-interviews', name: 'AI Mock Interview', icon: <Cpu size={20} /> },
