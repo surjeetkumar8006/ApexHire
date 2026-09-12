@@ -1,15 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, User, LogOut, CheckSquare, Menu } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, User, LogOut, CheckSquare, Menu, Camera, Settings, X, Upload, Sparkles } from 'lucide-react';
 import { useAuth, API_BASE } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { compressImage } from '../utils/imageCompressor';
 
 const Navbar = ({ onMenuClick }) => {
-  const { user, logout, authHeader } = useAuth();
+  const { user, updateUser, logout, authHeader } = useAuth();
   const { addToast } = useNotification();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [onlineCount, setOnlineCount] = useState(1);
   const dropdownRef = useRef(null);
+
+  // Avatar Edit Modal State
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [tempAvatar, setTempAvatar] = useState('');
+  const [savingAvatar, setSavingAvatar] = useState(false);
 
   // Generate or retrieve persistent browser session ID for accurate online counting
   const getSessionId = () => {
@@ -122,6 +130,75 @@ const Navbar = ({ onMenuClick }) => {
     }
   };
 
+  const handleOpenAvatarModal = () => {
+    setTempAvatar(user.avatar || '');
+    setShowAvatarModal(true);
+  };
+
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const compressed = await compressImage(file, 400, 400, 0.85);
+        setTempAvatar(compressed);
+        addToast('Profile picture preview loaded!', 'info');
+      } catch (err) {
+        addToast('Failed to process image file', 'error');
+      }
+    }
+  };
+
+  const handleSaveAvatar = async () => {
+    setSavingAvatar(true);
+    try {
+      const res = await fetch(`${API_BASE}/profile/settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader()
+        },
+        body: JSON.stringify({ avatar: tempAvatar })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to update profile picture');
+
+      updateUser(data.user);
+      addToast('Profile picture updated in real time! ✨', 'success');
+      setShowAvatarModal(false);
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setSavingAvatar(true);
+    try {
+      const res = await fetch(`${API_BASE}/profile/settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader()
+        },
+        body: JSON.stringify({ avatar: '' })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to remove avatar');
+
+      updateUser(data.user);
+      setTempAvatar('');
+      addToast('Profile picture removed', 'info');
+      setShowAvatarModal(false);
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
@@ -130,7 +207,7 @@ const Navbar = ({ onMenuClick }) => {
         <button className="mobile-menu-btn" onClick={onMenuClick}>
           <Menu size={24} />
         </button>
-        <div style={styles.brand}>
+        <div style={styles.brand} onClick={() => navigate('/')} style={{ ...styles.brand, cursor: 'pointer' }}>
           <span style={styles.logoGradient}>ApexHire</span>
           <span style={styles.subBrand}>Portal</span>
         </div>
@@ -208,14 +285,14 @@ const Navbar = ({ onMenuClick }) => {
             )}
           </div>
 
-          {/* User Profile Info */}
-          <div style={styles.userCard}>
-            <div style={styles.avatar}>
+          {/* Interactive User Profile Info & Avatar Upload Trigger */}
+          <div style={styles.userCard} onClick={handleOpenAvatarModal} title="Click to update Profile Picture or settings">
+            <div style={styles.avatarWrap}>
               {user.avatar ? (
                 <img 
                   src={user.avatar} 
                   alt={user.name} 
-                  style={{ width: '100%', height: '100%', borderRadius: '6px', objectFit: 'cover' }} 
+                  style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
                   onError={(e) => {
                     e.target.style.display = 'none';
                     const fallback = e.target.parentNode.querySelector('.nav-avatar-fallback');
@@ -231,13 +308,20 @@ const Navbar = ({ onMenuClick }) => {
                   height: '100%', 
                   alignItems: 'center', 
                   justifyContent: 'center',
-                  fontWeight: 'bold',
-                  fontSize: '0.8rem',
-                  color: '#ffffff'
+                  fontWeight: '800',
+                  fontSize: '0.85rem',
+                  color: '#ffffff',
+                  background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+                  borderRadius: '50%'
                 }}
               >
                 {(user.name || 'U').charAt(0).toUpperCase()}
               </span>
+
+              {/* Camera icon overlay */}
+              <div style={styles.cameraOverlay} title="Change Photo">
+                <Camera size={10} color="#ffffff" />
+              </div>
             </div>
             <div className="nav-hide-mobile" style={styles.userInfo}>
               <span style={styles.userName}>{user.name}</span>
@@ -249,9 +333,124 @@ const Navbar = ({ onMenuClick }) => {
                     : 'Student'}
               </span>
             </div>
-            <button onClick={logout} className="nav-logout-btn nav-hide-mobile" title="Logout">
+            <button onClick={(e) => { e.stopPropagation(); logout(); }} className="nav-logout-btn nav-hide-mobile" title="Logout">
               <LogOut size={18} />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* REAL-TIME AVATAR EDIT MODAL */}
+      {showAvatarModal && (
+        <div style={styles.modalOverlay} onClick={() => setShowAvatarModal(false)}>
+          <div className="animate-fade-in" style={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div style={styles.modalHeaderBlock}>
+              <div>
+                <h3 style={{ color: 'var(--text-primary)', margin: 0, fontWeight: '700', fontSize: '1.1rem' }}>
+                  Update Profile Picture
+                </h3>
+                <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.78rem', marginTop: '0.2rem' }}>
+                  Upload a photo to personalize your ApexHire candidate & recruiter avatar.
+                </p>
+              </div>
+              <button onClick={() => setShowAvatarModal(false)} style={styles.modalCloseBtn}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
+              {/* Avatar Preview Ring */}
+              <div 
+                style={styles.largeAvatarPreview}
+                onClick={() => document.getElementById('navbar-avatar-upload').click()}
+                title="Click to choose image file"
+              >
+                {tempAvatar ? (
+                  <img 
+                    src={tempAvatar} 
+                    alt="Preview" 
+                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+                  />
+                ) : (
+                  <span style={{ fontSize: '2.5rem', fontWeight: '800', color: '#ffffff' }}>
+                    {(user?.name || 'U').charAt(0).toUpperCase()}
+                  </span>
+                )}
+
+                <div style={styles.previewCameraBadge}>
+                  <Camera size={16} color="#0b0f19" />
+                </div>
+              </div>
+
+              <input 
+                type="file" 
+                accept="image/*" 
+                id="navbar-avatar-upload" 
+                style={{ display: 'none' }} 
+                onChange={handleAvatarFileChange} 
+              />
+
+              <div style={{ textAlign: 'center' }}>
+                <h4 style={{ margin: 0, color: 'var(--text-primary)', fontWeight: '700', fontSize: '1.05rem' }}>
+                  {user?.name}
+                </h4>
+                <span className="text-muted" style={{ fontSize: '0.8rem' }}>
+                  {user?.email} • <span style={{ color: 'var(--primary)', fontWeight: '600', textTransform: 'capitalize' }}>{user?.role}</span>
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center', width: '100%', marginTop: '0.5rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-outline" 
+                  style={{ fontSize: '0.82rem', padding: '0.5rem 1rem' }}
+                  onClick={() => document.getElementById('navbar-avatar-upload').click()}
+                >
+                  <Upload size={14} />
+                  <span>Select New Photo</span>
+                </button>
+
+                {tempAvatar && (
+                  <button 
+                    type="button" 
+                    className="btn btn-outline" 
+                    style={{ fontSize: '0.82rem', padding: '0.5rem 1rem', borderColor: 'rgba(239, 68, 68, 0.4)', color: 'var(--danger)' }}
+                    onClick={handleRemoveAvatar}
+                    disabled={savingAvatar}
+                  >
+                    <span>Remove Photo</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Bottom Buttons */}
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', width: '100%', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', marginTop: '0.5rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-outline"
+                  style={{ fontSize: '0.82rem' }}
+                  onClick={() => {
+                    setShowAvatarModal(false);
+                    const settingsPath = user?.role === 'admin' ? '/admin/settings' : user?.role === 'recruiter' ? '/recruiter/settings' : '/student/settings';
+                    navigate(settingsPath);
+                  }}
+                >
+                  <Settings size={14} />
+                  <span>Full Profile Settings</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  className="btn btn-primary"
+                  style={{ fontSize: '0.82rem', padding: '0.5rem 1.25rem' }}
+                  onClick={handleSaveAvatar}
+                  disabled={savingAvatar}
+                >
+                  <span>{savingAvatar ? 'Saving...' : 'Save Profile Picture'}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -420,27 +619,41 @@ const styles = {
     color: 'var(--text-muted)',
   },
   userCard: {
-    height: '40px',
+    height: '42px',
     background: 'var(--bg-surface-elevated)',
     border: '1px solid var(--border-color)',
-    borderRadius: '10px',
-    padding: '0 0.8rem',
+    borderRadius: '12px',
+    padding: '0 0.75rem',
     display: 'flex',
     alignItems: 'center',
     gap: '0.65rem',
     boxSizing: 'border-box',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
   },
-  avatar: {
-    width: '26px',
-    height: '26px',
-    borderRadius: '6px',
-    background: 'rgba(255, 255, 255, 0.15)',
-    border: '1px solid rgba(255, 255, 255, 0.25)',
+  avatarWrap: {
+    width: '30px',
+    height: '30px',
+    borderRadius: '50%',
+    position: 'relative',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#ffffff',
     flexShrink: 0,
+  },
+  cameraOverlay: {
+    position: 'absolute',
+    bottom: '-2px',
+    right: '-2px',
+    width: '14px',
+    height: '14px',
+    borderRadius: '50%',
+    background: 'var(--primary)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: '1.5px solid var(--bg-surface)',
+    zIndex: 2,
   },
   userInfo: {
     display: 'flex',
@@ -470,6 +683,82 @@ const styles = {
     '&:hover': {
       color: 'var(--danger)',
     },
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(5, 8, 18, 0.85)',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    padding: '1rem',
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: '460px',
+    background: 'var(--bg-surface)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    boxShadow: 'var(--shadow-lg)',
+  },
+  modalHeaderBlock: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'linear-gradient(135deg, var(--primary-glow) 0%, var(--secondary-glow) 100%)',
+    borderBottom: '1px solid var(--border-color)',
+    padding: '1.25rem 1.5rem',
+    position: 'relative',
+  },
+  modalCloseBtn: {
+    background: 'var(--bg-surface-elevated)',
+    border: '1px solid var(--border-color)',
+    color: 'var(--text-muted)',
+    cursor: 'pointer',
+    padding: '6px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s',
+    width: '30px',
+    height: '30px',
+  },
+  largeAvatarPreview: {
+    width: '110px',
+    height: '110px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    cursor: 'pointer',
+    border: '3px solid var(--border-color)',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+  },
+  previewCameraBadge: {
+    position: 'absolute',
+    bottom: '4px',
+    right: '4px',
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    background: '#ffffff',
+    border: '2px solid var(--bg-surface)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
   },
 };
 

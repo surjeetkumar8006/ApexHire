@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Lock, Bell, Shield, Smartphone, Globe, CheckCircle, Users, Trash, Pencil, Plus, X, Loader, Camera } from 'lucide-react';
 import { useAuth, API_BASE } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
+import { compressImage } from '../../utils/imageCompressor';
 
 const SettingsPage = () => {
   const { user, updateUser, authHeader } = useAuth();
@@ -405,19 +406,16 @@ const SettingsPage = () => {
                       accept="image/*" 
                       id="avatar-upload" 
                       style={{ display: 'none' }} 
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files[0];
                         if (file) {
-                          if (file.size > 2 * 1024 * 1024) {
-                            addToast('File size must be under 2MB', 'error');
-                            return;
+                          try {
+                            const compressed = await compressImage(file, 400, 400, 0.85);
+                            setFormData(prev => ({ ...prev, avatar: compressed }));
+                            addToast('Profile picture loaded! Click "Save Profile" to apply.', 'info');
+                          } catch (err) {
+                            addToast('Failed to process image file', 'error');
                           }
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setFormData(prev => ({ ...prev, avatar: reader.result }));
-                            addToast('Avatar uploaded! Click "Save Profile" to apply changes.', 'info');
-                          };
-                          reader.readAsDataURL(file);
                         }
                       }} 
                     />

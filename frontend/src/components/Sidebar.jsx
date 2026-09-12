@@ -87,6 +87,58 @@ const Sidebar = ({ isOpen, onClose }) => {
         <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>Menu</span>
         <button className="sidebar-close-btn" onClick={onClose}><X size={20} /></button>
       </div>
+
+      {/* User Profile Summary Header */}
+      <div 
+        style={styles.profileHeaderCard}
+        onClick={() => {
+          const settingsPath = user.role === 'admin' ? '/admin/settings' : user.role === 'recruiter' ? '/recruiter/settings' : '/student/settings';
+          navigate(settingsPath);
+          if (isOpen && onClose) onClose();
+        }}
+        title="View Profile Settings"
+      >
+        <div style={styles.sidebarAvatar}>
+          {user.avatar ? (
+            <img 
+              src={user.avatar} 
+              alt={user.name} 
+              style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                const fallback = e.target.parentNode.querySelector('.sidebar-avatar-fallback');
+                if (fallback) fallback.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <span 
+            className="sidebar-avatar-fallback" 
+            style={{ 
+              display: user.avatar ? 'none' : 'flex', 
+              width: '100%', 
+              height: '100%', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              fontWeight: '800',
+              fontSize: '0.9rem',
+              color: '#ffffff',
+              background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+              borderRadius: '50%'
+            }}
+          >
+            {(user.name || 'U').charAt(0).toUpperCase()}
+          </span>
+        </div>
+        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          <strong style={{ color: 'var(--text-primary)', fontSize: '0.88rem', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            {user.name}
+          </strong>
+          <span style={{ fontSize: '0.72rem', color: 'var(--primary)', fontWeight: '600', textTransform: 'capitalize' }}>
+            {user.role === 'admin' ? 'Placement Admin' : user.role === 'recruiter' ? 'Corporate Recruiter' : 'Student Candidate'}
+          </span>
+        </div>
+      </div>
+
       <div style={styles.menuList}>
         {links.map((link) => {
           const isActive = location.pathname === link.path;
@@ -127,6 +179,28 @@ const styles = {
   },
   mobileHeader: {
     display: 'none', // Shown via CSS on mobile
+  },
+  profileHeaderCard: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem 0.85rem',
+    borderRadius: '12px',
+    background: 'var(--bg-surface-elevated)',
+    border: '1px solid var(--border-color)',
+    marginBottom: '1rem',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  sidebarAvatar: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   menuList: {
     display: 'flex',
