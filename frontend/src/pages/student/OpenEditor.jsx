@@ -12,7 +12,9 @@ import {
   FileCode,
   Layers,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Sliders,
+  ChevronDown
 } from 'lucide-react';
 import { useAuth, API_BASE } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
@@ -245,7 +247,6 @@ const evaluateCode = (code, language) => {
           const parts = argContent.split('+');
           parts.forEach(p => {
             const token = p.trim();
-            // If identifier token is not quoted, not a number, and not declared
             if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(token) && !varDeclarations.has(token) && isNaN(token)) {
               errors.push(`Main.java:${lineIdx + 1}: error: cannot find symbol\n    System.out.println(${token});\n                       ^\n  symbol:   variable ${token}\n  location: class Main`);
             }
@@ -371,42 +372,45 @@ const OpenEditor = () => {
     addToast('Code copied to clipboard!', 'success');
   };
 
+  const lineCount = code.split('\n').length;
+  const lineNumbers = Array.from({ length: lineCount }, (_, i) => i + 1).join('\n');
+
   return (
     <div style={styles.container} className="animate-fade-in">
-      {/* Top Header */}
+      {/* Sleek Top Banner Header */}
       <div style={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Code size={28} color="var(--primary)" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div style={styles.iconGlowBadge}>
+            <Code size={22} color="#ffffff" />
+          </div>
           <div>
             <h1 style={styles.title}>Live Open Editor</h1>
-            <p style={styles.subtitle}>Write, edit, and run JavaScript & Java code in real time.</p>
+            <p style={styles.subtitle}>Write, edit, and compile JavaScript & Java 17 code in real time.</p>
           </div>
         </div>
 
-        {/* Controls Bar */}
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        {/* Controls Dropdowns */}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Language Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Language:</label>
+          <div style={styles.selectWrapper}>
+            <span style={styles.selectLabel}>Language:</span>
             <select
-              className="form-input"
+              style={styles.customSelect}
               value={language}
               onChange={(e) => handleLanguageChange(e.target.value)}
-              style={{ width: '180px', fontWeight: '700', borderColor: 'rgba(99, 102, 241, 0.4)' }}
             >
               <option value="javascript">JavaScript (Node.js)</option>
               <option value="java">Java (OpenJDK 17)</option>
             </select>
           </div>
 
-          {/* Template Preset Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Snippet Preset:</label>
+          {/* Preset Selector */}
+          <div style={styles.selectWrapper}>
+            <span style={styles.selectLabel}>Snippet Preset:</span>
             <select
-              className="form-input"
+              style={styles.customSelect}
               value={templateKey}
               onChange={(e) => handleTemplateChange(e.target.value)}
-              style={{ width: '200px' }}
             >
               <option value="blank">Blank Playground</option>
               <option value="twoSum">Two Sum Algorithm</option>
@@ -417,102 +421,107 @@ const OpenEditor = () => {
         </div>
       </div>
 
-      {/* Main Code Editor Box */}
-      <div className="glass-card" style={{ padding: '1rem', background: '#090d16', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+      {/* IDE Code Editor Box */}
+      <div style={styles.ideContainer}>
+        {/* Editor Toolbar */}
         <div style={styles.editorToolbar}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <FileCode size={18} color="#ffffff" />
-            <span style={{ fontSize: '0.88rem', fontWeight: '700', color: '#ffffff' }}>
-              {language === 'javascript' ? 'main.js' : 'Main.java'}
-            </span>
-            <span style={styles.langBadge}>
-              {language === 'javascript' ? 'JavaScript' : 'Java 17'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div style={styles.fileTabActive}>
+              <FileCode size={16} color={language === 'javascript' ? '#fde047' : '#f87171'} />
+              <span>{language === 'javascript' ? 'main.js' : 'Main.java'}</span>
+            </div>
+            <span style={styles.langPillBadge}>
+              {language === 'javascript' ? 'V8 Engine' : 'JVM 17'}
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={handleCopyCode} className="btn btn-secondary" style={styles.toolBtn} title="Copy Code">
+          <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+            <button onClick={handleCopyCode} style={styles.toolBtn} title="Copy Code">
               <Copy size={14} /> Copy
             </button>
-            <button onClick={handleResetCode} className="btn btn-secondary" style={styles.toolBtn} title="Reset Code">
+            <button onClick={handleResetCode} style={styles.toolBtn} title="Reset Code">
               <RotateCcw size={14} /> Reset
             </button>
             <button
               onClick={handleRunCode}
-              className="btn btn-primary"
               disabled={running}
-              style={{ background: '#6366f1', borderColor: '#6366f1', padding: '0.45rem 1.25rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              style={styles.runBtn}
             >
               {running ? (
                 <>
-                  <Loader2 size={15} className="animate-spin" /> Compiling & Running...
+                  <Loader2 size={16} className="animate-spin" /> Compiling & Running...
                 </>
               ) : (
                 <>
-                  <Play size={15} fill="#ffffff" /> Run Code
+                  <Play size={16} fill="#ffffff" /> Run Code
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* Code Textarea Area */}
-        <textarea
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          rows={15}
-          spellCheck={false}
-          style={styles.codeTextarea}
-          placeholder="// Type your code here..."
-        />
+        {/* Code Editor Window with Line Numbers */}
+        <div style={styles.editorBody}>
+          <pre style={styles.lineNumbersCol}>{lineNumbers}</pre>
+          <textarea
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            rows={16}
+            spellCheck={false}
+            style={styles.codeTextarea}
+            placeholder="// Type your code here..."
+          />
+        </div>
 
         <div style={styles.editorFooter}>
-          <span>Lines: {code.split('\n').length} | Chars: {code.length}</span>
-          <span>Engine: Real-Time {language === 'javascript' ? 'V8 Node.js' : 'JVM OpenJDK 17'}</span>
+          <span>Lines: {lineCount} | Chars: {code.length}</span>
+          <span>Environment: {language === 'javascript' ? 'ECMAScript 2024 / Node.js' : 'Java Standard Edition 17.0.9'}</span>
         </div>
       </div>
 
-      {/* Terminal / Execution Output Console Window */}
+      {/* Terminal Execution Console Output Window */}
       {output && (
         <div
-          className="glass-card animate-fade-in"
           style={{
-            padding: '1rem',
-            background: '#030712',
-            border: output.isError ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(74, 222, 128, 0.3)'
+            ...styles.consoleContainer,
+            border: output.isError ? '1px solid rgba(244, 63, 94, 0.4)' : '1px solid rgba(16, 185, 129, 0.4)',
+            background: output.isError ? 'rgba(15, 23, 42, 0.95)' : 'rgba(9, 13, 22, 0.95)',
+            boxShadow: output.isError ? '0 0 20px rgba(244, 63, 94, 0.15)' : '0 0 20px rgba(16, 185, 129, 0.15)'
           }}
+          className="animate-fade-in"
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.5rem' }}>
+          {/* Mac Terminal Header */}
+          <div style={styles.terminalHeader}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {output.isError ? <AlertCircle size={18} color="#ef4444" /> : <Terminal size={18} color="#4ade80" />}
-              <span style={{ fontSize: '0.9rem', fontWeight: '800', color: output.isError ? '#ef4444' : '#4ade80' }}>
-                {output.isError ? 'Compilation / Runtime Error Console' : 'Execution Console Output'}
+              <div style={styles.macDots}>
+                <span style={{ background: '#ff5f56' }}></span>
+                <span style={{ background: '#ffbd2e' }}></span>
+                <span style={{ background: '#27c93f' }}></span>
+              </div>
+              <span style={{ fontSize: '0.82rem', fontWeight: '800', color: output.isError ? '#f87171' : '#34d399', letterSpacing: '0.5px' }}>
+                TERMINAL CONSOLE OUTPUT
               </span>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.78rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '0.2rem 0.55rem', borderRadius: '12px', fontWeight: '700' }}>
-                ⏱ {output.executionTime}
-              </span>
-              <span style={{ fontSize: '0.78rem', color: '#c084fc', background: 'rgba(168, 85, 247, 0.15)', padding: '0.2rem 0.55rem', borderRadius: '12px', fontWeight: '700' }}>
-                Time: {output.timeComplexity} | Space: {output.spaceComplexity}
-              </span>
-              <span style={{
-                fontSize: '0.78rem',
-                color: output.isError ? '#ef4444' : '#4ade80',
-                background: output.isError ? 'rgba(239, 68, 68, 0.15)' : 'rgba(74, 222, 128, 0.15)',
-                padding: '0.2rem 0.55rem',
-                borderRadius: '12px',
-                fontWeight: '700'
-              }}>
+            <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center' }}>
+              <span style={styles.metaBadgeTime}>⏱ {output.executionTime}</span>
+              <span style={styles.metaBadgeComplexity}>Time: {output.timeComplexity} | Space: {output.spaceComplexity}</span>
+              <span
+                style={{
+                  ...styles.statusBadge,
+                  color: output.isError ? '#f87171' : '#34d399',
+                  background: output.isError ? 'rgba(244, 63, 94, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                  border: output.isError ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)'
+                }}
+              >
                 {output.isError ? '✗ ' + output.status : '✓ ' + output.status}
               </span>
             </div>
           </div>
 
-          <pre style={{ ...styles.consoleLog, color: output.isError ? '#f87171' : '#ffffff' }}>
+          <pre style={{ ...styles.consoleLog, color: output.isError ? '#fca5a5' : '#f8fafc' }}>
             {output.logs.map((log, idx) => (
-              <div key={idx} style={{ marginBottom: '0.25rem' }}>{log}</div>
+              <div key={idx} style={{ marginBottom: '0.35rem' }}>{log}</div>
             ))}
           </pre>
         </div>
@@ -532,57 +541,154 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: '1rem',
-    background: 'rgba(15, 23, 42, 0.6)',
-    padding: '1.25rem 1.5rem',
-    borderRadius: '16px',
-    border: '1px solid var(--border-color)',
+    gap: '1.25rem',
+    background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75))',
+    backdropFilter: 'blur(12px)',
+    padding: '1.25rem 1.75rem',
+    borderRadius: '18px',
+    border: '1px solid rgba(99, 102, 241, 0.25)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+  },
+  iconGlowBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '46px',
+    height: '46px',
+    borderRadius: '14px',
+    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+    boxShadow: '0 0 20px rgba(99, 102, 241, 0.45)',
   },
   title: {
-    fontSize: '1.6rem',
+    fontSize: '1.65rem',
     fontWeight: '800',
-    color: 'var(--text-primary)',
+    color: '#ffffff',
     margin: 0,
+    letterSpacing: '-0.5px',
   },
   subtitle: {
     fontSize: '0.88rem',
-    color: 'var(--text-secondary)',
-    margin: '0.25rem 0 0 0',
+    color: '#94a3b8',
+    margin: '0.2rem 0 0 0',
+  },
+  selectWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.65rem',
+    background: 'rgba(15, 23, 42, 0.6)',
+    padding: '0.35rem 0.75rem',
+    borderRadius: '12px',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+  },
+  selectLabel: {
+    fontSize: '0.82rem',
+    fontWeight: '700',
+    color: '#cbd5e1',
+  },
+  customSelect: {
+    background: '#0f172a',
+    color: '#ffffff',
+    border: '1px solid rgba(99, 102, 241, 0.4)',
+    borderRadius: '8px',
+    padding: '0.45rem 0.85rem',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    outline: 'none',
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
+    transition: 'border-color 0.2s',
+  },
+  ideContainer: {
+    background: '#090d16',
+    borderRadius: '18px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
+    overflow: 'hidden',
   },
   editorToolbar: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: '0.75rem',
-    marginBottom: '0.75rem',
+    padding: '0.75rem 1.25rem',
+    background: 'rgba(15, 23, 42, 0.8)',
     borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
   },
-  langBadge: {
-    fontSize: '0.72rem',
+  fileTabActive: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    background: '#090d16',
+    border: '1px solid rgba(99, 102, 241, 0.3)',
+    borderBottom: 'none',
+    padding: '0.45rem 0.95rem',
+    borderRadius: '8px 8px 0 0',
+    fontSize: '0.88rem',
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  langPillBadge: {
+    fontSize: '0.7rem',
     fontWeight: '800',
-    background: 'rgba(99, 102, 241, 0.2)',
-    color: '#818cf8',
-    padding: '0.15rem 0.5rem',
-    borderRadius: '10px',
+    background: 'rgba(99, 102, 241, 0.18)',
+    color: '#a5b4fc',
+    padding: '0.2rem 0.6rem',
+    borderRadius: '12px',
     border: '1px solid rgba(99, 102, 241, 0.3)',
   },
   toolBtn: {
-    fontSize: '0.78rem',
-    padding: '0.35rem 0.65rem',
+    background: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
+    color: '#cbd5e1',
+    borderRadius: '8px',
+    padding: '0.45rem 0.85rem',
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    gap: '0.35rem',
+    gap: '0.4rem',
+    transition: 'all 0.2s',
+  },
+  runBtn: {
+    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+    border: 'none',
+    color: '#ffffff',
+    borderRadius: '8px',
+    padding: '0.55rem 1.35rem',
+    fontSize: '0.88rem',
+    fontWeight: '800',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    boxShadow: '0 0 16px rgba(99, 102, 241, 0.45)',
+    transition: 'all 0.2s',
+  },
+  editorBody: {
+    display: 'flex',
+    background: '#030712',
+  },
+  lineNumbersCol: {
+    fontFamily: '"Fira Code", Consolas, Monaco, monospace',
+    fontSize: '0.9rem',
+    lineHeight: '1.6',
+    color: '#475569',
+    textAlign: 'right',
+    padding: '1.25rem 0.85rem 1.25rem 1rem',
+    userSelect: 'none',
+    borderRight: '1px solid rgba(255, 255, 255, 0.06)',
+    margin: 0,
+    background: '#060a12',
   },
   codeTextarea: {
-    width: '100%',
-    fontFamily: 'Consolas, Monaco, "Fira Code", monospace',
+    flex: 1,
+    fontFamily: '"Fira Code", "Cascadia Code", Consolas, Monaco, monospace',
     fontSize: '0.92rem',
-    lineHeight: '1.5',
+    lineHeight: '1.6',
     background: '#030712',
-    color: '#ffffff',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '8px',
-    padding: '1rem',
+    color: '#f8fafc',
+    border: 'none',
+    padding: '1.25rem',
     resize: 'vertical',
     outline: 'none',
     boxSizing: 'border-box',
@@ -590,16 +696,63 @@ const styles = {
   editorFooter: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginTop: '0.5rem',
-    fontSize: '0.75rem',
-    color: 'var(--text-muted)',
+    padding: '0.6rem 1.25rem',
+    fontSize: '0.76rem',
+    color: '#64748b',
+    background: 'rgba(15, 23, 42, 0.8)',
+    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+  },
+  consoleContainer: {
+    borderRadius: '16px',
+    padding: '1.25rem',
+    overflow: 'hidden',
+  },
+  terminalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: '0.75rem',
+    marginBottom: '0.85rem',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+  },
+  macDots: {
+    display: 'flex',
+    gap: '0.4rem',
+    '& span': {
+      width: '10px',
+      height: '10px',
+      borderRadius: '50%',
+      display: 'inline-block',
+    }
+  },
+  metaBadgeTime: {
+    fontSize: '0.78rem',
+    color: '#38bdf8',
+    background: 'rgba(56, 189, 248, 0.15)',
+    padding: '0.25rem 0.65rem',
+    borderRadius: '12px',
+    fontWeight: '700',
+  },
+  metaBadgeComplexity: {
+    fontSize: '0.78rem',
+    color: '#c084fc',
+    background: 'rgba(168, 85, 247, 0.15)',
+    padding: '0.25rem 0.65rem',
+    borderRadius: '12px',
+    fontWeight: '700',
+  },
+  statusBadge: {
+    fontSize: '0.78rem',
+    padding: '0.25rem 0.65rem',
+    borderRadius: '12px',
+    fontWeight: '700',
   },
   consoleLog: {
-    fontFamily: 'Consolas, Monaco, monospace',
-    fontSize: '0.88rem',
+    fontFamily: '"Fira Code", Consolas, Monaco, monospace',
+    fontSize: '0.9rem',
     margin: 0,
     whiteSpace: 'pre-wrap',
-    lineHeight: '1.5',
+    lineHeight: '1.55',
   },
 };
 
