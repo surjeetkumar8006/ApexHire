@@ -13,6 +13,7 @@ import ForumAndCommunity from './pages/shared/ForumAndCommunity';
 
 // Student Pages
 import StudentDashboard from './pages/student/StudentDashboard';
+import OpenEditor from './pages/student/OpenEditor';
 import StudentGym from './pages/student/StudentGym';
 import JobBoard from './pages/student/JobBoard';
 import AICoach from './pages/student/AICoach';
@@ -91,7 +92,8 @@ function App() {
 
               {/* ----- Student Routes ----- */}
               <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
-              <Route path="/student/gym" element={<ProtectedRoute allowedRoles={['student']}><StudentGym /></ProtectedRoute>} />
+              <Route path="/student/open-editor" element={<ProtectedRoute allowedRoles={['student']}><OpenEditor /></ProtectedRoute>} />
+              <Route path="/student/gym" element={<ProtectedRoute allowedRoles={['student']}><OpenEditor /></ProtectedRoute>} />
               <Route path="/student/jobs" element={<ProtectedRoute allowedRoles={['student']}><JobBoard /></ProtectedRoute>} />
               <Route path="/student/applications" element={<ProtectedRoute allowedRoles={['student']}><StudentApplications /></ProtectedRoute>} />
               <Route path="/student/ai-coach" element={<Navigate to="/student/dashboard" replace />} />
