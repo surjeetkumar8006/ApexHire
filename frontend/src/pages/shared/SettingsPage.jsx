@@ -522,8 +522,8 @@ const SettingsPage = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                     <label className="form-label" style={{ margin: 0 }}>Full Name *</label>
                     {user?.name && user.role !== 'admin' && (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
-                        <Lock size={12} color="var(--warning)" /> Verified & Locked
+                      <span style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.25)', fontWeight: '600' }}>
+                        <CheckCircle size={13} color="#10b981" /> Verified
                       </span>
                     )}
                   </div>
@@ -555,8 +555,8 @@ const SettingsPage = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                     <label className="form-label" style={{ margin: 0 }}>Email Address *</label>
                     {user?.email && user.role !== 'admin' && (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
-                        <Lock size={12} color="var(--warning)" /> Verified & Locked
+                      <span style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.25)', fontWeight: '600' }}>
+                        <CheckCircle size={13} color="#10b981" /> Verified
                       </span>
                     )}
                   </div>
