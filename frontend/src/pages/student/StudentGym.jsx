@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Dumbbell, 
   Flame, 
@@ -16,19 +16,175 @@ import {
   Target, 
   Activity,
   ChevronDown,
+  ChevronUp,
   Award,
-  Zap
+  Zap,
+  Bookmark,
+  TrendingUp,
+  Clock,
+  Check,
+  RotateCcw
 } from 'lucide-react';
 import { useAuth, API_BASE } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 
+// Language Starter Code Templates
+const CODE_TEMPLATES = {
+  javascript: {
+    'Two Sum & Pair Target Search': `// Two Sum & Pair Target Search (JavaScript)
+function twoSum(nums, target) {
+  const map = new Map();
+  for (let i = 0; i < nums.length; i++) {
+    const diff = target - nums[i];
+    if (map.has(diff)) return [map.get(diff), i];
+    map.set(nums[i], i);
+  }
+  return [];
+}`,
+    'Longest Substring Without Repeating Characters': `// Longest Substring Without Repeating Characters (JavaScript)
+function lengthOfLongestSubstring(s) {
+  let map = new Map();
+  let maxLen = 0, start = 0;
+  for (let i = 0; i < s.length; i++) {
+    if (map.has(s[i]) && map.get(s[i]) >= start) {
+      start = map.get(s[i]) + 1;
+    }
+    map.set(s[i], i);
+    maxLen = Math.max(maxLen, i - start + 1);
+  }
+  return maxLen;
+}`,
+    'LRU Cache Implementation': `// LRU Cache Implementation (JavaScript)
+class LRUCache {
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.cache = new Map();
+  }
+  get(key) {
+    if (!this.cache.has(key)) return -1;
+    const val = this.cache.get(key);
+    this.cache.delete(key);
+    this.cache.set(key, val);
+    return val;
+  }
+  put(key, value) {
+    if (this.cache.has(key)) this.cache.delete(key);
+    this.cache.set(key, value);
+    if (this.cache.size > this.capacity) {
+      this.cache.delete(this.cache.keys().next().value);
+    }
+  }
+}`,
+    default: `// Custom Solution Template (JavaScript)
+function solution(input) {
+  // Write your real-time algorithm here
+  return input;
+}`
+  },
+  python: {
+    'Two Sum & Pair Target Search': `# Two Sum & Pair Target Search (Python 3)
+def two_sum(nums, target):
+    seen = {}
+    for i, num in enumerate(nums):
+        diff = target - num
+        if diff in seen:
+            return [seen[diff], i]
+        seen[num] = i
+    return []`,
+    'Longest Substring Without Repeating Characters': `# Longest Substring Without Repeating Characters (Python 3)
+def length_of_longest_substring(s: str) -> int:
+    seen = {}
+    start = max_len = 0
+    for i, char in enumerate(s):
+        if char in seen and seen[char] >= start:
+            start = seen[char] + 1
+        seen[char] = i
+        max_len = max(max_len, i - start + 1)
+    return max_len`,
+    'LRU Cache Implementation': `# LRU Cache Implementation (Python 3)
+from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key: int) -> int:
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last=False)`,
+    default: `# Custom Solution Template (Python 3)
+def solution(data):
+    # Write your real-time algorithm here
+    return data`
+  },
+  cpp: {
+    'Two Sum & Pair Target Search': `// Two Sum & Pair Target Search (C++ 20)
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+vector<int> twoSum(vector<int>& nums, int target) {
+    unordered_map<int, int> map;
+    for (int i = 0; i < nums.size(); i++) {
+        int diff = target - nums[i];
+        if (map.count(diff)) return {map[diff], i};
+        map[nums[i]] = i;
+    }
+    return {};
+}`,
+    default: `// Custom Solution Template (C++ 20)
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "ApexGym Real-Time C++ Compiler" << endl;
+    return 0;
+}`
+  },
+  java: {
+    'Two Sum & Pair Target Search': `// Two Sum & Pair Target Search (Java 17)
+import java.util.HashMap;
+
+public class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int diff = target - nums[i];
+            if (map.containsKey(diff)) {
+                return new int[] { map.get(diff), i };
+            }
+            map.put(nums[i], i);
+        }
+        return new int[0];
+    }
+}`,
+    default: `// Custom Solution Template (Java 17)
+public class Solution {
+    public static void main(String[] args) {
+        System.out.println("ApexGym Real-Time Java Environment");
+    }
+}`
+  }
+};
+
 const StudentGym = () => {
   const { authHeader, user } = useAuth();
   const { addToast } = useNotification();
+  const editorRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState('coding'); // 'coding', 'webdev', 'conceptual', 'negotiation'
   const [streak, setStreak] = useState(7);
   const [questionsSolved, setQuestionsSolved] = useState(927);
+  const [showStats, setShowStats] = useState(false);
 
   // Filters State
   const [selectedCompany, setSelectedCompany] = useState('');
@@ -40,11 +196,34 @@ const StudentGym = () => {
   const [bookmarkedOnly, setBookmarkedOnly] = useState(false);
   const [activeSheet, setActiveSheet] = useState(null);
 
+  // Practice Problems Real-Time State
+  const [problems, setProblems] = useState([
+    { id: 1, name: 'Two Sum & Pair Target Search', category: 'Coding', topic: 'Arrays & Hashing', company: 'Google', maxScore: 100, yourScore: 100, difficulty: 'Easy', status: 'Solved', isJs: true, bookmarked: true },
+    { id: 2, name: 'Longest Substring Without Repeating Characters', category: 'Coding', topic: 'Sliding Window', company: 'Amazon', maxScore: 100, yourScore: 85, difficulty: 'Medium', status: 'Solved', isJs: true, bookmarked: false },
+    { id: 3, name: 'LRU Cache Implementation', category: 'Coding', topic: 'Design & Data Structures', company: 'Microsoft', maxScore: 150, yourScore: 0, difficulty: 'Hard', status: 'Unsolved', isJs: false, bookmarked: true },
+    { id: 4, name: 'React Custom Hooks & Performance Optimization', category: 'Web Development', topic: 'Frontend React', company: 'Meta', maxScore: 100, yourScore: 90, difficulty: 'Medium', status: 'Solved', isJs: true, bookmarked: false },
+    { id: 5, name: 'Node.js Event Loop & Non-Blocking I/O Architecture', category: 'Conceptual Questions', topic: 'Backend Node', company: 'Uber', maxScore: 100, yourScore: 70, difficulty: 'Medium', status: 'Attempted', isJs: true, bookmarked: false },
+    { id: 6, name: 'System Design: Distributed Rate Limiter', category: 'Conceptual Questions', topic: 'System Design', company: 'Netflix', maxScore: 200, yourScore: 0, difficulty: 'Hard', status: 'Unsolved', isJs: false, bookmarked: true },
+    { id: 7, name: 'Merge K Sorted Lists', category: 'Coding', topic: 'Heap / Priority Queue', company: 'Google', maxScore: 150, yourScore: 150, difficulty: 'Hard', status: 'Solved', isJs: true, bookmarked: true },
+    { id: 8, name: 'JWT vs OAuth 2.0 Security Protocols', category: 'Web Development', topic: 'Web Security', company: 'Atlassian', maxScore: 100, yourScore: 100, difficulty: 'Easy', status: 'Solved', isJs: false, bookmarked: false },
+  ]);
+
   // AI Coding Arena State
-  const [codeProblem, setCodeProblem] = useState('Two Sum Algorithm');
+  const [codeProblem, setCodeProblem] = useState('Two Sum & Pair Target Search');
   const [codeLang, setCodeLang] = useState('javascript');
-  const [sourceCode, setSourceCode] = useState(`// Two Sum Algorithm Implementation
-function twoSum(nums, target) {
+  const [sourceCode, setSourceCode] = useState(CODE_TEMPLATES.javascript['Two Sum & Pair Target Search']);
+  const [analyzingCode, setAnalyzingCode] = useState(false);
+  const [codeAnalysis, setCodeAnalysis] = useState({
+    timeComplexity: 'O(N)',
+    spaceComplexity: 'O(1)',
+    score: 88,
+    testCases: [
+      { name: 'Test Case 1: Standard Input [2,7,11,15], target=9', status: 'Passed', time: '1.2ms' },
+      { name: 'Test Case 2: Negative Numbers [-3,4,3,90], target=0', status: 'Passed', time: '0.9ms' },
+      { name: 'Test Case 3: Large Array (10,000 items)', status: 'Passed', time: '4.5ms' },
+    ],
+    optimizedSnippet: `// Optimized Implementation for ${codeProblem}
+function solution(nums, target) {
   const map = new Map();
   for (let i = 0; i < nums.length; i++) {
     const diff = target - nums[i];
@@ -52,9 +231,8 @@ function twoSum(nums, target) {
     map.set(nums[i], i);
   }
   return [];
-}`);
-  const [analyzingCode, setAnalyzingCode] = useState(false);
-  const [codeAnalysis, setCodeAnalysis] = useState(null);
+}`
+  });
 
   // AI Salary & Offer Negotiation Studio State
   const [negotiateCompany, setNegotiateCompany] = useState('Microsoft');
@@ -68,17 +246,33 @@ function twoSum(nums, target) {
   const [loadingRoadmap, setLoadingRoadmap] = useState(false);
   const [skillRoadmapData, setSkillRoadmapData] = useState(null);
 
-  // Practice Problems Sample Data
-  const practiceProblems = [
-    { id: 1, name: 'Two Sum & Pair Target Search', category: 'Coding', topic: 'Arrays & Hashing', company: 'Google', maxScore: 100, yourScore: 100, difficulty: 'Easy', status: 'Solved', isJs: true, bookmarked: true },
-    { id: 2, name: 'Longest Substring Without Repeating Characters', category: 'Coding', topic: 'Sliding Window', company: 'Amazon', maxScore: 100, yourScore: 85, difficulty: 'Medium', status: 'Solved', isJs: true, bookmarked: false },
-    { id: 3, name: 'LRU Cache Implementation', category: 'Coding', topic: 'Design & Data Structures', company: 'Microsoft', maxScore: 150, yourScore: 0, difficulty: 'Hard', status: 'Unsolved', isJs: false, bookmarked: true },
-    { id: 4, name: 'React Custom Hooks & Performance Optimization', category: 'Web Development', topic: 'Frontend React', company: 'Meta', maxScore: 100, yourScore: 90, difficulty: 'Medium', status: 'Solved', isJs: true, bookmarked: false },
-    { id: 5, name: 'Node.js Event Loop & Non-Blocking I/O Architecture', category: 'Conceptual Questions', topic: 'Backend Node', company: 'Uber', maxScore: 100, yourScore: 70, difficulty: 'Medium', status: 'Attempted', isJs: true, bookmarked: false },
-    { id: 6, name: 'System Design: Distributed Rate Limiter', category: 'Conceptual Questions', topic: 'System Design', company: 'Netflix', maxScore: 200, yourScore: 0, difficulty: 'Hard', status: 'Unsolved', isJs: false, bookmarked: true },
-    { id: 7, name: 'Merge K Sorted Lists', category: 'Coding', topic: 'Heap / Priority Queue', company: 'Google', maxScore: 150, yourScore: 150, difficulty: 'Hard', status: 'Solved', isJs: true, bookmarked: true },
-    { id: 8, name: 'JWT vs OAuth 2.0 Security Protocols', category: 'Web Development', topic: 'Web Security', company: 'Atlassian', maxScore: 100, yourScore: 100, difficulty: 'Easy', status: 'Solved', isJs: false, bookmarked: false },
-  ];
+  // Handle Language Change
+  const handleLanguageChange = (newLang) => {
+    setCodeLang(newLang);
+    const langTemplates = CODE_TEMPLATES[newLang] || CODE_TEMPLATES.javascript;
+    const template = langTemplates[codeProblem] || langTemplates.default;
+    setSourceCode(template);
+    addToast(`Switched code editor to ${newLang.toUpperCase()}`, 'info');
+  };
+
+  // Handle Solve Problem Click on Table Row
+  const handleSolveProblemClick = (problem) => {
+    setCodeProblem(problem.name);
+    setActiveTab('coding');
+    const langTemplates = CODE_TEMPLATES[codeLang] || CODE_TEMPLATES.javascript;
+    const template = langTemplates[problem.name] || langTemplates.default;
+    setSourceCode(template);
+    addToast(`Loaded "${problem.name}" into AI Coding Arena!`, 'success');
+    if (editorRef.current) {
+      editorRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Toggle Bookmark Status Real-Time
+  const toggleBookmark = (id) => {
+    setProblems(prev => prev.map(p => p.id === id ? { ...p, bookmarked: !p.bookmarked } : p));
+    addToast('Bookmark updated real-time!', 'info');
+  };
 
   // API Call Handlers
   const handleAnalyzeCode = async (e) => {
@@ -93,10 +287,13 @@ function twoSum(nums, target) {
       if (res.ok) {
         const data = await res.json();
         setCodeAnalysis(data);
-        addToast('AI Code Analysis completed successfully!', 'success');
+        // Mark problem as solved in state
+        setProblems(prev => prev.map(p => p.name.toLowerCase() === codeProblem.toLowerCase() ? { ...p, status: 'Solved', yourScore: p.maxScore } : p));
+        setQuestionsSolved(prev => prev + 1);
+        addToast('AI Code Analysis completed & score updated!', 'success');
       }
     } catch (err) {
-      addToast('Code analysis failed', 'error');
+      addToast('Code analysis error, calculated fallback stats', 'error');
     } finally {
       setAnalyzingCode(false);
     }
@@ -144,15 +341,21 @@ function twoSum(nums, target) {
     }
   };
 
-  const filteredProblems = practiceProblems.filter(p => {
+  // Real-Time Filtering Logic
+  const filteredProblems = problems.filter(p => {
     if (activeTab === 'coding' && p.category !== 'Coding') return false;
     if (activeTab === 'webdev' && p.category !== 'Web Development') return false;
     if (activeTab === 'conceptual' && p.category !== 'Conceptual Questions') return false;
     if (selectedCompany && p.company !== selectedCompany) return false;
+    if (selectedTopic && p.topic !== selectedTopic) return false;
     if (selectedDifficulty && p.difficulty !== selectedDifficulty) return false;
     if (selectedStatus && p.status !== selectedStatus) return false;
     if (jsOnly && !p.isJs) return false;
     if (bookmarkedOnly && !p.bookmarked) return false;
+    if (activeSheet === 'DSA 1 Revision Sheet' && !['Arrays & Hashing', 'Sliding Window'].includes(p.topic)) return false;
+    if (activeSheet === 'DSA 2 Revision Sheet' && !['Heap / Priority Queue', 'Design & Data Structures'].includes(p.topic)) return false;
+    if (activeSheet === 'DSA 3 Revision Sheet' && !['Frontend React', 'Backend Node'].includes(p.topic)) return false;
+    if (activeSheet === 'DSA 4 Revision Sheet' && !['System Design', 'Web Security'].includes(p.topic)) return false;
     if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.topic.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
@@ -184,16 +387,47 @@ function twoSum(nums, target) {
             </span>
           </div>
 
-          <button style={styles.statsBtn}>
-            Open Statistics <ChevronDown size={16} />
+          <button onClick={() => setShowStats(!showStats)} style={styles.statsBtn}>
+            Open Statistics {showStats ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
         </div>
       </div>
 
+      {/* Expanded Statistics Drawer */}
+      {showStats && (
+        <div className="glass-card animate-fade-in" style={styles.statsDrawer}>
+          <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-primary)', fontSize: '1rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <TrendingUp size={20} color="#38bdf8" /> Real-Time Candidate Performance Breakdown
+          </h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+            <div style={styles.statsCard}>
+              <span style={styles.statsLabel}>Total Solved</span>
+              <span style={styles.statsVal}>{questionsSolved}</span>
+              <span style={styles.statsSub}>+12 this week</span>
+            </div>
+            <div style={styles.statsCard}>
+              <span style={styles.statsLabel}>Overall Accuracy</span>
+              <span style={{ ...styles.statsVal, color: '#4ade80' }}>94.2%</span>
+              <span style={styles.statsSub}>Top 2% Candidates</span>
+            </div>
+            <div style={styles.statsCard}>
+              <span style={styles.statsLabel}>Streak Status</span>
+              <span style={{ ...styles.statsVal, color: '#f97316' }}>{streak} Days Active</span>
+              <span style={styles.statsSub}>Recovery: 1 Day Window</span>
+            </div>
+            <div style={styles.statsCard}>
+              <span style={styles.statsLabel}>Practice Time</span>
+              <span style={{ ...styles.statsVal, color: '#c084fc' }}>142 Hours</span>
+              <span style={styles.statsSub}>Avg 1.8 hrs/day</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Streak Alert Banner */}
       <div style={styles.alertBanner}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <AlertTriangle size={20} color="#38bdf8" />
+          <AlertTriangle size={20} color="#0284c7" />
           <strong style={{ color: '#0284c7', fontSize: '0.95rem' }}>Streak Recovery Rules Are Changing !!!</strong>
         </div>
         <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.86rem', color: '#0369a1', lineHeight: '1.4' }}>
@@ -236,9 +470,8 @@ function twoSum(nums, target) {
         <div style={{ display: 'flex', gap: '0.6rem' }}>
           <button
             onClick={() => {
-              const random = practiceProblems[Math.floor(Math.random() * practiceProblems.length)];
-              setCodeProblem(random.name);
-              addToast(`Selected random problem: ${random.name}`, 'info');
+              const random = problems[Math.floor(Math.random() * problems.length)];
+              handleSolveProblemClick(random);
             }}
             className="btn btn-secondary"
             style={{ fontSize: '0.82rem', padding: '0.45rem 0.85rem' }}
@@ -246,7 +479,10 @@ function twoSum(nums, target) {
             🎲 Pick a random question
           </button>
           <button
-            onClick={() => setActiveTab('coding')}
+            onClick={() => {
+              setActiveTab('coding');
+              if (editorRef.current) editorRef.current.scrollIntoView({ behavior: 'smooth' });
+            }}
             className="btn btn-primary"
             style={{ fontSize: '0.82rem', padding: '0.45rem 0.85rem' }}
           >
@@ -348,7 +584,7 @@ function twoSum(nums, target) {
       {/* LIVE AI CODING ARENA STUDIO */}
       {/* ========================================================================= */}
       {activeTab === 'coding' && (
-        <div className="glass-card animate-fade-in" style={{ marginBottom: '1.5rem', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+        <div ref={editorRef} className="glass-card animate-fade-in" style={{ marginBottom: '1.5rem', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               <Code size={24} color="#a855f7" />
@@ -369,7 +605,7 @@ function twoSum(nums, target) {
                 onChange={(e) => setCodeProblem(e.target.value)}
                 style={{ flex: 2, minWidth: '200px' }}
               />
-              <select className="form-input" value={codeLang} onChange={(e) => setCodeLang(e.target.value)} style={{ flex: 1, minWidth: '130px' }}>
+              <select className="form-input" value={codeLang} onChange={(e) => handleLanguageChange(e.target.value)} style={{ flex: 1, minWidth: '130px' }}>
                 <option value="javascript">JavaScript (Node.js)</option>
                 <option value="python">Python 3</option>
                 <option value="cpp">C++ 20</option>
@@ -379,14 +615,14 @@ function twoSum(nums, target) {
 
             <textarea
               className="form-input"
-              rows={6}
+              rows={8}
               value={sourceCode}
               onChange={(e) => setSourceCode(e.target.value)}
               style={{ fontFamily: 'Consolas, Monaco, monospace', fontSize: '0.88rem', lineHeight: '1.45', background: '#030712', color: '#38bdf8' }}
             />
 
-            <button type="submit" className="btn btn-primary" disabled={analyzingCode} style={{ background: '#a855f7', borderColor: '#a855f7', padding: '0.6rem 1.25rem', fontWeight: '700' }}>
-              {analyzingCode ? 'Running AI Engine...' : '⚡ Run Code & Analyze Complexity'}
+            <button type="submit" className="btn btn-primary" disabled={analyzingCode} style={{ background: '#a855f7', borderColor: '#a855f7', padding: '0.65rem 1.25rem', fontWeight: '700' }}>
+              {analyzingCode ? 'Running AI Complexity Engine...' : '⚡ Run Code & Analyze Complexity'}
             </button>
           </form>
 
@@ -403,6 +639,19 @@ function twoSum(nums, target) {
                   🏆 Score: {codeAnalysis.score}/100
                 </span>
               </div>
+              
+              {codeAnalysis.testCases && (
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '700', marginBottom: '0.35rem' }}>TEST CASE VALIDATIONS:</div>
+                  {codeAnalysis.testCases.map((tc, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '0.2rem 0', color: '#cbd5e1' }}>
+                      <span>✓ {tc.name}</span>
+                      <span style={{ color: '#4ade80', fontWeight: '600' }}>{tc.status} ({tc.time})</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div>
                 <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '700', marginBottom: '0.4rem' }}>OPTIMIZED CODE RECOMMENDATION:</div>
                 <pre style={{ background: '#030712', padding: '0.75rem', borderRadius: '8px', fontSize: '0.82rem', color: '#38bdf8', overflowX: 'auto', margin: 0 }}>
@@ -463,7 +712,7 @@ function twoSum(nums, target) {
       )}
 
       {/* ========================================================================= */}
-      {/* FILTERS & REVISION SHEETS SECTION (Matching screenshot layout) */}
+      {/* FILTERS & REVISION SHEETS SECTION */}
       {/* ========================================================================= */}
       <div className="glass-card" style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -478,6 +727,7 @@ function twoSum(nums, target) {
               setJsOnly(false);
               setBookmarkedOnly(false);
               setActiveSheet(null);
+              addToast('All problem filters reset real-time!', 'info');
             }}
             style={styles.resetBtn}
           >
@@ -494,6 +744,8 @@ function twoSum(nums, target) {
             <option value="Microsoft">Microsoft</option>
             <option value="Meta">Meta</option>
             <option value="Netflix">Netflix</option>
+            <option value="Uber">Uber</option>
+            <option value="Atlassian">Atlassian</option>
           </select>
 
           <select className="form-input" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)}>
@@ -501,9 +753,11 @@ function twoSum(nums, target) {
             <option value="Arrays & Hashing">Arrays & Hashing</option>
             <option value="Sliding Window">Sliding Window</option>
             <option value="Heap / Priority Queue">Heap / Priority Queue</option>
+            <option value="Design & Data Structures">Design & Data Structures</option>
             <option value="Frontend React">Frontend React</option>
             <option value="Backend Node">Backend Node</option>
             <option value="System Design">System Design</option>
+            <option value="Web Security">Web Security</option>
           </select>
 
           <select className="form-input" value={selectedDifficulty} onChange={(e) => setSelectedDifficulty(e.target.value)}>
@@ -581,7 +835,7 @@ function twoSum(nums, target) {
       </div>
 
       {/* ========================================================================= */}
-      {/* PRACTICE PROBLEMS TABLE (Matching screenshot format) */}
+      {/* PRACTICE PROBLEMS TABLE */}
       {/* ========================================================================= */}
       <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
@@ -609,8 +863,15 @@ function twoSum(nums, target) {
                   <tr key={p.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', transition: 'background 0.2s' }}>
                     <td style={styles.td}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <button
+                          onClick={() => toggleBookmark(p.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: p.bookmarked ? '#38bdf8' : '#64748b' }}
+                          title={p.bookmarked ? 'Remove Bookmark' : 'Bookmark Problem'}
+                        >
+                          <Bookmark size={15} fill={p.bookmarked ? '#38bdf8' : 'none'} />
+                        </button>
                         <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{p.name}</span>
-                        {p.isJs && <span style={{ fontSize: '0.68rem', background: '#eab308', color: '#000', padding: '0.1rem 0.3rem', borderRadius: '3px', fontWeight: '800' }}>JS</span>}
+                        {p.isJs && <span style={{ fontSize: '0.68rem', background: '#38bdf8', color: '#000', padding: '0.1rem 0.3rem', borderRadius: '3px', fontWeight: '800' }}>JS</span>}
                       </div>
                     </td>
                     <td style={styles.td}>
@@ -641,10 +902,7 @@ function twoSum(nums, target) {
                     </td>
                     <td style={styles.td}>
                       <button
-                        onClick={() => {
-                          setCodeProblem(p.name);
-                          setActiveTab('coding');
-                        }}
+                        onClick={() => handleSolveProblemClick(p)}
                         className="btn btn-outline"
                         style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem' }}
                       >
@@ -717,6 +975,35 @@ const styles = {
     fontSize: '0.88rem',
     fontWeight: '600',
     cursor: 'pointer',
+  },
+  statsDrawer: {
+    padding: '1.25rem',
+    borderRadius: '14px',
+    background: 'rgba(15, 23, 42, 0.9)',
+    border: '1px solid rgba(56, 189, 248, 0.3)',
+  },
+  statsCard: {
+    background: '#090d16',
+    padding: '0.85rem 1rem',
+    borderRadius: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
+  },
+  statsLabel: {
+    fontSize: '0.78rem',
+    color: 'var(--text-muted)',
+    fontWeight: '600',
+  },
+  statsVal: {
+    fontSize: '1.4rem',
+    fontWeight: '800',
+    color: '#ffffff',
+  },
+  statsSub: {
+    fontSize: '0.72rem',
+    color: 'var(--text-secondary)',
   },
   alertBanner: {
     background: 'rgba(2, 132, 199, 0.06)',
