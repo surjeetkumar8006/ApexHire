@@ -890,41 +890,185 @@ function solution(nums, target) {
 // =========================================================================
 // NEW FEATURE 3: AI Skill Gap & 30-Day Placement Roadmap Engine
 // =========================================================================
+// =========================================================================
+// NEW FEATURE 3: AI Skill Gap & 30-Day Placement Roadmap Engine
+// =========================================================================
 export const generateSkillRoadmap = async (req, res) => {
   const { targetCompany, currentSkills } = req.body;
 
   try {
     const company = targetCompany || 'Google';
-    const missingSkills = ['System Design & Scalability', 'Redis Caching & Pub/Sub', 'Kafka Event Streaming', 'Docker & Kubernetes Containerization'];
-
-    const roadmap = [
-      {
-        week: 'Week 1: Core System Architecture & DSA Refinement',
-        focus: 'Master Advanced Data Structures & Algorithmic Patterns',
-        tasks: ['Solve 15 LeetCode Medium/Hard Graphs & Dynamic Programming problems', 'Study Memory Management and Garbage Collection internals']
+    
+    // Company-specific dynamic roadmap profiles
+    const COMPANY_PROFILES = {
+      'Google': {
+        matchPercentage: 76,
+        missingSkills: ['Large-Scale Distributed Systems', 'Advanced Graph Algorithms & DP', 'MapReduce & Distributed Consensus (Raft/Paxos)', 'GCP / Infrastructure Automation'],
+        roadmap: [
+          {
+            week: 'Week 1: Core System Architecture & Graph/DP Refinement',
+            focus: 'Master Advanced Data Structures & Algorithmic Patterns',
+            tasks: ['Solve 15 Google-tagged LeetCode Medium/Hard Graphs & Dynamic Programming problems', 'Study Memory Management and Garbage Collection internals in C++/Java']
+          },
+          {
+            week: 'Week 2: Distributed Systems & Google File System (GFS) Concepts',
+            focus: 'Distributed Consensus, Chubby Lock Service & Spanner DB Concepts',
+            tasks: ['Implement Raft consensus algorithm simulation', 'Build a distributed key-value store with replication and failover']
+          },
+          {
+            week: 'Week 3: GCP & High-Throughput Infrastructure Engineering',
+            focus: 'Google Cloud Bigtable, Pub/Sub & Kubernetes Cluster Configs',
+            tasks: ['Deploy containerized microservices on GKE with Prometheus monitoring', 'Implement high-performance gRPC streaming service']
+          },
+          {
+            week: 'Week 4: Google Coding & System Design Sprint',
+            focus: 'Google 45-min Structured Technical Interview Simulation',
+            tasks: ['Conduct 3 Google Mock Technical Sprints on ApexHire', 'Optimize code quality, edge cases, and time/space complexity']
+          }
+        ]
       },
-      {
-        week: 'Week 2: Microservices & High-Throughput Databases',
-        focus: 'Database Indexing, Sharding & NoSQL Scaling',
-        tasks: ['Implement Redis Caching layer over MongoDB/PostgreSQL', 'Build API Rate Limiter using Token Bucket Algorithm']
+      'Meta': {
+        matchPercentage: 81,
+        missingSkills: ['React Internal Fiber & Concurrent Mode', 'GraphQL & Relay Cache Architecture', 'Hack/PHP & Modern C++ Core', 'Large-Scale Live Media Architecture'],
+        roadmap: [
+          {
+            week: 'Week 1: Meta Frontend & React Internal Performance Tuning',
+            focus: 'React Fiber Architecture, Concurrent Mode & Custom Hooks',
+            tasks: ['Build custom Virtual DOM & Concurrent Renderer from scratch', 'Optimize JavaScript bundle size, code splitting, and memoization']
+          },
+          {
+            week: 'Week 2: GraphQL Schema Design & Relay Client Cache',
+            focus: 'Graph Queries, DataLoader Batching & Real-time WebSockets',
+            tasks: ['Build GraphQL Gateway with DataLoader reducing DB queries by 85%', 'Implement cursor-based pagination and real-time subscription stream']
+          },
+          {
+            week: 'Week 3: Meta Backend Infrastructure & High Concurrency',
+            focus: 'TAO Graph Database Patterns & Distributed Caching (Memcached)',
+            tasks: ['Design high-throughput Social Newsfeed Algorithm with fan-out on write', 'Benchmark cache hit ratios and write-through latency']
+          },
+          {
+            week: 'Week 4: Meta System Design & Product Architecture Sprint',
+            focus: 'Design Instagram/WhatsApp Messaging & Live Video Architecture',
+            tasks: ['Conduct Meta System Design Mock Sprint on ApexHire', 'Build end-to-end Chat & WebRTC Calling prototype']
+          }
+        ]
       },
-      {
-        week: 'Week 3: Event-Driven Systems & Cloud Infrastructure',
-        focus: 'Kafka, WebSockets & Docker Container Deployment',
-        tasks: ['Dockerize full-stack application with multi-stage build', 'Setup Real-time Event Streaming pipeline using Apache Kafka']
+      'Microsoft': {
+        matchPercentage: 84,
+        missingSkills: ['.NET Core / C# Internals', 'Azure Cloud Services & Active Directory', 'Enterprise Microservices Security', 'Cosmos DB & Multi-Region Sync'],
+        roadmap: [
+          {
+            week: 'Week 1: Microsoft Core OOP & Low-Level System Design (LLD)',
+            focus: 'Object-Oriented Design Patterns, SOLID Principles & C#/.NET',
+            tasks: ['Build an Enterprise Elevator / Parking Lot System applying SOLID principles', 'Master Thread Pool & Async Task async/await execution']
+          },
+          {
+            week: 'Week 2: Azure Cloud Architecture & Enterprise Security',
+            focus: 'Azure Functions, Key Vault, and OAuth2 / SAML Enterprise Identity',
+            tasks: ['Set up Azure Event Grid with Serverless Functions', 'Implement Single Sign-On (SSO) authentication & RBAC middleware']
+          },
+          {
+            week: 'Week 3: Cosmos DB & Multi-Region Database Replication',
+            focus: 'Global NoSQL Consistency Models & Database Partitioning',
+            tasks: ['Design multi-tenant SaaS schema on Azure Cosmos DB', 'Benchmark read/write latency across global multi-region setups']
+          },
+          {
+            week: 'Week 4: Microsoft Technical & Behavioral Interview Sprint',
+            focus: 'Low Level Design (LLD) + High Level Design (HLD) Sprints',
+            tasks: ['Complete Microsoft LLD/HLD Mock Sprints on ApexHire', 'Refine STAR methodology responses for Microsoft Competencies']
+          }
+        ]
       },
-      {
-        week: 'Week 4: Mock Interview Sprints & Production Project',
-        focus: 'Live Voice Mocks & High-Impact Portfolio Demo',
-        tasks: ['Conduct 3 Voice AI Technical Mock Interviews on ApexHire', 'Deploy production project on AWS/Vercel with CI/CD GitHub Actions']
+      'Amazon': {
+        matchPercentage: 79,
+        missingSkills: ['AWS Core Architecture (DynamoDB, SQS, S3, Lambda)', 'Amazon Leadership Principles (LPs)', 'Operational Excellence & Resilience', 'Distributed Rate Limiting'],
+        roadmap: [
+          {
+            week: 'Week 1: AWS Cloud Native Services & Serverless Architecture',
+            focus: 'DynamoDB Single-Table Design, SQS Message Queuing & AWS Lambda',
+            tasks: ['Design a Serverless E-Commerce Order Processor using AWS SQS + Lambda', 'Master DynamoDB Partition Keys & Global Secondary Indexes']
+          },
+          {
+            week: 'Week 2: High-Availability Systems & Resilience Engineering',
+            focus: 'Circuit Breakers, Exponential Backoff with Jitter, & Idempotency',
+            tasks: ['Implement Token Bucket Rate Limiter & Resilience Circuit Breaker', 'Setup Distributed Tracing with AWS X-Ray & CloudWatch Alarms']
+          },
+          {
+            week: 'Week 3: Amazon Leadership Principles Integration & Code Review',
+            focus: 'Customer Obsession, Ownership, & Dive Deep Code Walkthroughs',
+            tasks: ['Prepare 6 LP Stories using STAR method', 'Conduct peer code reviews emphasizing scalability and operational metrics']
+          },
+          {
+            week: 'Week 4: Amazon Bar Raiser & System Design Interview Sprint',
+            focus: 'Design Amazon Prime Video / E-Commerce Checkout System',
+            tasks: ['Complete Amazon Bar Raiser Mock Sprint on ApexHire', 'Finalize production repository deployment and infrastructure as code']
+          }
+        ]
+      },
+      'Salesforce': {
+        matchPercentage: 83,
+        missingSkills: ['Multi-Tenant Architecture Design', 'Apex / Lightning Web Components (LWC)', 'Enterprise Data Ingestion & ETL', 'REST / SOAP Integration Patterns'],
+        roadmap: [
+          {
+            week: 'Week 1: Multi-Tenant Software Architecture & Cloud Isolation',
+            focus: 'Tenant Data Partitioning, Metadata-Driven Architectures & LWC',
+            tasks: ['Build a Multi-Tenant SaaS Backend with Isolated Tenant Schemas', 'Build custom reactive LWC UI components with Lightning Design System']
+          },
+          {
+            week: 'Week 2: Enterprise API Integrations & Webhook Processing',
+            focus: 'Salesforce Pub/Sub API, Bulk API 2.0, & Asynchronous Processing',
+            tasks: ['Implement Bulk Data Ingestion pipeline handling 100k+ records', 'Configure OAuth 2.0 JWT Bearer flow for server-to-server integration']
+          },
+          {
+            week: 'Week 3: Security, Compliance & Apex Trigger Patterns',
+            focus: 'Field-Level Security (FLS), Sharing Rules & Scalable Trigger Frameworks',
+            tasks: ['Implement domain layer pattern with trigger handlers', 'Audit data encryption at rest and in transit']
+          },
+          {
+            week: 'Week 4: Salesforce Enterprise Architecture & Mock Sprint',
+            focus: 'Design Enterprise CRM & Cloud Pipeline System',
+            tasks: ['Complete Salesforce Technical Architecture Mock on ApexHire', 'Publish open-source integration plugin']
+          }
+        ]
       }
-    ];
+    };
+
+    // Find profile or build custom profile for any other company
+    let profile = COMPANY_PROFILES[company];
+    if (!profile) {
+      profile = {
+        matchPercentage: 80,
+        missingSkills: [`${company} Tech Stack Architecture`, 'Distributed Caching & Redis', 'Docker & Kubernetes', 'System Design & Scalability'],
+        roadmap: [
+          {
+            week: `Week 1: ${company} Technical Foundations & DSA`,
+            focus: 'Algorithmic Efficiency & Data Structure Mastery',
+            tasks: [`Solve 15 ${company}-focused coding challenges`, 'Optimize time and space complexity']
+          },
+          {
+            week: `Week 2: ${company} Backend & System Design`,
+            focus: 'API Gateway & Microservices Scaling',
+            tasks: ['Build scalable REST/gRPC backend service', 'Implement Redis caching and database indexing']
+          },
+          {
+            week: `Week 3: Cloud Deployment & Security Architecture`,
+            focus: 'Containerization, CI/CD & Security Middleware',
+            tasks: ['Dockerize application and deploy on Cloud', 'Configure OAuth2 authentication and HTTPS security']
+          },
+          {
+            week: `Week 4: ${company} Mock Technical Interview Sprint`,
+            focus: 'Live Sprints & Final Portfolio Optimization',
+            tasks: [`Conduct 3 ${company} Mock Sprints on ApexHire`, 'Deploy production ready project']
+          }
+        ]
+      };
+    }
 
     res.json({
       targetCompany: company,
-      matchPercentage: 78,
-      missingSkills,
-      roadmap
+      matchPercentage: profile.matchPercentage,
+      missingSkills: profile.missingSkills,
+      roadmap: profile.roadmap
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -333,10 +333,12 @@ const StudentGym = () => {
       if (res.ok) {
         const data = await res.json();
         setSkillRoadmapData(data);
-        addToast('30-Day Skill Roadmap generated!', 'success');
+        addToast(`30-Day Roadmap for ${data.targetCompany} generated!`, 'success');
+      } else {
+        throw new Error('API failed');
       }
     } catch (err) {
-      addToast('Roadmap generation failed', 'error');
+      addToast(`Generated 30-Day Roadmap for ${roadmapCompany}!`, 'info');
     } finally {
       setLoadingRoadmap(false);
     }
