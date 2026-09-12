@@ -322,6 +322,9 @@ const AdminJobs = () => {
                       <h4 style={styles.jobItemTitle}>{job.title}</h4>
                       <p style={styles.jobItemCompany}>
                         {job.company} • <span style={{ color: 'var(--text-muted)' }}>{job.location}</span>
+                        <span className="badge bg-secondary-glow text-secondary text-xs ms-2" style={{ borderRadius: '8px', fontSize: '0.72rem', padding: '0.15rem 0.5rem' }}>
+                          👤 {job.postedBy?.name || 'Placement Admin'} ({job.postedBy?.role === 'recruiter' ? 'Recruiter' : 'Admin'})
+                        </span>
                       </p>
                     </div>
                   </div>

@@ -323,13 +323,20 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                   ) : (
                     jobs.map(job => (
                       <div key={job._id} className="recruiter-job-card">
-                        <div className="d-flex justify-content-between align-items-start">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
                           <div>
                             <span className="recruiter-job-title">{job.title}</span>
                             <span className="recruiter-job-meta">{job.company} • {job.location}</span>
                           </div>
                           <span className="recruiter-job-badge">{job.type}</span>
                         </div>
+                        
+                        <div className="mb-2">
+                          <span className="badge bg-secondary-glow text-secondary text-xs" style={{ borderRadius: '10px', fontSize: '0.72rem', padding: '0.2rem 0.55rem' }}>
+                            👤 Posted by: {job.postedBy?.name || 'Placement Admin'} ({job.postedBy?.role === 'admin' ? 'Admin' : 'Recruiter'})
+                          </span>
+                        </div>
+
                         <div className="recruiter-job-footer text-xs text-muted">
                           <span>Salary: {job.salary}</span>
                           <span className={`dot-status ${job.status === 'active' ? 'bg-success' : 'bg-muted'}`} style={{ width: 8, height: 8, borderRadius: '50%' }}></span>

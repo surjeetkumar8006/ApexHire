@@ -186,7 +186,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         })}
       </div>
 
-      <div style={styles.footer}>
+      <div className="sidebar-footer" style={styles.footer}>
         <button onClick={logout} className="sidebar-logout-btn" title="Logout">
           <LogOut size={20} />
           <span className="sidebar-link-text">Logout</span>
@@ -201,7 +201,7 @@ const styles = {
   sidebar: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   mobileHeader: {
     display: 'none', // Shown via CSS on mobile

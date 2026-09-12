@@ -505,7 +505,8 @@ body.light-theme .form-select {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start !important;
+  gap: 0.5rem;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.85);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   scrollbar-width: none !important;
@@ -651,6 +652,12 @@ body.light-theme .form-select {
 
 .sidebar-menu-item.active svg {
   color: #818cf8 !important;
+}
+
+.sidebar-footer {
+  margin-top: auto !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.85rem;
 }
 
 .sidebar-logout-btn {

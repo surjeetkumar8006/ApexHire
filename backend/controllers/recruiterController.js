@@ -5,38 +5,35 @@ import Interview from '../models/Interview.js';
 import Notification from '../models/Notification.js';
 import User from '../models/User.js';
 
-// @desc    Get all jobs posted by the logged-in recruiter
+// @desc    Get all jobs in portal (both Admin & Recruiter created)
 // @route   GET /api/recruiter/jobs
 // @access  Private (Recruiter)
 export const getRecruiterJobs = async (req, res) => {
   try {
-    let jobs = await Job.find({ postedBy: req.user._id }).sort({ createdAt: -1 });
-    if (jobs.length === 0) {
-      // Fallback to active portal jobs so HR dashboard is immediately populated
-      jobs = await Job.find({}).sort({ createdAt: -1 }).limit(10);
-    }
+    const jobs = await Job.find({})
+      .populate('postedBy', 'name email role')
+      .sort({ createdAt: -1 });
     res.json(jobs);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Get all applications for the recruiter's jobs
+// @desc    Get all applications for portal jobs
 // @route   GET /api/recruiter/applicants
 // @access  Private (Recruiter)
 export const getRecruiterApplicants = async (req, res) => {
   try {
-    const userJobs = await Job.find({ postedBy: req.user._id });
-    const jobIds = userJobs.map((job) => job._id);
-
-    let query = { job: { $in: jobIds } };
-    if (jobIds.length === 0) {
-      query = {}; // Populate all candidate applications if recruiter has no custom jobs posted
-    }
-
-    const applications = await Application.find(query)
+    const applications = await Application.find({})
       .populate('student', 'name email phone avatar')
-      .populate('job', 'title company location type salary')
+      .populate({
+        path: 'job',
+        select: 'title company location type salary postedBy status',
+        populate: {
+          path: 'postedBy',
+          select: 'name email role'
+        }
+      })
       .sort({ createdAt: -1 });
 
     // Auto-increment Profile Views for candidates viewed by recruiter
@@ -58,80 +55,55 @@ export const getRecruiterApplicants = async (req, res) => {
 // @route   PUT /api/recruiter/applications/:id
 // @access  Private (Recruiter)
 export const updateApplicationStatus = async (req, res) => {
-  const { status, feedback } = req.body;
-
+  const { status } = req.body;
   try {
-    const application = await Application.findById(req.params.id)
-      .populate('student', 'name email')
-      .populate('job', 'title company');
-
+    const application = await Application.findById(req.params.id);
     if (!application) {
       return res.status(404).json({ message: 'Application not found' });
     }
 
-    if (status) application.status = status;
-    if (feedback !== undefined) application.feedback = feedback;
-
+    application.status = status;
     await application.save();
 
-    // Increment candidate profileViews when status is updated by recruiter
-    if (application.student?._id) {
-      await Profile.findOneAndUpdate(
-        { user: application.student._id },
-        { $inc: { profileViews: 1 } }
-      );
-    }
-
-    // Notify student about stage updates
+    // Create a notification for the student
     await Notification.create({
-      recipient: application.student._id,
-      title: `Application Update: ${application.job.title} 💼`,
-      message: `Your application status for "${application.job.title}" at "${application.job.company}" has been updated to "${status}".`,
+      recipient: application.student,
+      sender: req.user._id,
+      type: 'STATUS_UPDATE',
+      title: 'Application Status Updated',
+      message: `Your application status for job ID ${application.job} has been updated to "${status}".`,
     });
 
-    res.json({ message: 'Application updated successfully', application });
+    res.json(application);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Schedule interview and auto-generate meeting links
+// @desc    Schedule interview for candidate
 // @route   POST /api/recruiter/interviews
 // @access  Private (Recruiter)
-export const scheduleRecruiterInterview = async (req, res) => {
+export const scheduleInterview = async (req, res) => {
   const { studentId, jobTitle, company, date, time, type } = req.body;
-
   try {
-    if (!studentId || !jobTitle || !company || !date || !time) {
-      return res.status(400).json({ message: 'Please specify student, job, company, date, and time.' });
-    }
-
-    // Auto-generate a meeting link (Google Meet / Zoom mock)
-    const prefixes = ['meet.google.com/abc-defg-hij', 'meet.google.com/xyz-qwer-tyu', 'zoom.us/j/5558889999'];
-    const link = `https://${prefixes[Math.floor(Math.random() * prefixes.length)]}`;
-
     const interview = await Interview.create({
       student: studentId,
+      recruiter: req.user._id,
+      jobTitle,
       company,
-      role: jobTitle,
       date,
       time,
-      type: type || 'Technical Round',
+      type,
       status: 'Scheduled',
-      link,
+      meetingLink: `https://meet.google.com/apex-${Math.random().toString(36).substring(2, 7)}`
     });
 
-    // Increment profileViews for interview candidate
-    await Profile.findOneAndUpdate(
-      { user: studentId },
-      { $inc: { profileViews: 1 } }
-    );
-
-    // Notify student
     await Notification.create({
       recipient: studentId,
-      title: 'Interview scheduled! 🗓',
-      message: `Your interview for "${jobTitle}" at "${company}" is scheduled on ${date} @ ${time}. Join link: ${link}`,
+      sender: req.user._id,
+      type: 'INTERVIEW_SCHEDULED',
+      title: 'Interview Scheduled',
+      message: `An interview for ${jobTitle} at ${company} has been scheduled on ${date} at ${time}. Link: ${interview.meetingLink}`,
     });
 
     res.status(201).json(interview);
@@ -145,10 +117,8 @@ export const scheduleRecruiterInterview = async (req, res) => {
 // @access  Private (Recruiter)
 export const getRecruiterAnalytics = async (req, res) => {
   try {
-    const jobs = await Job.find({ postedBy: req.user._id });
-    const jobIds = jobs.map((job) => job._id);
-
-    const applications = await Application.find({ job: { $in: jobIds } });
+    const jobs = await Job.find({});
+    const applications = await Application.find({});
 
     // Funnel counts
     const counts = {
