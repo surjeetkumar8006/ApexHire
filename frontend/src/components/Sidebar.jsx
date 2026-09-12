@@ -158,12 +158,14 @@ const styles = {
     color: '#ffffff',
     display: 'flex',
     alignItems: 'center',
+    flexShrink: 0,
     opacity: 0.8,
   },
   activeIcon: {
     color: '#ffffff',
     display: 'flex',
     alignItems: 'center',
+    flexShrink: 0,
     opacity: 1,
   },
   linkText: {

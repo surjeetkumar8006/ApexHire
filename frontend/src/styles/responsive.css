@@ -22,17 +22,13 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.app-sidebar {
-  width: 295px;
-  background: var(--bg-surface);
-  border-right: 1px solid var(--border-color);
-  position: fixed;
-  top: 70px;
-  bottom: 0;
-  left: 0;
-  padding: 2rem 0.75rem;
-  z-index: 900;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+@media (min-width: 993px) {
+  .app-sidebar {
+    width: 76px;
+  }
+  .app-sidebar:hover {
+    width: 275px;
+  }
 }
 
 /* ==========================================================================
@@ -57,6 +53,7 @@
   }
   
   .app-sidebar {
+    width: 275px !important;
     transform: translateX(-100%);
     top: 0;
     padding-top: 2rem;
@@ -66,6 +63,12 @@
   
   .app-sidebar.open {
     transform: translateX(0);
+  }
+
+  .sidebar-link-text {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
   }
 
   .app-sidebar > div:first-child {
