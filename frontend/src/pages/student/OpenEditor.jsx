@@ -311,14 +311,10 @@ const OpenEditor = () => {
   const [running, setRunning] = useState(false);
   const [output, setOutput] = useState(null);
 
-  // Switch Language
+  // Switch Language (Preserving user code)
   const handleLanguageChange = (newLang) => {
     setLanguage(newLang);
-    const langTemplates = STARTER_TEMPLATES[newLang] || STARTER_TEMPLATES.javascript;
-    const newCode = langTemplates[templateKey] || langTemplates.blank;
-    setCode(newCode);
-    setOutput(null);
-    addToast(`Switched environment to ${newLang === 'javascript' ? 'JavaScript (Node.js)' : 'Java 17'}`, 'info');
+    addToast(`Switched environment to ${newLang === 'javascript' ? 'JavaScript (Node.js)' : 'Java 17'} (Code preserved)`, 'info');
   };
 
   // Switch Template Preset
