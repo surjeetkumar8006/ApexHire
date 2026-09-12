@@ -42,16 +42,6 @@ function twoSum(nums, target) {
   const [analyzingCode, setAnalyzingCode] = useState(false);
   const [codeAnalysis, setCodeAnalysis] = useState(null);
 
-  const [roadmapCompany, setRoadmapCompany] = useState('Google');
-  const [loadingRoadmap, setLoadingRoadmap] = useState(false);
-  const [skillRoadmapData, setSkillRoadmapData] = useState(null);
-
-  const [negotiateCompany, setNegotiateCompany] = useState('Microsoft');
-  const [offeredSalary, setOfferedSalary] = useState('24 LPA');
-  const [targetSalary, setTargetSalary] = useState('32 LPA');
-  const [negotiating, setNegotiating] = useState(false);
-  const [negotiationResult, setNegotiationResult] = useState(null);
-
   const handleTailorResume = async (e) => {
     e.preventDefault();
     setTailoring(true);
@@ -94,47 +84,7 @@ function twoSum(nums, target) {
     }
   };
 
-  const handleGenerateRoadmap = async (e) => {
-    e.preventDefault();
-    setLoadingRoadmap(true);
-    try {
-      const res = await fetch(`${API_BASE}/ai/skill-roadmap`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeader() },
-        body: JSON.stringify({ targetCompany: roadmapCompany, currentSkills: profile?.skills || [] })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setSkillRoadmapData(data);
-        addToast('30-Day Skill Roadmap generated!', 'success');
-      }
-    } catch (err) {
-      addToast('Failed to generate roadmap', 'error');
-    } finally {
-      setLoadingRoadmap(false);
-    }
-  };
 
-  const handleNegotiateOffer = async (e) => {
-    e.preventDefault();
-    setNegotiating(true);
-    try {
-      const res = await fetch(`${API_BASE}/ai/negotiate-offer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeader() },
-        body: JSON.stringify({ company: negotiateCompany, offeredCtc: offeredSalary, targetCtc: targetSalary })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setNegotiationResult(data);
-        addToast('Negotiation strategies generated!', 'success');
-      }
-    } catch (err) {
-      addToast('Failed to generate negotiation strategies', 'error');
-    } finally {
-      setNegotiating(false);
-    }
-  };
 
   const fetchProfile = async () => {
     try {
@@ -891,133 +841,7 @@ function twoSum(nums, target) {
             )}
           </div>
 
-          {/* ========================================================================= */}
-          {/* FEATURE 3: 🧠 AI SKILL GAP & 30-DAY PLACEMENT ROADMAP */}
-          {/* ========================================================================= */}
-          <div className="glass-card" style={{ marginBottom: '1.5rem', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
-              <Activity size={22} color="#fbbf24" />
-              <h3 style={{ ...styles.cardTitle, margin: 0, color: '#ffffff' }}>AI Skill Gap & 30-Day Placement Roadmap</h3>
-            </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              Select target tech companies to diagnose missing technical skills and generate a personalized 4-week step-by-step learning roadmap.
-            </p>
-            <form onSubmit={handleGenerateRoadmap} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-              <select className="form-input" value={roadmapCompany} onChange={(e) => setRoadmapCompany(e.target.value)} style={{ flex: 1, minWidth: '200px' }}>
-                <option value="Google">Google (SDE-1 / Staff)</option>
-                <option value="Meta">Meta (Production Eng)</option>
-                <option value="Microsoft">Microsoft (Software Engineer)</option>
-                <option value="Amazon">Amazon (SDE-1 AWS)</option>
-                <option value="Salesforce">Salesforce (Full Stack)</option>
-              </select>
-              <button type="submit" className="btn btn-primary" disabled={loadingRoadmap} style={{ background: '#d97706', borderColor: '#d97706' }}>
-                {loadingRoadmap ? 'Generating Roadmap...' : '🧠 Generate 30-Day Roadmap'}
-              </button>
-            </form>
 
-            {skillRoadmapData && (
-              <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '12px', padding: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#ffffff' }}>{skillRoadmapData.targetCompany} Readiness Match:</span>
-                  <span style={{ fontSize: '1rem', fontWeight: '900', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>
-                    {skillRoadmapData.matchPercentage}% Alignment
-                  </span>
-                </div>
-                <div style={{ marginBottom: '0.75rem' }}>
-                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '600', marginBottom: '0.35rem' }}>MISSING REQUIRED SKILLS:</div>
-                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                    {skillRoadmapData.missingSkills.map(sk => (
-                      <span key={sk} style={{ fontSize: '0.75rem', background: 'rgba(251, 191, 36, 0.15)', border: '1px solid rgba(251, 191, 36, 0.3)', color: '#fde047', padding: '0.15rem 0.5rem', borderRadius: '12px' }}>
-                        ⚠️ {sk}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {skillRoadmapData.roadmap.map((w, idx) => (
-                    <div key={idx} style={{ background: '#090d16', padding: '0.65rem 0.85rem', borderRadius: '8px', borderLeft: '3px solid #fbbf24' }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#ffffff' }}>{w.week}</div>
-                      <div style={{ fontSize: '0.78rem', color: '#fbbf24', margin: '2px 0' }}>Focus: {w.focus}</div>
-                      <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>• {w.tasks.join(' | ')}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ========================================================================= */}
-          {/* FEATURE 4: 💼 AI SALARY & OFFER NEGOTIATION ASSISTANT */}
-          {/* ========================================================================= */}
-          <div className="glass-card" style={{ marginBottom: '1.5rem', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
-              <Briefcase size={22} color="#34d399" />
-              <h3 style={{ ...styles.cardTitle, margin: 0, color: '#ffffff' }}>AI Salary & Offer Negotiation Studio</h3>
-            </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              Analyze job offer packages vs market benchmarks and generate 3 tailored, professional negotiation email scripts.
-            </p>
-            <form onSubmit={handleNegotiateOffer} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Company Name (e.g. Microsoft)"
-                  value={negotiateCompany}
-                  onChange={(e) => setNegotiateCompany(e.target.value)}
-                  style={{ flex: 1, minWidth: '150px' }}
-                />
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Offered CTC (e.g. 24 LPA)"
-                  value={offeredSalary}
-                  onChange={(e) => setOfferedSalary(e.target.value)}
-                  style={{ flex: 1, minWidth: '120px' }}
-                />
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Target CTC (e.g. 32 LPA)"
-                  value={targetSalary}
-                  onChange={(e) => setTargetSalary(e.target.value)}
-                  style={{ flex: 1, minWidth: '120px' }}
-                />
-              </div>
-              <button type="submit" className="btn btn-primary" disabled={negotiating} style={{ background: '#059669', borderColor: '#059669' }}>
-                {negotiating ? 'Generating Strategies...' : '💼 Generate Negotiation Scripts'}
-              </button>
-            </form>
-
-            {negotiationResult && (
-              <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(52, 211, 153, 0.3)', borderRadius: '12px', padding: '1rem' }}>
-                <div style={{ fontSize: '0.82rem', color: '#34d399', fontWeight: '600', marginBottom: '0.75rem' }}>
-                  📊 Benchmark: {negotiationResult.recommendation}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {negotiationResult.emails.map((e, idx) => (
-                    <div key={idx} style={{ background: '#090d16', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                        <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#ffffff' }}>{e.title}</span>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(e.body);
-                            addToast('Negotiation email script copied!', 'success');
-                          }}
-                          style={{ background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', padding: '0.15rem 0.5rem', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer' }}
-                        >
-                          📋 Copy Email
-                        </button>
-                      </div>
-                      <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: '0.78rem', color: '#cbd5e1', margin: 0, lineHeight: '1.45' }}>
-                        {e.body}
-                      </pre>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Profile Details Form */}
           <div className="glass-card">
