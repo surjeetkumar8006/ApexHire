@@ -90,7 +90,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* User Profile Summary Header */}
       <div 
-        style={styles.profileHeaderCard}
+        className="sidebar-profile-card"
         onClick={() => {
           const settingsPath = user.role === 'admin' ? '/admin/settings' : user.role === 'recruiter' ? '/recruiter/settings' : '/student/settings';
           navigate(settingsPath);
@@ -98,7 +98,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         }}
         title="View Profile Settings"
       >
-        <div style={styles.sidebarAvatar}>
+        <div className="sidebar-profile-avatar">
           {user.avatar ? (
             <img 
               src={user.avatar} 
@@ -129,11 +129,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             {(user.name || 'U').charAt(0).toUpperCase()}
           </span>
         </div>
-        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-          <strong style={{ color: 'var(--text-primary)', fontSize: '0.88rem', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+        <div className="sidebar-profile-info">
+          <strong className="sidebar-profile-name">
             {user.name}
           </strong>
-          <span style={{ fontSize: '0.72rem', color: 'var(--primary)', fontWeight: '600', textTransform: 'capitalize' }}>
+          <span className="sidebar-profile-role">
             {user.role === 'admin' ? 'Placement Admin' : user.role === 'recruiter' ? 'Corporate Recruiter' : 'Student Candidate'}
           </span>
         </div>

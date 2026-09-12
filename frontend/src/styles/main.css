@@ -535,6 +535,102 @@ body.light-theme .form-select {
   box-shadow: 12px 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(56, 189, 248, 0.12);
 }
 
+/* Sidebar Profile Card Styling */
+.sidebar-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  height: 52px;
+  min-height: 52px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.sidebar-profile-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-profile-avatar {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.sidebar-profile-card:hover .sidebar-profile-avatar {
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.sidebar-profile-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-10px);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.app-sidebar:hover .sidebar-profile-info,
+.app-sidebar.open .sidebar-profile-info {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.sidebar-profile-name {
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  display: block;
+}
+
+.sidebar-profile-role {
+  font-size: 0.72rem;
+  color: #a5b4fc;
+  font-weight: 500;
+  text-transform: capitalize;
+  display: block;
+}
+
+/* Adjustments when Sidebar is Collapsed on desktop */
+@media (min-width: 769px) {
+  .app-sidebar:not(:hover) .sidebar-profile-card {
+    padding: 0;
+    justify-content: center;
+    border-color: transparent;
+    background: transparent;
+  }
+}
+
 .sidebar-menu-item {
   display: flex;
   align-items: center;
