@@ -10,7 +10,16 @@ const referralRequestSchema = new mongoose.Schema(
     job: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Job',
-      required: true,
+      required: false,
+    },
+    alumniId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Alumni',
+      required: false,
+    },
+    jobTitle: {
+      type: String,
+      default: '',
     },
     alumniName: {
       type: String,
@@ -28,6 +37,18 @@ const referralRequestSchema = new mongoose.Schema(
       default: 'Pending',
     },
     note: {
+      type: String,
+      default: '',
+    },
+    resumeUrl: {
+      type: String,
+      default: '',
+    },
+    portfolioUrl: {
+      type: String,
+      default: '',
+    },
+    responseNote: {
       type: String,
       default: '',
     },

@@ -25,6 +25,7 @@ import StudentAssessments from './pages/student/StudentAssessments';
 import StudentResources from './pages/student/StudentResources';
 import StudentAppAnalytics from './pages/student/StudentAppAnalytics';
 import StudentEvents from './pages/student/StudentEvents';
+import StudentAlumniReferrals from './pages/student/StudentAlumniReferrals';
 
 // Recruiter Pages
 import RecruiterDashboard from './pages/recruiter/RecruiterDashboard';
@@ -104,6 +105,7 @@ function App() {
               <Route path="/student/resources" element={<ProtectedRoute allowedRoles={['student']}><StudentResources /></ProtectedRoute>} />
               <Route path="/student/app-analytics" element={<ProtectedRoute allowedRoles={['student']}><StudentAppAnalytics /></ProtectedRoute>} />
               <Route path="/student/events" element={<ProtectedRoute allowedRoles={['student']}><StudentEvents /></ProtectedRoute>} />
+              <Route path="/student/alumni-referrals" element={<ProtectedRoute allowedRoles={['student']}><StudentAlumniReferrals /></ProtectedRoute>} />
               <Route path="/student/forum" element={<ProtectedRoute allowedRoles={['student']}><ForumAndCommunity /></ProtectedRoute>} />
               <Route path="/student/chat" element={<ProtectedRoute allowedRoles={['student']}><ChatPortal /></ProtectedRoute>} />
               <Route path="/student/settings" element={<ProtectedRoute allowedRoles={['student']}><SettingsPage /></ProtectedRoute>} />

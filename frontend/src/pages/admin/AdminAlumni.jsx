@@ -390,6 +390,11 @@ const AdminAlumni = () => {
                             <span className="font-semibold text-primary">{ref.job.title}</span>
                             <span className="text-muted d-block text-xs" style={{ fontSize: '0.68rem' }}>at {ref.job.company}</span>
                           </div>
+                        ) : ref.jobTitle ? (
+                          <div>
+                            <span className="font-semibold text-primary">{ref.jobTitle}</span>
+                            <span className="text-muted d-block text-xs" style={{ fontSize: '0.68rem' }}>at {ref.alumniCompany}</span>
+                          </div>
                         ) : (
                           <span className="text-muted italic">General Position</span>
                         )}

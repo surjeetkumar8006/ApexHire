@@ -41,6 +41,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/student/assessments', name: 'Skill Assessments', icon: <Award size={20} /> },
     { path: '/student/interviews', name: 'My Interviews', icon: <CalendarCheck size={20} /> },
     { path: '/student/events', name: 'Career Events', icon: <CalendarCheck size={20} /> },
+    { path: '/student/alumni-referrals', name: 'Alumni & Referrals', icon: <GraduationCap size={20} /> },
     { path: '/student/forum', name: 'Discussion Forum', icon: <MessagesSquare size={20} /> },
     { path: '/student/chat', name: 'Inbox Chat', icon: <MessageSquare size={20} /> },
     { path: '/student/app-analytics', name: 'App Analytics', icon: <BarChart size={20} /> },

@@ -29,6 +29,34 @@ const alumniSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    domain: {
+      type: String,
+      default: 'Software Engineering',
+    },
+    skills: {
+      type: [String],
+      default: [],
+    },
+    availableForReferrals: {
+      type: Boolean,
+      default: true,
+    },
+    availableForMentorship: {
+      type: Boolean,
+      default: true,
+    },
+    location: {
+      type: String,
+      default: 'Remote',
+    },
+    avatar: {
+      type: String,
+      default: '',
+    },
+    bio: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,
