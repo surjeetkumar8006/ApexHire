@@ -521,14 +521,14 @@ body.light-theme .form-select {
 .sidebar-menu-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.8rem 0.95rem;
-  border-radius: var(--border-radius-md);
+  gap: 1.1rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 14px;
   cursor: pointer;
   text-align: left;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
   transition: all var(--transition-fast);
   background: transparent;
   width: 100%;
@@ -539,8 +539,10 @@ body.light-theme .form-select {
   display: inline-block;
   opacity: 0;
   visibility: hidden;
-  font-size: 0.9rem;
-  color: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.2px;
   white-space: nowrap;
   transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
   transform: translateX(-8px);
@@ -554,13 +556,14 @@ body.light-theme .form-select {
 
 .sidebar-menu-item:hover {
   color: #ffffff !important;
-  background-color: rgba(255, 255, 255, 0.08) !important;
+  background-color: #22242a !important;
 }
 
 .sidebar-menu-item.active {
   color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.14) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  background: #2a2b30 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .sidebar-logout-btn {
