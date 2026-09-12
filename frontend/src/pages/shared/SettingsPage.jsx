@@ -513,14 +513,73 @@ const SettingsPage = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} className="form-input" required />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <label className="form-label" style={{ margin: 0 }}>Full Name *</label>
+                    {user?.name && user.role !== 'admin' && (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                        <Lock size={12} color="var(--warning)" /> Verified & Locked
+                      </span>
+                    )}
+                  </div>
+                  <input 
+                    type="text" 
+                    name="name" 
+                    value={formData.name} 
+                    onChange={handleChange} 
+                    className="form-input" 
+                    required 
+                    disabled={Boolean(user?.name && user.role !== 'admin')}
+                    style={{
+                      ...(user?.name && user.role !== 'admin' ? {
+                        opacity: 0.75,
+                        cursor: 'not-allowed',
+                        background: 'var(--bg-surface-elevated)',
+                        borderColor: 'var(--border-color)'
+                      } : {})
+                    }}
+                  />
+                  {user?.name && user.role !== 'admin' && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                      Official candidate name is locked after registration for placement record verification.
+                    </span>
+                  )}
                 </div>
                 
                 <div className="form-group">
-                  <label className="form-label">Email Address</label>
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} className="form-input" required />
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Updating your email will modify your login credentials.</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <label className="form-label" style={{ margin: 0 }}>Email Address *</label>
+                    {user?.email && user.role !== 'admin' && (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                        <Lock size={12} color="var(--warning)" /> Verified & Locked
+                      </span>
+                    )}
+                  </div>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    value={formData.email} 
+                    onChange={handleChange} 
+                    className="form-input" 
+                    required 
+                    disabled={Boolean(user?.email && user.role !== 'admin')}
+                    style={{
+                      ...(user?.email && user.role !== 'admin' ? {
+                        opacity: 0.75,
+                        cursor: 'not-allowed',
+                        background: 'var(--bg-surface-elevated)',
+                        borderColor: 'var(--border-color)'
+                      } : {})
+                    }}
+                  />
+                  {user?.email && user.role !== 'admin' ? (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                      Registered primary email is locked to protect login credentials and identity verification.
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                      Updating your email will modify your login credentials.
+                    </span>
+                  )}
                 </div>
 
                 <div className="form-group">
