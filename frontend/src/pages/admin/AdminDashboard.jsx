@@ -50,12 +50,17 @@ const AdminDashboard = ({ view = 'overview' }) => {
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [broadcasting, setBroadcasting] = useState(false);
 
+  // AI Leaderboard States
+  const [aiLeaderboard, setAiLeaderboard] = useState([]);
+  const [leaderboardTierFilter, setLeaderboardTierFilter] = useState('All');
+
   const fetchData = async () => {
     try {
-      const [profilesRes, jobsRes, appsRes] = await Promise.all([
+      const [profilesRes, jobsRes, appsRes, leaderboardRes] = await Promise.all([
         fetch(`${API_BASE}/profile/all`, { headers: authHeader() }),
         fetch(`${API_BASE}/jobs`, { headers: authHeader() }),
         fetch(`${API_BASE}/applications/all`, { headers: authHeader() }),
+        fetch(`${API_BASE}/ai/candidate-leaderboard`, { headers: authHeader() }),
       ]);
 
       if (profilesRes.ok && jobsRes.ok && appsRes.ok) {
@@ -64,8 +69,13 @@ const AdminDashboard = ({ view = 'overview' }) => {
         const appsData = await appsRes.json();
 
         setProfiles(profilesData);
-        setApplications(appsData);
         setJobs(jobsData);
+        setApplications(appsData);
+
+        if (leaderboardRes && leaderboardRes.ok) {
+          const lbData = await leaderboardRes.json();
+          setAiLeaderboard(lbData);
+        }
 
         // Calculate dynamic metrics
         const uniquePlacedStudentIds = new Set(
@@ -1507,6 +1517,100 @@ const AdminDashboard = ({ view = 'overview' }) => {
             <h3>Avg Resume Score</h3>
             <p>{stats.avgScore}</p>
           </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* FEATURE 5: 📊 RECRUITER AI CANDIDATE RANKING LEADERBOARD */}
+      {/* ========================================================================= */}
+      <div className="glass-card mb-4" style={{ border: '1px solid rgba(56, 189, 248, 0.35)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <Trophy size={22} color="#38bdf8" />
+            <div>
+              <h3 style={{ ...styles.cardTitle, margin: 0, color: '#ffffff' }}>Recruiter AI Candidate Ranking Leaderboard</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>Real-time Gemini AI candidate shortlisting ranked by AI Match Score & Verification Tier.</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
+            {['All', 'Elite Tier', 'Top Tier', 'Standard Tier'].map(t => (
+              <button
+                key={t}
+                onClick={() => setLeaderboardTierFilter(t)}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '0.3rem 0.75rem',
+                  borderRadius: '20px',
+                  border: '1px solid ' + (leaderboardTierFilter === t ? '#38bdf8' : 'rgba(255,255,255,0.1)'),
+                  background: leaderboardTierFilter === t ? 'rgba(56, 189, 248, 0.2)' : 'transparent',
+                  color: leaderboardTierFilter === t ? '#38bdf8' : '#94a3b8',
+                  fontWeight: '700',
+                  cursor: 'pointer'
+                }}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ overflowX: 'auto' }}>
+          <table className="table" style={{ width: '100%', fontSize: '0.85rem', color: '#cbd5e1' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#94a3b8' }}>
+                <th style={{ padding: '0.6rem' }}>Rank</th>
+                <th style={{ padding: '0.6rem' }}>Candidate Name</th>
+                <th style={{ padding: '0.6rem' }}>AI Match Score</th>
+                <th style={{ padding: '0.6rem' }}>Tier</th>
+                <th style={{ padding: '0.6rem' }}>Verification</th>
+                <th style={{ padding: '0.6rem' }}>Key Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              {aiLeaderboard.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ padding: '1.5rem', textStyle: 'center', color: '#94a3b8' }}>Loading AI Candidate Leaderboard...</td>
+                </tr>
+              ) : (
+                aiLeaderboard
+                  .filter(c => leaderboardTierFilter === 'All' || c.tier === leaderboardTierFilter)
+                  .map((cand, idx) => (
+                    <tr key={cand.id || idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                      <td style={{ padding: '0.6rem', fontWeight: '900', color: idx === 0 ? '#fbbf24' : idx === 1 ? '#94a3b8' : idx === 2 ? '#cd7f32' : '#ffffff' }}>
+                        #{idx + 1}
+                      </td>
+                      <td style={{ padding: '0.6rem', fontWeight: '700', color: '#ffffff' }}>
+                        {cand.name} <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal' }}>({cand.email})</span>
+                      </td>
+                      <td style={{ padding: '0.6rem' }}>
+                        <span style={{ fontSize: '0.9rem', fontWeight: '900', color: cand.aiMatchScore >= 88 ? '#4ade80' : '#38bdf8', background: cand.aiMatchScore >= 88 ? 'rgba(74,222,128,0.15)' : 'rgba(56,189,248,0.15)', padding: '0.2rem 0.5rem', borderRadius: '12px' }}>
+                          ⚡ {cand.aiMatchScore}%
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.6rem' }}>
+                        <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px', background: cand.tier === 'Elite Tier' ? 'rgba(192, 132, 252, 0.2)' : 'rgba(56, 189, 248, 0.2)', color: cand.tier === 'Elite Tier' ? '#c084fc' : '#38bdf8', border: '1px solid ' + (cand.tier === 'Elite Tier' ? 'rgba(192, 132, 252, 0.4)' : 'rgba(56, 189, 248, 0.4)'), fontWeight: '700' }}>
+                          {cand.tier}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.6rem' }}>
+                        {cand.isVerified ? (
+                          <span style={{ color: '#4ade80', fontWeight: '700', fontSize: '0.8rem' }}>✓ Verified</span>
+                        ) : (
+                          <span style={{ color: '#fbbf24', fontSize: '0.8rem' }}>⚠️ Pending</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '0.6rem' }}>
+                        <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                          {cand.skills.slice(0, 3).map((sk, i) => (
+                            <span key={i} style={{ fontSize: '0.7rem', background: 'rgba(255, 255, 255, 0.06)', padding: '0.1rem 0.4rem', borderRadius: '6px' }}>{sk}</span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 

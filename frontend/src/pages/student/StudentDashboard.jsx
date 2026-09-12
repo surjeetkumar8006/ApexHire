@@ -22,6 +22,120 @@ const StudentDashboard = () => {
   const [position, setPosition] = useState('');
   const [expDescription, setExpDescription] = useState('');
 
+  // --- 4 NEW STUDENT AI FEATURES STATES & HANDLERS ---
+  const [tailorJobTitle, setTailorJobTitle] = useState('Google SDE-1');
+  const [tailoring, setTailoring] = useState(false);
+  const [tailorResult, setTailorResult] = useState(null);
+
+  const [codeProblem, setCodeProblem] = useState('Two Sum Algorithm');
+  const [codeLang, setCodeLang] = useState('javascript');
+  const [sourceCode, setSourceCode] = useState(`// Two Sum Algorithm Implementation
+function twoSum(nums, target) {
+  const map = new Map();
+  for (let i = 0; i < nums.length; i++) {
+    const diff = target - nums[i];
+    if (map.has(diff)) return [map.get(diff), i];
+    map.set(nums[i], i);
+  }
+  return [];
+}`);
+  const [analyzingCode, setAnalyzingCode] = useState(false);
+  const [codeAnalysis, setCodeAnalysis] = useState(null);
+
+  const [roadmapCompany, setRoadmapCompany] = useState('Google');
+  const [loadingRoadmap, setLoadingRoadmap] = useState(false);
+  const [skillRoadmapData, setSkillRoadmapData] = useState(null);
+
+  const [negotiateCompany, setNegotiateCompany] = useState('Microsoft');
+  const [offeredSalary, setOfferedSalary] = useState('24 LPA');
+  const [targetSalary, setTargetSalary] = useState('32 LPA');
+  const [negotiating, setNegotiating] = useState(false);
+  const [negotiationResult, setNegotiationResult] = useState(null);
+
+  const handleTailorResume = async (e) => {
+    e.preventDefault();
+    setTailoring(true);
+    try {
+      const res = await fetch(`${API_BASE}/ai/tailor-resume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify({ jobTitle: tailorJobTitle, currentSkills: profile?.skills || [] })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTailorResult(data);
+        addToast('ATS Resume Tailored successfully!', 'success');
+      }
+    } catch (err) {
+      addToast('Failed to tailor resume', 'error');
+    } finally {
+      setTailoring(false);
+    }
+  };
+
+  const handleAnalyzeCode = async (e) => {
+    e.preventDefault();
+    setAnalyzingCode(true);
+    try {
+      const res = await fetch(`${API_BASE}/ai/analyze-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify({ problemTitle: codeProblem, language: codeLang, code: sourceCode })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCodeAnalysis(data);
+        addToast('AI Code Analysis complete!', 'success');
+      }
+    } catch (err) {
+      addToast('Code analysis error', 'error');
+    } finally {
+      setAnalyzingCode(false);
+    }
+  };
+
+  const handleGenerateRoadmap = async (e) => {
+    e.preventDefault();
+    setLoadingRoadmap(true);
+    try {
+      const res = await fetch(`${API_BASE}/ai/skill-roadmap`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify({ targetCompany: roadmapCompany, currentSkills: profile?.skills || [] })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSkillRoadmapData(data);
+        addToast('30-Day Skill Roadmap generated!', 'success');
+      }
+    } catch (err) {
+      addToast('Failed to generate roadmap', 'error');
+    } finally {
+      setLoadingRoadmap(false);
+    }
+  };
+
+  const handleNegotiateOffer = async (e) => {
+    e.preventDefault();
+    setNegotiating(true);
+    try {
+      const res = await fetch(`${API_BASE}/ai/negotiate-offer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify({ company: negotiateCompany, offeredCtc: offeredSalary, targetCtc: targetSalary })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNegotiationResult(data);
+        addToast('Negotiation strategies generated!', 'success');
+      }
+    } catch (err) {
+      addToast('Failed to generate negotiation strategies', 'error');
+    } finally {
+      setNegotiating(false);
+    }
+  };
+
   const fetchProfile = async () => {
     try {
       const res = await fetch(`${API_BASE}/profile`, {
@@ -645,6 +759,264 @@ const StudentDashboard = () => {
                 </label>
               )}
             </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* FEATURE 1: 🎯 AI RESUME ATS TAILOR & MATCH BOOSTER */}
+          {/* ========================================================================= */}
+          <div className="glass-card" style={{ marginBottom: '1.5rem', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
+              <Target size={22} color="#38bdf8" />
+              <h3 style={{ ...styles.cardTitle, margin: 0, color: '#ffffff' }}>AI Resume ATS Tailor & Match Booster</h3>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Tailor your resume against target vacancy roles to boost ATS match scores from 65% to 95%+ with tailored high-impact bullet points.
+            </p>
+            <form onSubmit={handleTailorResume} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Target Role (e.g. Google SDE-1, Amazon Full Stack)"
+                value={tailorJobTitle}
+                onChange={(e) => setTailorJobTitle(e.target.value)}
+                style={{ flex: 1, minWidth: '220px' }}
+              />
+              <button type="submit" className="btn btn-primary" disabled={tailoring}>
+                {tailoring ? 'Tailoring Resume...' : '⚡ Boost ATS Score'}
+              </button>
+            </form>
+
+            {tailorResult && (
+              <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '12px', padding: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#ffffff' }}>{tailorResult.jobTitle} ATS Score:</span>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{tailorResult.currentScore}%</span>
+                    <span style={{ fontSize: '1.1rem', fontWeight: '900', color: '#4ade80', background: 'rgba(74, 222, 128, 0.15)', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>
+                      ⚡ {tailorResult.boostedScore}% Match
+                    </span>
+                  </div>
+                </div>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '600', marginBottom: '0.35rem' }}>MISSING ATS KEYWORDS:</div>
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                    {tailorResult.missingKeywords.map(kw => (
+                      <span key={kw} style={{ fontSize: '0.75rem', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', padding: '0.15rem 0.5rem', borderRadius: '12px' }}>
+                        + {kw}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '600', marginBottom: '0.35rem' }}>TAILORED ATS BULLET POINTS:</div>
+                  <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+                    {tailorResult.tailoredBulletPoints.map((bp, i) => (
+                      <li key={i} style={{ marginBottom: '0.35rem' }}>{bp}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ========================================================================= */}
+          {/* FEATURE 2: ⚡ INTERACTIVE AI CODING & TECHNICAL ARENA */}
+          {/* ========================================================================= */}
+          <div className="glass-card" style={{ marginBottom: '1.5rem', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
+              <Code size={22} color="#a855f7" />
+              <h3 style={{ ...styles.cardTitle, margin: 0, color: '#ffffff' }}>AI Coding & Technical Interview Arena</h3>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Write code snippets for LeetCode / System Design problems and receive real-time Time $O(N)$ / Space $O(1)$ complexity analysis, test case validations, and edge-case optimization.
+            </p>
+            <form onSubmit={handleAnalyzeCode} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Problem Name (e.g. Two Sum, LRU Cache)"
+                  value={codeProblem}
+                  onChange={(e) => setCodeProblem(e.target.value)}
+                  style={{ flex: 2 }}
+                />
+                <select className="form-input" value={codeLang} onChange={(e) => setCodeLang(e.target.value)} style={{ flex: 1 }}>
+                  <option value="javascript">JavaScript</option>
+                  <option value="python">Python</option>
+                  <option value="cpp">C++</option>
+                  <option value="java">Java</option>
+                </select>
+              </div>
+              <textarea
+                className="form-input"
+                rows={5}
+                value={sourceCode}
+                onChange={(e) => setSourceCode(e.target.value)}
+                style={{ fontFamily: 'Consolas, monospace', fontSize: '0.85rem', lineHeight: '1.4' }}
+              />
+              <button type="submit" className="btn btn-primary" disabled={analyzingCode} style={{ background: '#a855f7', borderColor: '#a855f7' }}>
+                {analyzingCode ? 'Analyzing Code...' : '⚡ Run AI Code Analysis'}
+              </button>
+            </form>
+
+            {codeAnalysis && (
+              <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '12px', padding: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.8rem', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', padding: '0.3rem 0.7rem', borderRadius: '20px', fontWeight: '700' }}>
+                    ⏱ Time: {codeAnalysis.timeComplexity}
+                  </span>
+                  <span style={{ fontSize: '0.8rem', background: 'rgba(168, 85, 247, 0.15)', border: '1px solid rgba(168, 85, 247, 0.3)', color: '#c084fc', padding: '0.3rem 0.7rem', borderRadius: '20px', fontWeight: '700' }}>
+                    💾 Space: {codeAnalysis.spaceComplexity}
+                  </span>
+                  <span style={{ fontSize: '0.8rem', background: 'rgba(74, 222, 128, 0.15)', border: '1px solid rgba(74, 222, 128, 0.3)', color: '#4ade80', padding: '0.3rem 0.7rem', borderRadius: '20px', fontWeight: '700' }}>
+                    🏆 Quality Score: {codeAnalysis.score}/100
+                  </span>
+                </div>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '600', marginBottom: '0.35rem' }}>TEST CASES EXECUTION:</div>
+                  {codeAnalysis.testCases.map((tc, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '0.2rem 0', color: '#cbd5e1' }}>
+                      <span>✓ {tc.name}</span>
+                      <span style={{ color: '#4ade80', fontWeight: '600' }}>{tc.status} ({tc.time})</span>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '600', marginBottom: '0.35rem' }}>OPTIMIZED CODE SUGGESTION:</div>
+                  <pre style={{ background: '#030712', padding: '0.75rem', borderRadius: '8px', fontSize: '0.8rem', color: '#38bdf8', overflowX: 'auto', margin: 0 }}>
+                    {codeAnalysis.optimizedSnippet}
+                  </pre>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ========================================================================= */}
+          {/* FEATURE 3: 🧠 AI SKILL GAP & 30-DAY PLACEMENT ROADMAP */}
+          {/* ========================================================================= */}
+          <div className="glass-card" style={{ marginBottom: '1.5rem', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
+              <Activity size={22} color="#fbbf24" />
+              <h3 style={{ ...styles.cardTitle, margin: 0, color: '#ffffff' }}>AI Skill Gap & 30-Day Placement Roadmap</h3>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Select target tech companies to diagnose missing technical skills and generate a personalized 4-week step-by-step learning roadmap.
+            </p>
+            <form onSubmit={handleGenerateRoadmap} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <select className="form-input" value={roadmapCompany} onChange={(e) => setRoadmapCompany(e.target.value)} style={{ flex: 1, minWidth: '200px' }}>
+                <option value="Google">Google (SDE-1 / Staff)</option>
+                <option value="Meta">Meta (Production Eng)</option>
+                <option value="Microsoft">Microsoft (Software Engineer)</option>
+                <option value="Amazon">Amazon (SDE-1 AWS)</option>
+                <option value="Salesforce">Salesforce (Full Stack)</option>
+              </select>
+              <button type="submit" className="btn btn-primary" disabled={loadingRoadmap} style={{ background: '#d97706', borderColor: '#d97706' }}>
+                {loadingRoadmap ? 'Generating Roadmap...' : '🧠 Generate 30-Day Roadmap'}
+              </button>
+            </form>
+
+            {skillRoadmapData && (
+              <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '12px', padding: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#ffffff' }}>{skillRoadmapData.targetCompany} Readiness Match:</span>
+                  <span style={{ fontSize: '1rem', fontWeight: '900', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>
+                    {skillRoadmapData.matchPercentage}% Alignment
+                  </span>
+                </div>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: '600', marginBottom: '0.35rem' }}>MISSING REQUIRED SKILLS:</div>
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                    {skillRoadmapData.missingSkills.map(sk => (
+                      <span key={sk} style={{ fontSize: '0.75rem', background: 'rgba(251, 191, 36, 0.15)', border: '1px solid rgba(251, 191, 36, 0.3)', color: '#fde047', padding: '0.15rem 0.5rem', borderRadius: '12px' }}>
+                        ⚠️ {sk}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {skillRoadmapData.roadmap.map((w, idx) => (
+                    <div key={idx} style={{ background: '#090d16', padding: '0.65rem 0.85rem', borderRadius: '8px', borderLeft: '3px solid #fbbf24' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#ffffff' }}>{w.week}</div>
+                      <div style={{ fontSize: '0.78rem', color: '#fbbf24', margin: '2px 0' }}>Focus: {w.focus}</div>
+                      <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>• {w.tasks.join(' | ')}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ========================================================================= */}
+          {/* FEATURE 4: 💼 AI SALARY & OFFER NEGOTIATION ASSISTANT */}
+          {/* ========================================================================= */}
+          <div className="glass-card" style={{ marginBottom: '1.5rem', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
+              <Briefcase size={22} color="#34d399" />
+              <h3 style={{ ...styles.cardTitle, margin: 0, color: '#ffffff' }}>AI Salary & Offer Negotiation Studio</h3>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Analyze job offer packages vs market benchmarks and generate 3 tailored, professional negotiation email scripts.
+            </p>
+            <form onSubmit={handleNegotiateOffer} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Company Name (e.g. Microsoft)"
+                  value={negotiateCompany}
+                  onChange={(e) => setNegotiateCompany(e.target.value)}
+                  style={{ flex: 1, minWidth: '150px' }}
+                />
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Offered CTC (e.g. 24 LPA)"
+                  value={offeredSalary}
+                  onChange={(e) => setOfferedSalary(e.target.value)}
+                  style={{ flex: 1, minWidth: '120px' }}
+                />
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Target CTC (e.g. 32 LPA)"
+                  value={targetSalary}
+                  onChange={(e) => setTargetSalary(e.target.value)}
+                  style={{ flex: 1, minWidth: '120px' }}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary" disabled={negotiating} style={{ background: '#059669', borderColor: '#059669' }}>
+                {negotiating ? 'Generating Strategies...' : '💼 Generate Negotiation Scripts'}
+              </button>
+            </form>
+
+            {negotiationResult && (
+              <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(52, 211, 153, 0.3)', borderRadius: '12px', padding: '1rem' }}>
+                <div style={{ fontSize: '0.82rem', color: '#34d399', fontWeight: '600', marginBottom: '0.75rem' }}>
+                  📊 Benchmark: {negotiationResult.recommendation}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {negotiationResult.emails.map((e, idx) => (
+                    <div key={idx} style={{ background: '#090d16', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#ffffff' }}>{e.title}</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(e.body);
+                            addToast('Negotiation email script copied!', 'success');
+                          }}
+                          style={{ background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', padding: '0.15rem 0.5rem', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer' }}
+                        >
+                          📋 Copy Email
+                        </button>
+                      </div>
+                      <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: '0.78rem', color: '#cbd5e1', margin: 0, lineHeight: '1.45' }}>
+                        {e.body}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Profile Details Form */}
