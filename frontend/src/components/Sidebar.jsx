@@ -19,7 +19,8 @@ import {
   MessageSquare,
   MessagesSquare,
   GraduationCap,
-  Dumbbell
+  Dumbbell,
+  Code
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { X } from 'lucide-react';
