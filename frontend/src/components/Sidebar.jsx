@@ -129,7 +129,8 @@ const styles = {
     flexDirection: 'column',
     gap: '0.2rem',
     overflowY: 'auto',
-    paddingRight: '0.5rem',
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
   },
   menuItem: {
     display: 'flex',

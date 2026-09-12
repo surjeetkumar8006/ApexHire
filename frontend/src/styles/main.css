@@ -507,6 +507,22 @@ body.light-theme .form-select {
   justify-content: space-between;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.7);
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease, background 0.35s ease;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Hide scrollbar completely inside sidebar */
+.app-sidebar::-webkit-scrollbar,
+.app-sidebar *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+.app-sidebar * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 /* Hover Expand - Pitch Black Background */
