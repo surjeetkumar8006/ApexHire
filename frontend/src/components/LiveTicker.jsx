@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Zap, TrendingUp, Award, Briefcase, Calendar, Radio } from 'lucide-react';
-import { API_BASE } from '../context/AuthContext';
+import { API_BASE, useAuth } from '../context/AuthContext';
 
 const LiveTicker = () => {
+  const { authHeader } = useAuth();
   const [tickerItems, setTickerItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRealData = async () => {
       try {
+        const headers = authHeader();
         const [statsRes, jobsRes, eventsRes] = await Promise.allSettled([
           fetch(`${API_BASE}/analytics/public`).then(r => r.json()),
-          fetch(`${API_BASE}/jobs`).then(r => r.json()),
-          fetch(`${API_BASE}/events`).then(r => r.json())
+          fetch(`${API_BASE}/jobs`, { headers }).then(r => r.json()),
+          fetch(`${API_BASE}/events`, { headers }).then(r => r.json())
         ]);
 
         const items = [];
