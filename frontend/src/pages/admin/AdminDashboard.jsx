@@ -1523,7 +1523,7 @@ const AdminDashboard = ({ view = 'overview' }) => {
       {/* ========================================================================= */}
       {/* FEATURE 5: 📊 RECRUITER AI CANDIDATE RANKING LEADERBOARD */}
       {/* ========================================================================= */}
-      <div className="glass-card mb-4" style={{ border: '1px solid rgba(56, 189, 248, 0.35)' }}>
+      <div className="glass-card mb-4" style={{ background: '#020408', border: '1px solid rgba(56, 189, 248, 0.35)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <Trophy size={22} color="#38bdf8" />
@@ -1539,13 +1539,14 @@ const AdminDashboard = ({ view = 'overview' }) => {
                 onClick={() => setLeaderboardTierFilter(t)}
                 style={{
                   fontSize: '0.75rem',
-                  padding: '0.3rem 0.75rem',
+                  padding: '0.35rem 0.85rem',
                   borderRadius: '20px',
-                  border: '1px solid ' + (leaderboardTierFilter === t ? '#38bdf8' : 'rgba(255,255,255,0.1)'),
-                  background: leaderboardTierFilter === t ? 'rgba(56, 189, 248, 0.2)' : 'transparent',
-                  color: leaderboardTierFilter === t ? '#38bdf8' : '#94a3b8',
+                  border: '1px solid ' + (leaderboardTierFilter === t ? '#38bdf8' : 'rgba(255,255,255,0.15)'),
+                  background: leaderboardTierFilter === t ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0a0d14',
+                  color: leaderboardTierFilter === t ? '#ffffff' : '#cbd5e1',
                   fontWeight: '700',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  boxShadow: leaderboardTierFilter === t ? '0 2px 10px rgba(56, 189, 248, 0.3)' : 'none'
                 }}
               >
                 {t}
@@ -1587,15 +1588,15 @@ const AdminDashboard = ({ view = 'overview' }) => {
                       <tr 
                         key={cand.id || idx} 
                         style={{ 
-                          background: 'rgba(15, 23, 42, 0.7)', 
-                          border: '1px solid rgba(255, 255, 255, 0.12)', 
+                          background: '#000000', 
+                          border: '1px solid rgba(255, 255, 255, 0.15)', 
                           borderRadius: '12px',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
+                          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.6)',
                           transition: 'all 0.2s ease-in-out'
                         }}
                       >
                         {/* Rank Badge */}
-                        <td style={{ padding: '0.85rem 1rem', borderTopLeftRadius: '12px', borderBottomLeftRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', borderRight: 'none' }}>
+                        <td style={{ padding: '0.85rem 1rem', borderTopLeftRadius: '12px', borderBottomLeftRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.15)', borderRight: 'none' }}>
                           <span style={{ 
                             display: 'inline-flex', 
                             alignItems: 'center', 
@@ -1614,7 +1615,7 @@ const AdminDashboard = ({ view = 'overview' }) => {
                         </td>
 
                         {/* Candidate Name & Email with Avatar */}
-                        <td style={{ padding: '0.85rem 1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                        <td style={{ padding: '0.85rem 1rem', borderTop: '1px solid rgba(255, 255, 255, 0.15)', borderBottom: '1px solid rgba(255, 255, 255, 0.15)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <div style={{
                               width: '32px',
@@ -1632,14 +1633,14 @@ const AdminDashboard = ({ view = 'overview' }) => {
                               {(cand.name || 'S').charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <strong style={{ color: '#f8fafc', fontSize: '0.9rem', display: 'block', fontWeight: '700' }}>{cand.name}</strong>
+                              <strong style={{ color: '#ffffff', fontSize: '0.9rem', display: 'block', fontWeight: '700' }}>{cand.name}</strong>
                               <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{cand.email}</span>
                             </div>
                           </div>
                         </td>
 
                         {/* AI Match Score */}
-                        <td style={{ padding: '0.85rem 1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                        <td style={{ padding: '0.85rem 1rem', borderTop: '1px solid rgba(255, 255, 255, 0.15)', borderBottom: '1px solid rgba(255, 255, 255, 0.15)' }}>
                           <span style={{ 
                             fontSize: '0.82rem', 
                             fontWeight: '800', 
@@ -1657,7 +1658,7 @@ const AdminDashboard = ({ view = 'overview' }) => {
                         </td>
 
                         {/* Tier */}
-                        <td style={{ padding: '0.85rem 1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                        <td style={{ padding: '0.85rem 1rem', borderTop: '1px solid rgba(255, 255, 255, 0.15)', borderBottom: '1px solid rgba(255, 255, 255, 0.15)' }}>
                           <span style={{ 
                             fontSize: '0.75rem', 
                             padding: '4px 10px', 
@@ -1672,7 +1673,7 @@ const AdminDashboard = ({ view = 'overview' }) => {
                         </td>
 
                         {/* Verification */}
-                        <td style={{ padding: '0.85rem 1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                        <td style={{ padding: '0.85rem 1rem', borderTop: '1px solid rgba(255, 255, 255, 0.15)', borderBottom: '1px solid rgba(255, 255, 255, 0.15)' }}>
                           {cand.isVerified ? (
                             <span style={{ 
                               color: '#34d399', 
@@ -1707,10 +1708,10 @@ const AdminDashboard = ({ view = 'overview' }) => {
                         </td>
 
                         {/* Key Skills */}
-                        <td style={{ padding: '0.85rem 1rem', borderTopRightRadius: '12px', borderBottomRightRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', borderLeft: 'none' }}>
+                        <td style={{ padding: '0.85rem 1rem', borderTopRightRadius: '12px', borderBottomRightRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.15)', borderLeft: 'none' }}>
                           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                             {displaySkills.slice(0, 3).map((sk, i) => (
-                              <span key={i} style={{ fontSize: '0.72rem', background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#cbd5e1', padding: '2px 8px', borderRadius: '6px', fontWeight: '500' }}>
+                              <span key={i} style={{ fontSize: '0.72rem', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.12)', color: '#cbd5e1', padding: '2px 8px', borderRadius: '6px', fontWeight: '500' }}>
                                 {sk}
                               </span>
                             ))}
