@@ -114,12 +114,19 @@ const AuthPage = ({ onBack }) => {
 
     try {
       const res = await requestForgotPassword(clean);
-      setOtpMessage(res.message || 'OTP generated!');
-      if (res.otp) {
+      setOtpMessage(res.message || 'OTP code sent!');
+      if (res.otp && !res.emailSent) {
         setOtpCode(res.otp);
+      } else {
+        setOtpCode('');
       }
       setViewMode('forgot_reset');
-      addToast('Verification OTP generated successfully!', 'success');
+      addToast(
+        res.emailSent
+          ? `📩 OTP code sent to ${clean}! Please check your Gmail inbox.`
+          : 'Verification OTP generated!',
+        'success'
+      );
     } catch (err) {
       const errMsg = err.message || 'Failed to request OTP code.';
       setFormError(errMsg);
@@ -635,20 +642,26 @@ const AuthPage = ({ onBack }) => {
 
                 {otpMessage && (
                   <div style={{
-                    padding: '0.75rem 0.95rem',
-                    borderRadius: '10px',
-                    backgroundColor: 'rgba(56, 189, 248, 0.12)',
-                    border: '1px solid rgba(56, 189, 248, 0.3)',
-                    color: '#38bdf8',
-                    fontSize: '0.82rem',
+                    padding: '0.85rem 1rem',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(34, 197, 94, 0.12)',
+                    border: '1px solid rgba(34, 197, 94, 0.35)',
+                    color: '#4ade80',
+                    fontSize: '0.85rem',
                     fontWeight: '600',
-                    marginBottom: '0.5rem',
+                    marginBottom: '0.85rem',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem'
+                    gap: '0.65rem',
+                    lineHeight: '1.45'
                   }}>
-                    <Key size={16} color="#38bdf8" />
-                    <span>{otpMessage}</span>
+                    <Mail size={20} color="#4ade80" style={{ flexShrink: 0 }} />
+                    <div>
+                      <div>{otpMessage}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#a7f3d0', fontWeight: '400', marginTop: '2px' }}>
+                        Please open your Gmail inbox or Spam folder to copy the 6-digit code.
+                      </div>
+                    </div>
                   </div>
                 )}
 

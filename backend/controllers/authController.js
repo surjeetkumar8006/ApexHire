@@ -138,9 +138,9 @@ export const forgotPassword = async (req, res) => {
 
     res.json({
       message: emailSent
-        ? 'Verification OTP code has been sent to your email address!'
+        ? `Verification OTP code has been sent directly to your email address (${user.email})!`
         : `Verification OTP generated: ${otp}`,
-      otp,
+      otp: emailSent ? undefined : otp,
       email: user.email,
       emailSent
     });
