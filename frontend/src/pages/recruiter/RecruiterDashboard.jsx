@@ -68,11 +68,15 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
   const [matchScores, setMatchScores] = useState({});
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [activeTab]);
+    fetchDashboardData(true);
+    const interval = setInterval(() => {
+      fetchDashboardData(false);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [activeTab, searchSkill]);
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
+  const fetchDashboardData = async (showLoadingSpinner = true) => {
+    if (showLoadingSpinner) setLoading(true);
     try {
       if (activeTab === 'overview') {
         // Fetch jobs, applicants, analytics
@@ -100,9 +104,11 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
       }
     } catch (err) {
       console.error(err);
-      addToast('Failed to load recruiter dashboard data', 'error');
+      if (showLoadingSpinner) {
+        addToast('Failed to load recruiter dashboard data', 'error');
+      }
     } finally {
-      setLoading(false);
+      if (showLoadingSpinner) setLoading(false);
     }
   };
 
@@ -681,7 +687,7 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                 <button 
                   type="submit" 
                   className="btn btn-primary"
-                  style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.88rem', boxShadow: '0 4px 16px rgba(255, 255, 255, 0.2)' }}
+                  style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.88rem', boxShadow: 'none' }}
                 >
                   Publish Opportunity
                 </button>
@@ -767,7 +773,7 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                 <button 
                   type="submit" 
                   className="btn btn-primary"
-                  style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.88rem', boxShadow: '0 4px 16px rgba(255, 255, 255, 0.2)' }}
+                  style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: '800', fontSize: '0.88rem', boxShadow: 'none' }}
                 >
                   Schedule & Send Link
                 </button>

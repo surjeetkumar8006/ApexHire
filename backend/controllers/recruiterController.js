@@ -10,7 +10,11 @@ import User from '../models/User.js';
 // @access  Private (Recruiter)
 export const getRecruiterJobs = async (req, res) => {
   try {
-    const jobs = await Job.find({ postedBy: req.user._id }).sort({ createdAt: -1 });
+    let jobs = await Job.find({ postedBy: req.user._id }).sort({ createdAt: -1 });
+    if (jobs.length === 0) {
+      // Fallback to active portal jobs so HR dashboard is immediately populated
+      jobs = await Job.find({}).sort({ createdAt: -1 }).limit(10);
+    }
     res.json(jobs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -22,12 +26,17 @@ export const getRecruiterJobs = async (req, res) => {
 // @access  Private (Recruiter)
 export const getRecruiterApplicants = async (req, res) => {
   try {
-    const jobs = await Job.find({ postedBy: req.user._id });
-    const jobIds = jobs.map((job) => job._id);
+    const userJobs = await Job.find({ postedBy: req.user._id });
+    const jobIds = userJobs.map((job) => job._id);
 
-    const applications = await Application.find({ job: { $in: jobIds } })
+    let query = { job: { $in: jobIds } };
+    if (jobIds.length === 0) {
+      query = {}; // Populate all candidate applications if recruiter has no custom jobs posted
+    }
+
+    const applications = await Application.find(query)
       .populate('student', 'name email phone avatar')
-      .populate('job', 'title company location type')
+      .populate('job', 'title company location type salary')
       .sort({ createdAt: -1 });
 
     // Auto-increment Profile Views for candidates viewed by recruiter
