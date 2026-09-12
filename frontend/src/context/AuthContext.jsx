@@ -84,6 +84,64 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const requestForgotPassword = async (email) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to send password reset request');
+      }
+
+      return data;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error('Connection timed out. Please try again.');
+      }
+      throw err;
+    }
+  };
+
+  const submitResetPassword = async (email, otp, newPassword) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), otp, newPassword }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to reset password');
+      }
+
+      return data;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error('Connection timed out. Please try again.');
+      }
+      throw err;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('userInfo');
     setUser(null);
@@ -104,7 +162,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, authHeader }}>
+    <AuthContext.Provider value={{ user, loading, login, register, requestForgotPassword, submitResetPassword, logout, updateUser, authHeader }}>
       {!loading && children}
     </AuthContext.Provider>
   );

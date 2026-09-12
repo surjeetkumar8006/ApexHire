@@ -3,6 +3,8 @@ import {
   registerUser,
   authUser,
   getUserProfile,
+  forgotPassword,
+  resetPassword,
   getCoordinators,
   createCoordinator,
   updateCoordinator,
@@ -14,6 +16,8 @@ const router = express.Router();
 
 router.post('/register', registerUser);
 router.post('/login', authUser);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 router.get('/profile', protect, getUserProfile);
 
 // Coordinator CRUD routes (Admin Only)

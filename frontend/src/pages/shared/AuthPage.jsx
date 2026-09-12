@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
-import { Lock, Mail, User, ArrowLeft, GraduationCap, Shield, Sparkles, CheckCircle, Briefcase } from 'lucide-react';
+import { Lock, Mail, User, ArrowLeft, GraduationCap, Shield, Sparkles, CheckCircle, Briefcase, Key, RefreshCw } from 'lucide-react';
 
 const companies = [
   { name: 'Google', icon: 'G' },
@@ -16,7 +16,7 @@ const companies = [
 
 const AuthPage = ({ onBack }) => {
   const navigate = useNavigate();
-  const { login, register } = useAuth();
+  const { login, register, requestForgotPassword, submitResetPassword } = useAuth();
   const { addToast } = useNotification();
 
   const handleReturnHome = () => {
@@ -24,12 +24,21 @@ const AuthPage = ({ onBack }) => {
     navigate('/');
   };
 
+  const [viewMode, setViewMode] = useState('auth'); // 'auth', 'forgot_email', 'forgot_reset'
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState('student'); // 'student' or 'admin'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Forgot password states
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [otpMessage, setOtpMessage] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -80,6 +89,91 @@ const AuthPage = ({ onBack }) => {
       }
     } catch (err) {
       const errMsg = err.message || 'Authentication failed. Please check your credentials.';
+      setFormError(errMsg);
+      addToast(errMsg, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRequestOtp = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    setFormError('');
+
+    const clean = forgotEmail ? forgotEmail.trim() : '';
+
+    if (!clean) {
+      const msg = 'Please enter your registered email address';
+      setFormError(msg);
+      addToast(msg, 'warning');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await requestForgotPassword(clean);
+      setOtpMessage(res.message || 'OTP generated!');
+      if (res.otp) {
+        setOtpCode(res.otp);
+      }
+      setViewMode('forgot_reset');
+      addToast('Verification OTP generated successfully!', 'success');
+    } catch (err) {
+      const errMsg = err.message || 'Failed to request OTP code.';
+      setFormError(errMsg);
+      addToast(errMsg, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    setFormError('');
+
+    const cleanEmail = forgotEmail ? forgotEmail.trim() : '';
+    const cleanOtp = otpCode ? otpCode.trim() : '';
+
+    if (!cleanOtp || !newPassword) {
+      const msg = 'Please enter the OTP code and new password';
+      setFormError(msg);
+      addToast(msg, 'warning');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      const msg = 'New passwords do not match';
+      setFormError(msg);
+      addToast(msg, 'error');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      const msg = 'New password must be at least 6 characters long';
+      setFormError(msg);
+      addToast(msg, 'warning');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await submitResetPassword(cleanEmail, cleanOtp, newPassword);
+      addToast(res.message || 'Password reset successfully! Please sign in.', 'success');
+      setEmail(cleanEmail);
+      setPassword(newPassword);
+      setViewMode('auth');
+      setIsLogin(true);
+      setForgotEmail('');
+      setOtpCode('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setOtpMessage('');
+    } catch (err) {
+      const errMsg = err.message || 'Failed to reset password.';
       setFormError(errMsg);
       addToast(errMsg, 'error');
     } finally {
@@ -227,247 +321,420 @@ const AuthPage = ({ onBack }) => {
           </button>
 
           <div className="glass-card auth-card">
-          {/* Capsule Switcher */}
-          <div className="auth-capsule-switcher">
-            <button
-              type="button"
-              onClick={() => { setIsLogin(true); setFormError(''); }}
-              style={{
-                ...styles.switcherBtn,
-                color: isLogin ? '#0b0f19' : 'var(--text-secondary)',
-                backgroundColor: isLogin ? '#ffffff' : 'transparent',
-                boxShadow: isLogin ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none',
-              }}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => { setIsLogin(false); setFormError(''); }}
-              style={{
-                ...styles.switcherBtn,
-                color: !isLogin ? '#0b0f19' : 'var(--text-secondary)',
-                backgroundColor: !isLogin ? '#ffffff' : 'transparent',
-                boxShadow: !isLogin ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none',
-              }}
-            >
-              Register
-            </button>
-          </div>
+            {viewMode === 'auth' && (
+              <>
+                {/* Capsule Switcher */}
+                <div className="auth-capsule-switcher">
+                  <button
+                    type="button"
+                    onClick={() => { setIsLogin(true); setFormError(''); }}
+                    style={{
+                      ...styles.switcherBtn,
+                      color: isLogin ? '#0b0f19' : 'var(--text-secondary)',
+                      backgroundColor: isLogin ? '#ffffff' : 'transparent',
+                      boxShadow: isLogin ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none',
+                    }}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsLogin(false); setFormError(''); }}
+                    style={{
+                      ...styles.switcherBtn,
+                      color: !isLogin ? '#0b0f19' : 'var(--text-secondary)',
+                      backgroundColor: !isLogin ? '#ffffff' : 'transparent',
+                      boxShadow: !isLogin ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none',
+                    }}
+                  >
+                    Register
+                  </button>
+                </div>
 
-          <div style={styles.formHeader}>
-            <h2 style={styles.formTitle}>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-            <p style={styles.formDesc}>
-              {isLogin
-                ? 'Enter your credentials to access your dashboard'
-                : 'Fill in your details to join the placement portal'}
-            </p>
-          </div>
+                <div style={styles.formHeader}>
+                  <h2 style={styles.formTitle}>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+                  <p style={styles.formDesc}>
+                    {isLogin
+                      ? 'Enter your credentials to access your dashboard'
+                      : 'Fill in your details to join the placement portal'}
+                  </p>
+                </div>
 
-          {formError && (
-            <div style={styles.errorBanner}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
-                <span style={{ fontSize: '1rem' }}>⚠️</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{formError}</span>
-              </div>
-              {formError.includes('already exists') && !isLogin && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsLogin(true);
-                    setFormError('');
-                  }}
-                  style={{
-                    background: '#ffffff',
-                    color: '#0b0f19',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '0.35rem 0.75rem',
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    marginLeft: '0.5rem'
-                  }}
-                >
-                  Sign In Now →
-                </button>
-              )}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="auth-form-fields" style={styles.form}>
-            {/* Name & Email Field - Row styling for register, single column for login */}
-            {!isLogin ? (
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <div style={styles.inputWrapper}>
-                    <User size={18} style={styles.inputIcon} />
-                    <input
-                      type="text"
-                      placeholder="John Doe"
-                      className="form-input"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      style={styles.inputWithIcon}
-                    />
+                {formError && (
+                  <div style={styles.errorBanner}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                      <span style={{ fontSize: '1rem' }}>⚠️</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{formError}</span>
+                    </div>
+                    {formError.includes('already exists') && !isLogin && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLogin(true);
+                          setFormError('');
+                        }}
+                        style={{
+                          background: '#ffffff',
+                          color: '#0b0f19',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '0.35rem 0.75rem',
+                          fontSize: '0.75rem',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          marginLeft: '0.5rem'
+                        }}
+                      >
+                        Sign In Now →
+                      </button>
+                    )}
                   </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Email Address</label>
-                  <div style={styles.inputWrapper}>
-                    <Mail size={18} style={styles.inputIcon} />
-                    <input
-                      type="email"
-                      placeholder="student@example.com"
-                      className="form-input"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      style={styles.inputWithIcon}
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="form-group">
-                <label className="form-label">Email Address</label>
-                <div style={styles.inputWrapper}>
-                  <Mail size={18} style={styles.inputIcon} />
-                  <input
-                    type="email"
-                    placeholder="student@example.com"
-                    className="form-input"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={styles.inputWithIcon}
-                  />
-                </div>
-              </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="auth-form-fields" style={styles.form}>
+                  {!isLogin ? (
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Full Name</label>
+                        <div style={styles.inputWrapper}>
+                          <User size={18} style={styles.inputIcon} />
+                          <input
+                            type="text"
+                            placeholder="John Doe"
+                            className="form-input"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            style={styles.inputWithIcon}
+                          />
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Email Address</label>
+                        <div style={styles.inputWrapper}>
+                          <Mail size={18} style={styles.inputIcon} />
+                          <input
+                            type="email"
+                            placeholder="student@example.com"
+                            className="form-input"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            style={styles.inputWithIcon}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="form-group">
+                      <label className="form-label">Email Address</label>
+                      <div style={styles.inputWrapper}>
+                        <Mail size={18} style={styles.inputIcon} />
+                        <input
+                          type="email"
+                          placeholder="student@example.com"
+                          className="form-input"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          style={styles.inputWithIcon}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {!isLogin ? (
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Password</label>
+                        <div style={styles.inputWrapper}>
+                          <Lock size={18} style={styles.inputIcon} />
+                          <input
+                            type="password"
+                            placeholder="••••••••"
+                            className="form-input"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            style={styles.inputWithIcon}
+                          />
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Confirm Password</label>
+                        <div style={styles.inputWrapper}>
+                          <Lock size={18} style={styles.inputIcon} />
+                          <input
+                            type="password"
+                            placeholder="••••••••"
+                            className="form-input"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            style={styles.inputWithIcon}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="form-group">
+                      <label className="form-label">Password</label>
+                      <div style={styles.inputWrapper}>
+                        <Lock size={18} style={styles.inputIcon} />
+                        <input
+                          type="password"
+                          placeholder="••••••••"
+                          className="form-input"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          style={styles.inputWithIcon}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.35rem' }}>
+                        <span
+                          onClick={() => {
+                            setForgotEmail(email || '');
+                            setFormError('');
+                            setViewMode('forgot_email');
+                          }}
+                          style={{ fontSize: '0.78rem', color: '#38bdf8', textDecoration: 'underline', cursor: 'pointer', fontWeight: 600 }}
+                        >
+                          Forgot Password?
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {!isLogin && (
+                    <div className="form-group">
+                      <label className="form-label font-semibold">Register As</label>
+                      <div className="auth-role-grid">
+                        <div
+                          onClick={() => setRole('student')}
+                          className={`auth-role-card ${role === 'student' ? 'active-student' : ''}`}
+                          style={{
+                            borderColor: role === 'student' ? 'var(--primary)' : 'var(--border-color)',
+                            backgroundColor: role === 'student' ? 'var(--primary-glow)' : 'var(--input-bg)',
+                          }}
+                        >
+                          <GraduationCap size={20} color={role === 'student' ? 'var(--primary)' : 'var(--text-muted)'} />
+                          <div style={styles.roleCardText}>
+                            <span style={{ ...styles.roleCardName, color: role === 'student' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>Student</span>
+                            <span style={styles.roleCardDesc}>Search & apply</span>
+                          </div>
+                        </div>
+
+                        <div
+                          onClick={() => setRole('recruiter')}
+                          className={`auth-role-card ${role === 'recruiter' ? 'active-recruiter' : ''}`}
+                          style={{
+                            borderColor: role === 'recruiter' ? 'var(--accent)' : 'var(--border-color)',
+                            backgroundColor: role === 'recruiter' ? 'var(--accent-glow)' : 'var(--input-bg)',
+                          }}
+                        >
+                          <Briefcase size={20} color={role === 'recruiter' ? 'var(--accent)' : 'var(--text-muted)'} />
+                          <div style={styles.roleCardText}>
+                            <span style={{ ...styles.roleCardName, color: role === 'recruiter' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>Recruiter</span>
+                            <span style={styles.roleCardDesc}>Post jobs & hire</span>
+                          </div>
+                        </div>
+
+                        <div
+                          onClick={() => setRole('admin')}
+                          className={`auth-role-card ${role === 'admin' ? 'active-admin' : ''}`}
+                          style={{
+                            borderColor: role === 'admin' ? 'var(--secondary)' : 'var(--border-color)',
+                            backgroundColor: role === 'admin' ? 'var(--secondary-glow)' : 'var(--input-bg)',
+                          }}
+                        >
+                          <Shield size={20} color={role === 'admin' ? 'var(--secondary)' : 'var(--text-muted)'} />
+                          <div style={styles.roleCardText}>
+                            <span style={{ ...styles.roleCardName, color: role === 'admin' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>Admin</span>
+                            <span style={styles.roleCardDesc}>Manage board</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <button type="submit" className="btn btn-primary" style={styles.submitBtn} disabled={loading}>
+                    {loading ? (
+                      <>
+                        <span className="spinner" style={styles.spinner}></span>
+                        <span>{isLogin ? 'Signing in...' : 'Creating account...'}</span>
+                      </>
+                    ) : (
+                      isLogin ? 'Sign In' : 'Sign Up'
+                    )}
+                  </button>
+                </form>
+              </>
             )}
 
-            {/* Password & Confirm Password Field - Row styling for register, single column for login */}
-            {!isLogin ? (
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Password</label>
-                  <div style={styles.inputWrapper}>
-                    <Lock size={18} style={styles.inputIcon} />
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      className="form-input"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      style={styles.inputWithIcon}
-                    />
+            {/* FORGOT PASSWORD - STEP 1: ENTER EMAIL */}
+            {viewMode === 'forgot_email' && (
+              <>
+                <div style={styles.formHeader}>
+                  <h2 style={styles.formTitle}>Forgot Password?</h2>
+                  <p style={styles.formDesc}>
+                    Enter your registered email address below to generate a 6-digit OTP verification code.
+                  </p>
+                </div>
+
+                {formError && (
+                  <div style={styles.errorBanner}>
+                    <span style={{ fontSize: '1rem' }}>⚠️</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{formError}</span>
                   </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Confirm Password</label>
-                  <div style={styles.inputWrapper}>
-                    <Lock size={18} style={styles.inputIcon} />
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      className="form-input"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      style={styles.inputWithIcon}
-                    />
+                )}
+
+                <form onSubmit={handleRequestOtp} className="auth-form-fields" style={styles.form}>
+                  <div className="form-group">
+                    <label className="form-label">Registered Email Address</label>
+                    <div style={styles.inputWrapper}>
+                      <Mail size={18} style={styles.inputIcon} />
+                      <input
+                        type="email"
+                        placeholder="student@example.com"
+                        className="form-input"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        style={styles.inputWithIcon}
+                      />
+                    </div>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <div style={styles.inputWrapper}>
-                  <Lock size={18} style={styles.inputIcon} />
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    className="form-input"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={styles.inputWithIcon}
-                  />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.35rem' }}>
+
+                  <button type="submit" className="btn btn-primary" style={styles.submitBtn} disabled={loading}>
+                    {loading ? (
+                      <>
+                        <span className="spinner" style={styles.spinner}></span>
+                        <span>Sending OTP...</span>
+                      </>
+                    ) : (
+                      'Send Verification OTP'
+                    )}
+                  </button>
+                </form>
+
+                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
                   <span
-                    onClick={() => addToast('Password reset instructions sent to your email!', 'info')}
-                    style={{ fontSize: '0.78rem', color: '#38bdf8', textDecoration: 'underline', cursor: 'pointer', fontWeight: 600 }}
+                    onClick={() => { setViewMode('auth'); setFormError(''); }}
+                    style={{ fontSize: '0.82rem', color: '#38bdf8', cursor: 'pointer', fontWeight: 600 }}
                   >
-                    Forgot Password?
+                    ← Back to Sign In
                   </span>
                 </div>
-              </div>
+              </>
             )}
 
-            {/* Role Cards Grid (Register only) */}
-            {!isLogin && (
-              <div className="form-group">
-                <label className="form-label font-semibold">Register As</label>
-                <div className="auth-role-grid">
-                  <div
-                    onClick={() => setRole('student')}
-                    className={`auth-role-card ${role === 'student' ? 'active-student' : ''}`}
-                    style={{
-                      borderColor: role === 'student' ? 'var(--primary)' : 'var(--border-color)',
-                      backgroundColor: role === 'student' ? 'var(--primary-glow)' : 'var(--input-bg)',
-                    }}
-                  >
-                    <GraduationCap size={20} color={role === 'student' ? 'var(--primary)' : 'var(--text-muted)'} />
-                    <div style={styles.roleCardText}>
-                      <span style={{ ...styles.roleCardName, color: role === 'student' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>Student</span>
-                      <span style={styles.roleCardDesc}>Search & apply</span>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => setRole('recruiter')}
-                    className={`auth-role-card ${role === 'recruiter' ? 'active-recruiter' : ''}`}
-                    style={{
-                      borderColor: role === 'recruiter' ? 'var(--accent)' : 'var(--border-color)',
-                      backgroundColor: role === 'recruiter' ? 'var(--accent-glow)' : 'var(--input-bg)',
-                    }}
-                  >
-                    <Briefcase size={20} color={role === 'recruiter' ? 'var(--accent)' : 'var(--text-muted)'} />
-                    <div style={styles.roleCardText}>
-                      <span style={{ ...styles.roleCardName, color: role === 'recruiter' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>Recruiter</span>
-                      <span style={styles.roleCardDesc}>Post jobs & hire</span>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => setRole('admin')}
-                    className={`auth-role-card ${role === 'admin' ? 'active-admin' : ''}`}
-                    style={{
-                      borderColor: role === 'admin' ? 'var(--secondary)' : 'var(--border-color)',
-                      backgroundColor: role === 'admin' ? 'var(--secondary-glow)' : 'var(--input-bg)',
-                    }}
-                  >
-                    <Shield size={20} color={role === 'admin' ? 'var(--secondary)' : 'var(--text-muted)'} />
-                    <div style={styles.roleCardText}>
-                      <span style={{ ...styles.roleCardName, color: role === 'admin' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>Admin</span>
-                      <span style={styles.roleCardDesc}>Manage board</span>
-                    </div>
-                  </div>
+            {/* FORGOT PASSWORD - STEP 2: ENTER OTP & NEW PASSWORD */}
+            {viewMode === 'forgot_reset' && (
+              <>
+                <div style={styles.formHeader}>
+                  <h2 style={styles.formTitle}>Reset Password</h2>
+                  <p style={styles.formDesc}>
+                    Enter the 6-digit OTP code and set your new password.
+                  </p>
                 </div>
-              </div>
-            )}
 
-            {/* Submit Button */}
-            <button type="submit" className="btn btn-primary" style={styles.submitBtn} disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="spinner" style={styles.spinner}></span>
-                  <span>{isLogin ? 'Signing in...' : 'Creating account...'}</span>
-                </>
-              ) : (
-                isLogin ? 'Sign In' : 'Sign Up'
-              )}
-            </button>
-          </form>
+                {otpMessage && (
+                  <div style={{
+                    padding: '0.75rem 0.95rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    color: '#38bdf8',
+                    fontSize: '0.82rem',
+                    fontWeight: '600',
+                    marginBottom: '0.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <Key size={16} color="#38bdf8" />
+                    <span>{otpMessage}</span>
+                  </div>
+                )}
+
+                {formError && (
+                  <div style={styles.errorBanner}>
+                    <span style={{ fontSize: '1rem' }}>⚠️</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{formError}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleResetPassword} className="auth-form-fields" style={styles.form}>
+                  <div className="form-group">
+                    <label className="form-label">6-Digit Verification OTP Code</label>
+                    <div style={styles.inputWrapper}>
+                      <Key size={18} style={styles.inputIcon} />
+                      <input
+                        type="text"
+                        placeholder="123456"
+                        className="form-input"
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value)}
+                        style={styles.inputWithIcon}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">New Password</label>
+                      <div style={styles.inputWrapper}>
+                        <Lock size={18} style={styles.inputIcon} />
+                        <input
+                          type="password"
+                          placeholder="••••••••"
+                          className="form-input"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          style={styles.inputWithIcon}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Confirm New Password</label>
+                      <div style={styles.inputWrapper}>
+                        <Lock size={18} style={styles.inputIcon} />
+                        <input
+                          type="password"
+                          placeholder="••••••••"
+                          className="form-input"
+                          value={confirmNewPassword}
+                          onChange={(e) => setConfirmNewPassword(e.target.value)}
+                          style={styles.inputWithIcon}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="btn btn-primary" style={styles.submitBtn} disabled={loading}>
+                    {loading ? (
+                      <>
+                        <span className="spinner" style={styles.spinner}></span>
+                        <span>Resetting Password...</span>
+                      </>
+                    ) : (
+                      'Reset Password Now'
+                    )}
+                  </button>
+                </form>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '0.82rem' }}>
+                  <span
+                    onClick={() => { setViewMode('forgot_email'); setFormError(''); }}
+                    style={{ color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <RefreshCw size={13} /> Resend OTP
+                  </span>
+                  <span
+                    onClick={() => { setViewMode('auth'); setFormError(''); }}
+                    style={{ color: '#38bdf8', cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    ← Back to Sign In
+                  </span>
+                </div>
+              </>
+            )}
         </div>
       </div>
     </div>
