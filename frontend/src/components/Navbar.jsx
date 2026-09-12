@@ -318,19 +318,32 @@ const Navbar = ({ onMenuClick }) => {
                 {(user.name || 'U').charAt(0).toUpperCase()}
               </span>
 
-              {/* Camera icon overlay */}
-              <div style={styles.cameraOverlay} title="Change Photo">
-                <Camera size={10} color="#ffffff" />
-              </div>
+              {/* Active Green Online Indicator Dot */}
+              <span 
+                style={{
+                  position: 'absolute',
+                  bottom: '-1px',
+                  right: '-1px',
+                  width: '9px',
+                  height: '9px',
+                  borderRadius: '50%',
+                  background: '#34d399',
+                  boxShadow: '0 0 8px #34d399',
+                  border: '2px solid #030712',
+                  zIndex: 3
+                }}
+                title="Active & Online"
+              />
             </div>
             <div className="nav-hide-mobile" style={styles.userInfo}>
               <span style={styles.userName}>{user.name}</span>
-              <span style={styles.userRole}>
+              <span style={{ ...styles.userRole, display: 'flex', alignItems: 'center', gap: '3px' }}>
                 {user.role === 'admin' 
                   ? 'Placement Admin' 
                   : user.role === 'recruiter' 
                     ? 'Recruiter' 
                     : 'Student'}
+                <span style={{ color: '#34d399', fontWeight: '700', marginLeft: '3px' }}>• Online</span>
               </span>
             </div>
             <button onClick={(e) => { e.stopPropagation(); logout(); }} className="nav-logout-btn nav-hide-mobile" title="Logout">

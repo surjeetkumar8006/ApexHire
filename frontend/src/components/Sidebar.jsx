@@ -128,6 +128,23 @@ const Sidebar = ({ isOpen, onClose }) => {
           >
             {(user.name || 'U').charAt(0).toUpperCase()}
           </span>
+
+          {/* Active Green Online Indicator Dot */}
+          <span 
+            style={{
+              position: 'absolute',
+              bottom: '-1px',
+              right: '-1px',
+              width: '9px',
+              height: '9px',
+              borderRadius: '50%',
+              background: '#34d399',
+              boxShadow: '0 0 8px #34d399',
+              border: '2px solid #030712',
+              zIndex: 3
+            }}
+            title="Active & Online"
+          />
         </div>
         <div className="sidebar-profile-info">
           <strong className="sidebar-profile-name">
@@ -135,6 +152,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           </strong>
           <span className="sidebar-profile-role">
             {user.role === 'admin' ? 'Placement Admin' : user.role === 'recruiter' ? 'Corporate Recruiter' : 'Student Candidate'}
+            <span style={{ color: '#34d399', fontWeight: '700', marginLeft: '4px' }}>• Online</span>
           </span>
         </div>
       </div>
