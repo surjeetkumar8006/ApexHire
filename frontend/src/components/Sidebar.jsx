@@ -82,7 +82,14 @@ const Sidebar = ({ isOpen, onClose }) => {
       : studentLinks;
 
   return (
-    <aside className={`app-sidebar ${isOpen ? 'open' : ''}`} style={styles.sidebar}>
+    <>
+      {isOpen && (
+        <div 
+          className="mobile-overlay" 
+          onClick={onClose} 
+        />
+      )}
+      <aside className={`app-sidebar ${isOpen ? 'open' : ''}`} style={styles.sidebar}>
       <div style={styles.mobileHeader}>
         <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>Menu</span>
         <button className="sidebar-close-btn" onClick={onClose}><X size={20} /></button>
@@ -186,6 +193,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </button>
       </div>
     </aside>
+  </>
   );
 };
 
