@@ -2,6 +2,9 @@ import express from 'express';
 import {
   registerUser,
   authUser,
+  verify2FAAndLogin,
+  sendMobileOtp,
+  verifyMobileOtp,
   getUserProfile,
   forgotPassword,
   resetPassword,
@@ -16,6 +19,9 @@ const router = express.Router();
 
 router.post('/register', registerUser);
 router.post('/login', authUser);
+router.post('/verify-2fa-login', verify2FAAndLogin);
+router.post('/send-mobile-otp', protect, sendMobileOtp);
+router.post('/verify-mobile-otp', protect, verifyMobileOtp);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.get('/profile', protect, getUserProfile);

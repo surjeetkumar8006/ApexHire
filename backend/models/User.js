@@ -44,6 +44,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    mobileOtp: {
+      type: String,
+      default: null,
+    },
+    mobileOtpExpires: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -72,6 +72,10 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || 'Invalid email or password');
       }
 
+      if (data.requires2FA) {
+        return data; // Return 2FA requirement payload to prompt OTP view
+      }
+
       // Add 30-minute session expiration timestamp
       data.sessionExpiresAt = Date.now() + SESSION_DURATION_MS;
 
@@ -82,6 +86,38 @@ export const AuthProvider = ({ children }) => {
       clearTimeout(timeoutId);
       if (err.name === 'AbortError') {
         throw new Error('Connection timed out. Please check your internet or try again.');
+      }
+      throw err;
+    }
+  };
+
+  const verify2FALogin = async (email, otp) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/verify-2fa-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), otp: otp.trim() }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to verify Mobile 2FA OTP code');
+      }
+
+      data.sessionExpiresAt = Date.now() + SESSION_DURATION_MS;
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      setUser(data);
+      return data;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error('Connection timed out. Please try again.');
       }
       throw err;
     }
@@ -199,7 +235,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, requestForgotPassword, submitResetPassword, logout, updateUser, authHeader }}>
+    <AuthContext.Provider value={{ user, loading, login, verify2FALogin, register, requestForgotPassword, submitResetPassword, logout, updateUser, authHeader }}>
       {!loading && children}
     </AuthContext.Provider>
   );

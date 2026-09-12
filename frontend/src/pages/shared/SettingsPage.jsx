@@ -28,6 +28,73 @@ const SettingsPage = () => {
   const [coordinators, setCoordinators] = useState([]);
   const [coordLoading, setCoordLoading] = useState(false);
   const [showCoordModal, setShowCoordModal] = useState(false);
+
+  // Mobile 2FA OTP States
+  const [mobilePhone, setMobilePhone] = useState(user?.phone || '');
+  const [mobileOtpInput, setMobileOtpInput] = useState('');
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [otpSentMsg, setOtpSentMsg] = useState('');
+
+  const handleSendMobile2FAOtp = async () => {
+    if (!mobilePhone || mobilePhone.trim().length < 8) {
+      return addToast('Please enter a valid mobile phone number', 'warning');
+    }
+
+    setSendingOtp(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/send-mobile-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader()
+        },
+        body: JSON.stringify({ phone: mobilePhone.trim() })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to send Mobile OTP');
+
+      setOtpSentMsg(data.message);
+      if (data.otp) setMobileOtpInput(data.otp);
+      addToast(data.message, 'success');
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyMobile2FAOtp = async (enable = true) => {
+    if (enable && !mobileOtpInput) {
+      return addToast('Please enter the 6-digit Mobile OTP code', 'warning');
+    }
+
+    setVerifyingOtp(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/verify-mobile-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader()
+        },
+        body: JSON.stringify({ otp: mobileOtpInput.trim(), enable })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to verify Mobile OTP');
+
+      updateUser(data.user);
+      setFormData(prev => ({ ...prev, twoFactorEnabled: data.twoFactorEnabled }));
+      setOtpSentMsg('');
+      setMobileOtpInput('');
+      addToast(data.message, 'success');
+    } catch (err) {
+      addToast(err.message, 'error');
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
   const [coordFormData, setCoordFormData] = useState({ name: '', email: '', password: '' });
   const [coordEditId, setCoordEditId] = useState(null);
 
@@ -488,21 +555,112 @@ const SettingsPage = () => {
                   </div>
                 </div>
                 
-                <div style={styles.securityBox}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Smartphone size={24} color="var(--primary)" />
-                    <div>
-                      <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>Two-Factor Authentication</h4>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Add an extra layer of security to your account.</p>
+                {/* Mobile 2FA Authentication Setup Box */}
+                <div style={{ background: 'var(--bg-surface-elevated)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border-color)', marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Smartphone size={22} />
+                      </div>
+                      <div>
+                        <h4 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: '700', margin: 0 }}>
+                          Mobile SMS Two-Factor Authentication (2FA)
+                        </h4>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', margin: 0, marginTop: '0.2rem' }}>
+                          Generates a 6-digit OTP code to your registered mobile phone number for secure sign-in.
+                        </p>
+                      </div>
                     </div>
+
+                    {user?.twoFactorEnabled ? (
+                      <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', border: '1px solid var(--success)', color: 'var(--success)', padding: '6px 14px', borderRadius: '20px', fontWeight: '700', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <CheckCircle size={14} /> Mobile 2FA Active & Secured
+                      </span>
+                    ) : (
+                      <span className="badge" style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', border: '1px solid var(--warning)', color: 'var(--warning)', padding: '6px 14px', borderRadius: '20px', fontWeight: '600', fontSize: '0.8rem' }}>
+                        2FA Disabled
+                      </span>
+                    )}
                   </div>
-                  <button 
-                    type="button" 
-                    className={formData.twoFactorEnabled ? "btn btn-danger" : "btn btn-outline"}
-                    onClick={() => setFormData(prev => ({ ...prev, twoFactorEnabled: !prev.twoFactorEnabled }))}
-                  >
-                    {formData.twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
-                  </button>
+
+                  {user?.twoFactorEnabled ? (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', flexWrap: 'wrap', gap: '1rem' }}>
+                      <div>
+                        <span style={{ fontSize: '0.84rem', color: 'var(--text-primary)', fontWeight: '600', display: 'block' }}>
+                          Registered 2FA Mobile Number: <strong>{user?.phone || mobilePhone || '+91 Registered Mobile'}</strong>
+                        </span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                          Every sign-in attempt will require entering a 6-digit OTP sent to your phone.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-outline"
+                        style={{ borderColor: 'rgba(239, 68, 68, 0.4)', color: 'var(--danger)', fontSize: '0.82rem' }}
+                        onClick={() => handleVerifyMobile2FAOtp(false)}
+                        disabled={verifyingOtp}
+                      >
+                        {verifyingOtp ? 'Disabling...' : 'Disable Mobile 2FA'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <label className="form-label font-semibold" style={{ fontSize: '0.82rem' }}>Mobile Phone Number *</label>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input
+                              type="text"
+                              placeholder="+91 9876543210"
+                              value={mobilePhone}
+                              onChange={e => setMobilePhone(e.target.value)}
+                              className="form-input"
+                              style={{ height: '40px', fontSize: '0.85rem' }}
+                            />
+                            <button
+                              type="button"
+                              className="btn btn-primary"
+                              style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', padding: '0 1rem' }}
+                              onClick={handleSendMobile2FAOtp}
+                              disabled={sendingOtp}
+                            >
+                              {sendingOtp ? 'Sending...' : 'Send Mobile OTP'}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="col-md-6">
+                          <label className="form-label font-semibold" style={{ fontSize: '0.82rem' }}>Enter 6-Digit Mobile OTP Code *</label>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input
+                              type="text"
+                              maxLength="6"
+                              placeholder="e.g. 482910"
+                              value={mobileOtpInput}
+                              onChange={e => setMobileOtpInput(e.target.value)}
+                              className="form-input"
+                              style={{ height: '40px', fontSize: '0.85rem', letterSpacing: '2px', fontWeight: '700' }}
+                            />
+                            <button
+                              type="button"
+                              className="btn btn-outline"
+                              style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', padding: '0 1rem', background: 'var(--success)', color: '#ffffff', border: 'none' }}
+                              onClick={() => handleVerifyMobile2FAOtp(true)}
+                              disabled={verifyingOtp || !mobileOtpInput}
+                            >
+                              {verifyingOtp ? 'Verifying...' : 'Verify & Enable 2FA'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {otpSentMsg && (
+                        <p style={{ color: 'var(--primary)', fontSize: '0.8rem', margin: 0, fontWeight: '500' }}>
+                          {otpSentMsg}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <button type="submit" disabled={loading} className="btn btn-primary" style={styles.saveBtn}>

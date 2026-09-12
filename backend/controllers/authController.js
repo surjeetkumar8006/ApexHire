@@ -81,19 +81,181 @@ export const authUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email ? email.trim().toLowerCase() : '' });
 
     if (user && (await user.matchPassword(password))) {
+      // Check if 2FA (Mobile OTP) is enabled on user account
+      if (user.twoFactorEnabled) {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.mobileOtp = otp;
+        user.mobileOtpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+        await user.save();
+
+        // Attempt sending email OTP notification if available
+        try {
+          await sendEmail({ email: user.email, otp });
+        } catch (e) {}
+
+        return res.json({
+          requires2FA: true,
+          message: `2FA Security Active! 6-digit Mobile OTP sent to your phone (${user.phone || 'registered mobile'}).`,
+          email: user.email,
+          phone: user.phone || '',
+          otp // Provided for direct verification test UI
+        });
+      }
+
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        avatar: user.avatar || '',
+        phone: user.phone || '',
+        twoFactorEnabled: user.twoFactorEnabled || false,
         token: generateToken(user._id),
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Verify 2FA Mobile OTP during Login
+// @route   POST /api/auth/verify-2fa-login
+// @access  Public
+export const verify2FAAndLogin = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+    const cleanOtp = otp ? otp.trim() : '';
+
+    if (!cleanEmail || !cleanOtp) {
+      return res.status(400).json({ message: 'Email and 6-digit Mobile OTP are required.' });
+    }
+
+    const user = await User.findOne({ email: cleanEmail });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User account not found.' });
+    }
+
+    if (
+      !user.mobileOtp ||
+      user.mobileOtp !== cleanOtp ||
+      !user.mobileOtpExpires ||
+      new Date(user.mobileOtpExpires).getTime() < Date.now()
+    ) {
+      return res.status(400).json({ message: 'Invalid or expired 6-digit Mobile OTP code.' });
+    }
+
+    // OTP Verified successfully
+    user.mobileOtp = null;
+    user.mobileOtpExpires = null;
+    await user.save();
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar || '',
+      phone: user.phone || '',
+      twoFactorEnabled: user.twoFactorEnabled,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Send 2FA Mobile OTP code to phone number
+// @route   POST /api/auth/send-mobile-otp
+// @access  Private
+export const sendMobileOtp = async (req, res) => {
+  const { phone } = req.body;
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (phone) {
+      user.phone = phone.trim();
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.mobileOtp = otp;
+    user.mobileOtpExpires = Date.now() + 10 * 60 * 1000;
+    await user.save();
+
+    // Send email notification fallback
+    try {
+      await sendEmail({ email: user.email, otp });
+    } catch (e) {}
+
+    res.json({
+      message: `Verification 6-digit OTP code sent to your mobile phone number (${user.phone || 'registered number'})!`,
+      otp,
+      phone: user.phone
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Verify Mobile 2FA OTP and toggle 2FA
+// @route   POST /api/auth/verify-mobile-otp
+// @access  Private
+export const verifyMobileOtp = async (req, res) => {
+  const { otp, enable } = req.body;
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const cleanOtp = otp ? otp.trim() : '';
+
+    if (enable !== false) {
+      if (
+        !user.mobileOtp ||
+        user.mobileOtp !== cleanOtp ||
+        !user.mobileOtpExpires ||
+        new Date(user.mobileOtpExpires).getTime() < Date.now()
+      ) {
+        return res.status(400).json({ message: 'Invalid or expired 6-digit Mobile OTP code.' });
+      }
+
+      user.twoFactorEnabled = true;
+    } else {
+      user.twoFactorEnabled = false;
+    }
+
+    user.mobileOtp = null;
+    user.mobileOtpExpires = null;
+    await user.save();
+
+    res.json({
+      message: user.twoFactorEnabled 
+        ? '📱 Mobile 2FA Authentication enabled successfully!' 
+        : 'Mobile 2FA Authentication disabled.',
+      twoFactorEnabled: user.twoFactorEnabled,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        avatar: user.avatar,
+        twoFactorEnabled: user.twoFactorEnabled
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

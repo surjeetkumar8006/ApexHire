@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
-import { Lock, Mail, User, ArrowLeft, GraduationCap, Shield, Sparkles, CheckCircle, Briefcase, Key, RefreshCw } from 'lucide-react';
+import { Lock, Mail, User, ArrowLeft, GraduationCap, Shield, Sparkles, CheckCircle, Briefcase, Key, RefreshCw, Smartphone } from 'lucide-react';
 
 const companies = [
   { name: 'Google', icon: 'G' },
@@ -16,7 +16,7 @@ const companies = [
 
 const AuthPage = ({ onBack }) => {
   const navigate = useNavigate();
-  const { login, register, requestForgotPassword, submitResetPassword } = useAuth();
+  const { login, verify2FALogin, register, requestForgotPassword, submitResetPassword } = useAuth();
   const { addToast } = useNotification();
 
   const handleReturnHome = () => {
@@ -24,13 +24,17 @@ const AuthPage = ({ onBack }) => {
     navigate('/');
   };
 
-  const [viewMode, setViewMode] = useState('auth'); // 'auth', 'forgot_email', 'forgot_reset'
+  const [viewMode, setViewMode] = useState('auth'); // 'auth', 'forgot_email', 'forgot_reset', '2fa_login'
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState('student'); // 'student' or 'admin'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Mobile 2FA Login States
+  const [twoFaEmail, setTwoFaEmail] = useState('');
+  const [mobile2faOtpInput, setMobile2faOtpInput] = useState('');
 
   // Forgot password states
   const [forgotEmail, setForgotEmail] = useState('');
@@ -81,7 +85,14 @@ const AuthPage = ({ onBack }) => {
 
     try {
       if (isLogin) {
-        await login(cleanEmail, password);
+        const res = await login(cleanEmail, password);
+        if (res && res.requires2FA) {
+          setTwoFaEmail(res.email);
+          if (res.otp) setMobile2faOtpInput(res.otp);
+          setViewMode('2fa_login');
+          addToast('📱 Mobile 2FA required! Enter the 6-digit OTP code sent to your phone.', 'info');
+          return;
+        }
         addToast('Logged in successfully!', 'success');
       } else {
         await register(name.trim(), cleanEmail, password, role);
@@ -89,6 +100,31 @@ const AuthPage = ({ onBack }) => {
       }
     } catch (err) {
       const errMsg = err.message || 'Authentication failed. Please check your credentials.';
+      setFormError(errMsg);
+      addToast(errMsg, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify2FALogin = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    setFormError('');
+
+    if (!mobile2faOtpInput || mobile2faOtpInput.trim().length !== 6) {
+      const msg = 'Please enter a valid 6-digit Mobile OTP code';
+      setFormError(msg);
+      addToast(msg, 'warning');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await verify2FALogin(twoFaEmail, mobile2faOtpInput);
+      addToast('📱 2FA Verification successful! Welcome back to ApexHire.', 'success');
+    } catch (err) {
+      const errMsg = err.message || 'Mobile 2FA Verification failed.';
       setFormError(errMsg);
       addToast(errMsg, 'error');
     } finally {
@@ -742,6 +778,66 @@ const AuthPage = ({ onBack }) => {
                   <span
                     onClick={() => { setViewMode('auth'); setFormError(''); }}
                     style={{ color: '#38bdf8', cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    ← Back to Sign In
+                  </span>
+                </div>
+              </>
+            )}
+
+            {/* MOBILE 2FA STEP - ENTER 6-DIGIT OTP */}
+            {viewMode === '2fa_login' && (
+              <>
+                <div style={styles.formHeader}>
+                  <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
+                    <Smartphone size={24} />
+                  </div>
+                  <h2 style={styles.formTitle}>Mobile 2FA Verification</h2>
+                  <p style={styles.formDesc}>
+                    Two-Factor Security Active. Enter the 6-digit Mobile OTP code sent to your phone.
+                  </p>
+                </div>
+
+                {formError && (
+                  <div style={styles.errorBanner}>
+                    <span style={{ fontSize: '1rem' }}>⚠️</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{formError}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleVerify2FALogin} className="auth-form-fields" style={styles.form}>
+                  <div className="form-group">
+                    <label className="form-label">6-Digit Mobile OTP Code</label>
+                    <div style={styles.inputWrapper}>
+                      <Smartphone size={18} style={styles.inputIcon} />
+                      <input
+                        type="text"
+                        maxLength="6"
+                        placeholder="123456"
+                        className="form-input"
+                        value={mobile2faOtpInput}
+                        onChange={(e) => setMobile2faOtpInput(e.target.value)}
+                        style={{ ...styles.inputWithIcon, letterSpacing: '4px', fontWeight: '800', fontSize: '1.15rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  <button type="submit" className="btn btn-primary" style={styles.submitBtn} disabled={loading}>
+                    {loading ? (
+                      <>
+                        <span className="spinner" style={styles.spinner}></span>
+                        <span>Verifying 2FA Code...</span>
+                      </>
+                    ) : (
+                      'Verify OTP & Sign In'
+                    )}
+                  </button>
+                </form>
+
+                <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+                  <span
+                    onClick={() => { setViewMode('auth'); setFormError(''); }}
+                    style={{ fontSize: '0.82rem', color: '#38bdf8', cursor: 'pointer', fontWeight: 600 }}
                   >
                     ← Back to Sign In
                   </span>
