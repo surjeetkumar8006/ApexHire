@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Profile from '../models/Profile.js';
 import Job from '../models/Job.js';
 import MockInterview from '../models/MockInterview.js';
+import User from '../models/User.js';
 
 // Helper: Rule-based local resume analyzer (fallback/offline)
 const localAnalyzeResume = (text) => {
@@ -1117,6 +1118,7 @@ export const negotiateOffer = async (req, res) => {
 };
 
 // =========================================================================
+// =========================================================================
 // NEW FEATURE 5: Recruiter AI Candidate Ranking Leaderboard (Real-Time DB Sync)
 // =========================================================================
 export const getCandidateLeaderboard = async (req, res) => {
@@ -1133,13 +1135,27 @@ export const getCandidateLeaderboard = async (req, res) => {
 
     const leaderboard = students.map((std, index) => {
       const prof = profileMap.get(std._id.toString());
-      const skillCount = prof?.skills ? prof.skills.length : 0;
-      const baseScore = prof?.aiFeedback?.score ? prof.aiFeedback.score : 70;
-      const finalScore = Math.min(99, Math.max(65, baseScore + (skillCount * 2)));
+      const skills = (prof?.skills && prof.skills.length > 0) ? prof.skills : [];
+      const skillCount = skills.length;
+      
+      // Calculate dynamic candidate score based on actual skills and resume feedback
+      let baseScore = prof?.aiFeedback?.score ? prof.aiFeedback.score : 65;
+      if (skillCount > 0) {
+        baseScore += (skillCount * 4);
+      }
+      if (prof?.resumeUrl) {
+        baseScore += 10;
+      }
+      if (prof?.isVerified) {
+        baseScore += 5;
+      }
+
+      // Add unique variance per candidate index to avoid identical score ties
+      const finalScore = Math.min(99, Math.max(40, baseScore - (index * 3)));
 
       let tier = 'Standard Tier';
-      if (finalScore >= 88) tier = 'Elite Tier';
-      else if (finalScore >= 75) tier = 'Top Tier';
+      if (finalScore >= 85) tier = 'Elite Tier';
+      else if (finalScore >= 70) tier = 'Top Tier';
 
       return {
         id: prof ? prof._id : std._id,
@@ -1150,7 +1166,7 @@ export const getCandidateLeaderboard = async (req, res) => {
         aiMatchScore: finalScore,
         tier,
         isVerified: prof ? !!prof.isVerified : false,
-        skills: (prof?.skills && prof.skills.length > 0) ? prof.skills : ['JavaScript', 'React', 'Node.js'],
+        skills: skills.length > 0 ? skills : ['JavaScript', 'React', 'Node.js'],
         resumeUrl: prof?.resumeUrl || ''
       };
     }).sort((a, b) => b.aiMatchScore - a.aiMatchScore);

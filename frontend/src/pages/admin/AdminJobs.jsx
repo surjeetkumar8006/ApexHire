@@ -169,40 +169,53 @@ const AdminJobs = () => {
         }
       }
 
-      // 2. Safely parse job requirements (handles String, Array, or empty)
+      // 2. Safely parse job requirements & job title keywords
       let requirements = [];
       if (Array.isArray(job.requirements)) {
-        requirements = job.requirements.map(r => String(r).toLowerCase().trim());
+        requirements = job.requirements.map(r => String(r).toLowerCase().trim()).filter(Boolean);
       } else if (typeof job.requirements === 'string' && job.requirements.trim()) {
         requirements = job.requirements.toLowerCase().split(',').map(r => r.trim()).filter(Boolean);
       }
 
-      // If job title exists, add keywords (e.g. SDE, Developer, React, Python)
-      if (job.title) {
-        const titleWords = job.title.toLowerCase().split(/[\s,/-]+/).filter(w => w.length >= 2);
-        requirements = [...new Set([...requirements, ...titleWords])];
-      }
+      // If job title exists (e.g. SDE, Frontend, Backend, React, Node), extract relevant domain keywords
+      const titleKeywords = (job.title || '')
+        .toLowerCase()
+        .split(/[\s,/-]+/)
+        .filter(w => w.length >= 2 && !['and', 'the', 'for', 'with', 'intern', 'trainee', 'senior', 'junior', 'lead'].includes(w));
 
-      // 3. Score every candidate
-      const scoredCandidates = candidates.map((cand) => {
+      const combinedKeywords = [...new Set([...requirements, ...titleKeywords])];
+
+      // 3. Score every candidate dynamically based on actual skill overlap & profile quality
+      const scoredCandidates = candidates.map((cand, idx) => {
         const candSkills = (cand.skills || []).map(s => String(s).toLowerCase());
         let matchCount = 0;
 
-        requirements.forEach((req) => {
-          if (candSkills.some(sk => sk.includes(req) || req.includes(sk))) {
+        combinedKeywords.forEach((kw) => {
+          if (candSkills.some(sk => sk.includes(kw) || kw.includes(sk))) {
             matchCount++;
           }
         });
 
-        const skillMatch = requirements.length > 0 ? (matchCount / requirements.length) * 100 : 70;
-        const baseScore = cand.aiMatchScore || 75;
+        // Dynamic Skill Ratio (0% to 100%)
+        let skillMatchRatio = 0;
+        if (combinedKeywords.length > 0) {
+          skillMatchRatio = (matchCount / combinedKeywords.length) * 100;
+        } else {
+          skillMatchRatio = Math.min(90, candSkills.length * 18);
+        }
 
-        // Final score bounded between 65% and 99%
-        const finalScore = Math.min(99, Math.max(65, Math.round((skillMatch * 0.5) + (baseScore * 0.5))));
+        // Base candidate resume quality
+        const candidateBaseQuality = cand.aiMatchScore || 70;
+
+        // Dynamic Final Score: 60% skill match + 40% candidate profile quality
+        let computedScore = Math.round((skillMatchRatio * 0.6) + (candidateBaseQuality * 0.4));
+
+        // Add candidate skill count bonus and index variance so no two candidates have duplicate ties
+        computedScore = Math.min(99, Math.max(30, computedScore + (candSkills.length * 3) - (idx * 4)));
 
         return {
           ...cand,
-          matchScore: finalScore,
+          matchScore: computedScore,
           matchedSkillsCount: matchCount
         };
       }).sort((a, b) => b.matchScore - a.matchScore);
