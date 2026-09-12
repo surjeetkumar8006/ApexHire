@@ -36,6 +36,9 @@ const SettingsPage = () => {
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [otpSentMsg, setOtpSentMsg] = useState('');
 
+  // Phone Number edit lock state
+  const [isEditingPhone, setIsEditingPhone] = useState(!user?.phone);
+
   const handleSendMobile2FAOtp = async () => {
     if (!mobilePhone || mobilePhone.trim().length < 8) {
       return addToast('Please enter a valid mobile phone number', 'warning');
@@ -187,6 +190,9 @@ const SettingsPage = () => {
       if (!res.ok) throw new Error(data.message || 'Failed to update settings');
 
       updateUser(data.user);
+      if (activeTab === 'profile') {
+        setIsEditingPhone(false);
+      }
       addToast('Settings saved successfully', 'success');
       
       // Clear password fields
@@ -583,9 +589,63 @@ const SettingsPage = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Phone Number</label>
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="form-input" placeholder="+1 (555) 000-0000" />
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Specify your active contact number for employer reachout.</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <label className="form-label" style={{ margin: 0 }}>Phone Number</label>
+                    {user?.phone && !isEditingPhone ? (
+                      <button 
+                        type="button" 
+                        onClick={() => setIsEditingPhone(true)} 
+                        style={{
+                          background: 'var(--primary-glow)',
+                          color: 'var(--primary)',
+                          border: '1px solid var(--primary-glow)',
+                          borderRadius: '6px',
+                          padding: '2px 10px',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        title="Click to edit phone number"
+                      >
+                        <Pencil size={12} /> Edit Phone Number
+                      </button>
+                    ) : isEditingPhone && user?.phone ? (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--success)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        ✏️ Editing Enabled
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <input 
+                    type="tel" 
+                    name="phone" 
+                    value={formData.phone} 
+                    onChange={handleChange} 
+                    className="form-input" 
+                    placeholder="+91 98765 43210"
+                    disabled={!isEditingPhone && Boolean(user?.phone)}
+                    style={{
+                      ...(!isEditingPhone && Boolean(user?.phone) ? {
+                        opacity: 0.8,
+                        cursor: 'not-allowed',
+                        background: 'var(--bg-surface-elevated)',
+                        borderColor: 'var(--border-color)'
+                      } : {})
+                    }}
+                  />
+
+                  {!isEditingPhone && Boolean(user?.phone) ? (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                      Phone number is locked. Click <strong>"Edit Phone Number"</strong> to change.
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                      Specify your active contact number for employer reachout. Click "Save Profile" to update and lock.
+                    </span>
+                  )}
                 </div>
 
                 <button type="submit" disabled={loading} className="btn btn-primary" style={styles.saveBtn}>
