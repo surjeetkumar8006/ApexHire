@@ -5,7 +5,7 @@ import sendEmail from '../utils/sendEmail.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
+    expiresIn: '30m', // 30 minutes session limit
   });
 };
 

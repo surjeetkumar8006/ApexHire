@@ -14,13 +14,44 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 Minutes
+
   useEffect(() => {
-    const storedUser = localStorage.getItem('userInfo');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedUserStr = localStorage.getItem('userInfo');
+    if (storedUserStr) {
+      try {
+        const storedUser = JSON.parse(storedUserStr);
+        if (storedUser.sessionExpiresAt && Date.now() > storedUser.sessionExpiresAt) {
+          // Session expired after 30 minutes
+          localStorage.removeItem('userInfo');
+          setUser(null);
+        } else {
+          setUser(storedUser);
+        }
+      } catch (e) {
+        localStorage.removeItem('userInfo');
+      }
     }
     setLoading(false);
   }, []);
+
+  // Timer check for auto-logout when 30-min session expires
+  useEffect(() => {
+    if (!user || !user.sessionExpiresAt) return;
+
+    const remainingTime = user.sessionExpiresAt - Date.now();
+    if (remainingTime <= 0) {
+      logout();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      alert('Your 30-minute active session has expired. Please sign in again.');
+      logout();
+    }, remainingTime);
+
+    return () => clearTimeout(timer);
+  }, [user]);
 
   const login = async (email, password) => {
     const controller = new AbortController();
@@ -40,6 +71,9 @@ export const AuthProvider = ({ children }) => {
       if (!res.ok) {
         throw new Error(data.message || 'Invalid email or password');
       }
+
+      // Add 30-minute session expiration timestamp
+      data.sessionExpiresAt = Date.now() + SESSION_DURATION_MS;
 
       localStorage.setItem('userInfo', JSON.stringify(data));
       setUser(data);
@@ -71,6 +105,9 @@ export const AuthProvider = ({ children }) => {
       if (!res.ok) {
         throw new Error(data.message || 'Registration failed');
       }
+
+      // Add 30-minute session expiration timestamp
+      data.sessionExpiresAt = Date.now() + SESSION_DURATION_MS;
 
       localStorage.setItem('userInfo', JSON.stringify(data));
       setUser(data);
