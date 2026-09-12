@@ -1117,15 +1117,24 @@ export const negotiateOffer = async (req, res) => {
 };
 
 // =========================================================================
-// NEW FEATURE 5: Recruiter AI Candidate Ranking Leaderboard
+// NEW FEATURE 5: Recruiter AI Candidate Ranking Leaderboard (Real-Time DB Sync)
 // =========================================================================
 export const getCandidateLeaderboard = async (req, res) => {
   try {
-    const profiles = await Profile.find({}).populate('user', 'name email role createdAt');
+    const students = await User.find({ role: 'student' }).select('name email avatar phone createdAt');
+    const profiles = await Profile.find({});
 
-    const leaderboard = profiles.map((p, index) => {
-      const skillCount = p.skills ? p.skills.length : 0;
-      const baseScore = p.aiFeedback && p.aiFeedback.score ? p.aiFeedback.score : 70;
+    const profileMap = new Map();
+    profiles.forEach(p => {
+      if (p.user) {
+        profileMap.set(p.user.toString(), p);
+      }
+    });
+
+    const leaderboard = students.map((std, index) => {
+      const prof = profileMap.get(std._id.toString());
+      const skillCount = prof?.skills ? prof.skills.length : 0;
+      const baseScore = prof?.aiFeedback?.score ? prof.aiFeedback.score : 70;
       const finalScore = Math.min(99, Math.max(65, baseScore + (skillCount * 2)));
 
       let tier = 'Standard Tier';
@@ -1133,15 +1142,16 @@ export const getCandidateLeaderboard = async (req, res) => {
       else if (finalScore >= 75) tier = 'Top Tier';
 
       return {
-        id: p._id,
-        user: p.user,
-        name: p.user ? p.user.name : `Candidate #${1000 + index}`,
-        email: p.user ? p.user.email : `candidate${index}@apexhire.ai`,
+        id: prof ? prof._id : std._id,
+        userId: std._id,
+        name: std.name || `Candidate #${1000 + index}`,
+        email: std.email || `candidate${index}@apexhire.ai`,
+        avatar: std.avatar || prof?.user?.avatar || '',
         aiMatchScore: finalScore,
         tier,
-        isVerified: !!p.isVerified,
-        skills: p.skills || ['JavaScript', 'React', 'Node.js'],
-        resumeUrl: p.resumeUrl || ''
+        isVerified: prof ? !!prof.isVerified : false,
+        skills: (prof?.skills && prof.skills.length > 0) ? prof.skills : ['JavaScript', 'React', 'Node.js'],
+        resumeUrl: prof?.resumeUrl || ''
       };
     }).sort((a, b) => b.aiMatchScore - a.aiMatchScore);
 

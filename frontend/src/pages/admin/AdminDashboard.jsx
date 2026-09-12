@@ -54,7 +54,7 @@ const AdminDashboard = ({ view = 'overview' }) => {
   const [aiLeaderboard, setAiLeaderboard] = useState([]);
   const [leaderboardTierFilter, setLeaderboardTierFilter] = useState('All');
 
-  const fetchData = async () => {
+  const fetchData = async (isInitial = false) => {
     try {
       const [profilesRes, jobsRes, appsRes, leaderboardRes] = await Promise.all([
         fetch(`${API_BASE}/profile/all`, { headers: authHeader() }),
@@ -106,12 +106,18 @@ const AdminDashboard = ({ view = 'overview' }) => {
     } catch (err) {
       console.error('Failed to load admin stats data', err);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(true);
+
+    const pollInterval = setInterval(() => {
+      fetchData(false);
+    }, 4000);
+
+    return () => clearInterval(pollInterval);
   }, []);
 
   // Toggle Verification
@@ -1628,9 +1634,14 @@ const AdminDashboard = ({ view = 'overview' }) => {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              flexShrink: 0
+                              flexShrink: 0,
+                              overflow: 'hidden'
                             }}>
-                              {(cand.name || 'S').charAt(0).toUpperCase()}
+                              {cand.avatar ? (
+                                <img src={cand.avatar} alt={cand.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : (
+                                (cand.name || 'S').charAt(0).toUpperCase()
+                              )}
                             </div>
                             <div>
                               <strong style={{ color: '#ffffff', fontSize: '0.9rem', display: 'block', fontWeight: '700' }}>{cand.name}</strong>
