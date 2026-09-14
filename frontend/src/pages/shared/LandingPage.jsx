@@ -575,7 +575,7 @@ const LandingPage = ({ onGetStarted }) => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <GraduationCap size={16} color="#38bdf8" />
+              <GraduationCap size={16} color="#ffffff" />
               <span>Courses</span>
             </a>
             <a
@@ -597,7 +597,7 @@ const LandingPage = ({ onGetStarted }) => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <Briefcase size={16} color="#34d399" />
+              <Briefcase size={16} color="#ffffff" />
               <span>Drives</span>
             </a>
 
