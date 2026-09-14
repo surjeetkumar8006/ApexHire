@@ -34,6 +34,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const studentLinks = [
     { path: '/student/dashboard', name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+    { path: '/student/courses', name: 'Tech Courses', icon: <GraduationCap size={20} /> },
     { path: '/student/open-editor', name: 'Open Editor', icon: <Code size={20} /> },
     { path: '/student/jobs', name: 'Job Board', icon: <Briefcase size={20} /> },
     { path: '/student/applications', name: 'My Applications', icon: <FileCheck size={20} /> },

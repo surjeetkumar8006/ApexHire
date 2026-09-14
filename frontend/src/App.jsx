@@ -13,8 +13,8 @@ import ChatPortal from './pages/shared/ChatPortal';
 import ForumAndCommunity from './pages/shared/ForumAndCommunity';
 import CourseDetailsPage from './pages/shared/CourseDetailsPage';
 
-// Student Pages
 import StudentDashboard from './pages/student/StudentDashboard';
+import StudentCourses from './pages/student/StudentCourses';
 import OpenEditor from './pages/student/OpenEditor';
 import StudentGym from './pages/student/StudentGym';
 import JobBoard from './pages/student/JobBoard';
@@ -98,6 +98,7 @@ function App() {
 
               {/* ----- Student Routes ----- */}
               <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
+              <Route path="/student/courses" element={<ProtectedRoute allowedRoles={['student']}><StudentCourses /></ProtectedRoute>} />
               <Route path="/student/open-editor" element={<ProtectedRoute allowedRoles={['student']}><OpenEditor /></ProtectedRoute>} />
               <Route path="/student/gym" element={<ProtectedRoute allowedRoles={['student']}><OpenEditor /></ProtectedRoute>} />
               <Route path="/student/jobs" element={<ProtectedRoute allowedRoles={['student']}><JobBoard /></ProtectedRoute>} />
