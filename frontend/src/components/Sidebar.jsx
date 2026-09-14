@@ -167,7 +167,11 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       <div style={styles.menuList}>
         {links.map((link) => {
-          const isActive = location.pathname === link.path;
+          const isActive = 
+            location.pathname === link.path ||
+            (link.path === '/student/courses' && location.pathname.includes('/courses')) ||
+            (link.path !== '/student/dashboard' && link.path !== '/admin/dashboard' && location.pathname.startsWith(link.path));
+
           return (
             <button
               key={link.path}
@@ -176,12 +180,32 @@ const Sidebar = ({ isOpen, onClose }) => {
                 if (isOpen && onClose) onClose();
               }}
               className={`sidebar-menu-item ${isActive ? 'active' : ''}`}
+              style={{
+                ...styles.menuItem,
+                ...(isActive ? styles.activeMenuItem : {})
+              }}
               title={link.name}
             >
+              {isActive && (
+                <span 
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: '15%',
+                    bottom: '15%',
+                    width: '4px',
+                    borderRadius: '0 4px 4px 0',
+                    background: '#38bdf8',
+                    boxShadow: '0 0 10px #38bdf8'
+                  }}
+                />
+              )}
               <span style={isActive ? styles.activeIcon : styles.icon}>
                 {link.icon}
               </span>
-              <span className="sidebar-link-text">{link.name}</span>
+              <span className="sidebar-link-text" style={{ fontWeight: isActive ? 800 : 500, color: isActive ? '#ffffff' : 'var(--text-secondary)' }}>
+                {link.name}
+              </span>
             </button>
           );
         })}
@@ -238,27 +262,26 @@ const styles = {
     msOverflowStyle: 'none',
   },
   menuItem: {
+    position: 'relative',
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
     padding: '0.85rem 1.25rem',
-    borderRadius: 'var(--border-radius-md)',
+    borderRadius: '12px',
     cursor: 'pointer',
     textAlign: 'left',
     fontSize: '0.95rem',
     fontWeight: '500',
     color: 'var(--text-secondary)',
-    transition: 'all var(--transition-fast)',
+    transition: 'all 0.2s ease',
     background: 'transparent',
-    '&:hover': {
-      color: 'var(--text-primary)',
-      background: 'rgba(255, 255, 255, 0.02)',
-    },
+    border: '1px solid transparent',
   },
   activeMenuItem: {
-    color: 'var(--text-primary)',
-    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15))',
-    border: '1px solid rgba(99, 102, 241, 0.25)',
+    color: '#ffffff',
+    background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.18) 0%, rgba(99, 102, 241, 0.18) 100%)',
+    border: '1px solid rgba(56, 189, 248, 0.4)',
+    boxShadow: '0 4px 16px rgba(56, 189, 248, 0.15)',
   },
   icon: {
     color: '#ffffff',
