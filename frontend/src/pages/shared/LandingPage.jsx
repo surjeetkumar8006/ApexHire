@@ -29,13 +29,24 @@ import {
   BarChart2,
   MessageSquare,
   Clock,
-  MapPin
+  MapPin,
+  Github,
+  Linkedin,
+  Twitter,
+  Youtube,
+  Menu,
+  X,
+  ArrowUp
 } from 'lucide-react';
-import { API_BASE } from '../../context/AuthContext';
+import { useAuth, API_BASE } from '../../context/AuthContext';
 
 const LandingPage = ({ onGetStarted }) => {
+  const authContext = useAuth();
+  const user = authContext?.user || null;
+
   const [activeTab, setActiveTab] = useState('coach');
   const [openFaq, setOpenFaq] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Real-Time Skill Match Calculator Playground State
   const [calcRole, setCalcRole] = useState('Full Stack Engineer');
@@ -158,6 +169,25 @@ const LandingPage = ({ onGetStarted }) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  const scrollToSection = (e, href) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const navLinks = [
+    { name: 'Features', href: '#features' },
+    { name: 'AI Calibrator', href: '#playground' },
+    { name: 'Workflow', href: '#process' },
+    { name: 'CTC Estimator', href: '#estimator' },
+    { name: 'Active Drives', href: '#drives' },
+    { name: 'Success Stories', href: '#testimonials' },
+    { name: 'FAQ', href: '#faq' },
+  ];
+
   const featureTabs = [
     {
       id: 'coach',
@@ -207,15 +237,6 @@ const LandingPage = ({ onGetStarted }) => {
         'Interactive analytics dashboard displaying live placement metrics'
       ]
     }
-  ];
-
-  const featuredJobs = [
-    { title: 'Software Development Engineer (SDE-1)', company: 'Google', ctc: '₹32 - ₹45 LPA', location: 'Bangalore / Remote', tags: ['React', 'Node.js', 'DSA', 'System Design'] },
-    { title: 'Frontend Engineering Specialist', company: 'Microsoft', ctc: '₹28 - ₹38 LPA', location: 'Hyderabad', tags: ['React', 'TypeScript', 'CSS', 'Performance'] },
-    { title: 'Cloud & Infrastructure Engineer', company: 'Amazon', ctc: '₹26 - ₹36 LPA', location: 'Gurugram / Hybrid', tags: ['AWS', 'NodeJS', 'Docker', 'Kubernetes'] },
-    { title: 'AI & ML Research Specialist', company: 'NVIDIA', ctc: '₹35 - ₹52 LPA', location: 'Pune / Remote', tags: ['Python', 'PyTorch', 'LLMs', 'Neural Nets'] },
-    { title: 'Full Stack Product Engineer', company: 'Meta', ctc: '₹38 - ₹55 LPA', location: 'Bangalore', tags: ['MERN', 'GraphQL', 'Next.js', 'System Design'] },
-    { title: 'DevOps & Systems Engineer', company: 'Netflix', ctc: '₹30 - ₹48 LPA', location: 'Remote', tags: ['Docker', 'K8s', 'CI/CD', 'Linux'] }
   ];
 
   const studentTestimonials = [
@@ -280,10 +301,242 @@ const LandingPage = ({ onGetStarted }) => {
 
   const activeFeatureData = featureTabs.find(tab => tab.id === activeTab) || featureTabs[0];
 
+  const handleAction = () => {
+    if (onGetStarted) {
+      onGetStarted();
+    } else {
+      const dest = user ? (user.role === 'admin' ? '/admin/dashboard' : user.role === 'recruiter' ? '/recruiter/dashboard' : '/student/dashboard') : '/login';
+      window.location.href = dest;
+    }
+  };
+
   return (
-    <div className="landing-container animate-fade-in" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', overflowX: 'hidden' }}>
+    <div className="landing-container animate-fade-in" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', overflowX: 'hidden', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .nav-links-desktop {
+            display: none !important;
+          }
+          .mobile-nav-toggle {
+            display: block !important;
+          }
+        }
+        .landing-nav-link:hover {
+          color: #ffffff !important;
+        }
+        .landing-card-hover {
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .landing-card-hover:hover {
+          transform: translateY(-5px) !important;
+          border-color: rgba(255, 255, 255, 0.22) !important;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4) !important;
+        }
+      `}</style>
+
+      {/* Ambient background blobs */}
       <div className="blob1"></div>
       <div className="blob2"></div>
+
+      {/* 0. STICKY TOP LANDING NAVBAR */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+        background: 'rgba(7, 10, 20, 0.88)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        width: '100%'
+      }}>
+        <div style={{
+          maxWidth: '1240px',
+          margin: '0 auto',
+          padding: '0.85rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          {/* Brand Logo */}
+          <div 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}
+          >
+            <div style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
+            }}>
+              <Zap size={22} color="#0b0f19" />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px', lineHeight: 1 }}>
+                Apex<span style={{ color: '#38bdf8' }}>Hire</span>
+              </span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.6px' }}>
+                AI CAREER ENGINE
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop Navigation Links */}
+          <nav className="nav-links-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
+            {navLinks.map(link => (
+              <a
+                key={link.name}
+                href={link.href}
+                onClick={(e) => scrollToSection(e, link.href)}
+                className="landing-nav-link"
+                style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.88rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  transition: 'color 0.2s ease',
+                }}
+              >
+                {link.name}
+              </a>
+            ))}
+          </nav>
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            {user ? (
+              <button
+                onClick={handleAction}
+                style={{
+                  padding: '0.55rem 1.25rem',
+                  borderRadius: '10px',
+                  background: '#ffffff',
+                  color: '#0b0f19',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 14px rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                <span>Dashboard</span>
+                <ArrowRight size={15} />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleAction}
+                  style={{
+                    padding: '0.55rem 1.1rem',
+                    borderRadius: '10px',
+                    background: 'transparent',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={handleAction}
+                  style={{
+                    padding: '0.55rem 1.25rem',
+                    borderRadius: '10px',
+                    background: '#ffffff',
+                    color: '#0b0f19',
+                    fontWeight: 800,
+                    fontSize: '0.85rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 14px rgba(255, 255, 255, 0.25)'
+                  }}
+                >
+                  <span>Get Started</span>
+                  <ArrowRight size={15} />
+                </button>
+              </>
+            )}
+
+            {/* Mobile Hamburger Toggle */}
+            <button
+              className="mobile-nav-toggle"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
+                padding: '0.45rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'none'
+              }}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div 
+            className="animate-fade-in"
+            style={{
+              background: 'rgba(11, 15, 25, 0.98)',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '1.25rem 1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}
+          >
+            {navLinks.map(link => (
+              <a
+                key={link.name}
+                href={link.href}
+                onClick={(e) => scrollToSection(e, link.href)}
+                style={{
+                  color: 'var(--text-primary)',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  padding: '0.4rem 0'
+                }}
+              >
+                {link.name}
+              </a>
+            ))}
+            <div style={{ paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={handleAction}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  borderRadius: '10px',
+                  background: '#ffffff',
+                  color: '#0b0f19',
+                  fontWeight: 800,
+                  fontSize: '0.9rem',
+                  border: 'none'
+                }}
+              >
+                Launch Portal Free
+              </button>
+            </div>
+          </div>
+        )}
+      </header>
 
       {/* 1. HERO SECTION */}
       <section className="landing-hero" style={{ paddingTop: '2.5rem', marginBottom: '4rem' }}>
@@ -305,11 +558,11 @@ const LandingPage = ({ onGetStarted }) => {
           </p>
 
           <div className="hero-ctas" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-            <button onClick={onGetStarted} className="btn btn-primary" style={{ padding: '0.85rem 2rem', fontSize: '0.95rem', fontWeight: 800, background: '#ffffff', color: '#0b0f19', borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(255, 255, 255, 0.3)' }}>
+            <button onClick={handleAction} className="btn btn-primary" style={{ padding: '0.85rem 2rem', fontSize: '0.95rem', fontWeight: 800, background: '#ffffff', color: '#0b0f19', borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(255, 255, 255, 0.3)' }}>
               <span>Launch Career Portal</span>
               <ArrowRight size={18} style={{ marginLeft: '6px' }} />
             </button>
-            <button onClick={onGetStarted} className="btn btn-outline" style={{ padding: '0.85rem 1.75rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: '12px' }}>
+            <button onClick={handleAction} className="btn btn-outline" style={{ padding: '0.85rem 1.75rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: '12px' }}>
               <Cpu size={18} style={{ marginRight: '6px' }} />
               <span>Try AI Mock Interview</span>
             </button>
@@ -430,9 +683,9 @@ const LandingPage = ({ onGetStarted }) => {
       </section>
 
       {/* 1.5 REAL-TIME INTERACTIVE AI SKILL MATCH PLAYGROUND */}
-      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 4.5rem auto', padding: '0 1rem' }}>
+      <section id="playground" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 4.5rem auto', padding: '0 1rem' }}>
         <div 
-          className="glass-card" 
+          className="glass-card landing-card-hover" 
           style={{ 
             background: 'var(--bg-surface-elevated)', 
             border: '1px solid var(--border-color)', 
@@ -568,7 +821,7 @@ const LandingPage = ({ onGetStarted }) => {
                 </p>
 
                 <button 
-                  onClick={onGetStarted} 
+                  onClick={handleAction} 
                   className="btn btn-sm btn-primary w-100 py-2.5 font-bold text-xs"
                   style={{ background: '#ffffff', color: '#0b0f19', borderRadius: '10px' }}
                 >
@@ -580,8 +833,8 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* 2. STEP-BY-STEP CAREER ACCELERATION JOURNEY (NEW SECTION) */}
-      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 4.5rem auto', padding: '0 1rem' }}>
+      {/* 2. STEP-BY-STEP CAREER ACCELERATION JOURNEY */}
+      <section id="process" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 4.5rem auto', padding: '0 1rem' }}>
         <div className="text-center mb-5">
           <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3 py-1.5 rounded-pill d-inline-flex align-items-center gap-1 mb-2">
             <Compass size={14} /> End-to-End Placement Workflow
@@ -623,7 +876,7 @@ const LandingPage = ({ onGetStarted }) => {
           ].map((item, idx) => (
             <div 
               key={idx}
-              className="glass-card"
+              className="glass-card landing-card-hover"
               style={{
                 padding: '1.75rem',
                 borderRadius: '18px',
@@ -664,7 +917,7 @@ const LandingPage = ({ onGetStarted }) => {
       </section>
 
       {/* 3. INTERACTIVE FEATURES SHOWCASE */}
-      <section className="showcase-section" style={{ marginBottom: '4.5rem' }}>
+      <section id="features" className="showcase-section" style={{ marginBottom: '4.5rem' }}>
         <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#ffffff' }}>Engineered For Career Acceleration</h2>
         <div className="showcase-tabs">
           {featureTabs.map((tab) => (
@@ -802,9 +1055,9 @@ const LandingPage = ({ onGetStarted }) => {
       </section>
 
       {/* 3.5 REAL-TIME SALARY & PLACEMENT CTC ESTIMATOR */}
-      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 4.5rem auto', padding: '0 1rem' }}>
+      <section id="estimator" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 4.5rem auto', padding: '0 1rem' }}>
         <div 
-          className="glass-card" 
+          className="glass-card landing-card-hover" 
           style={{ 
             background: 'var(--bg-surface-elevated)', 
             border: '1px solid var(--border-color)', 
@@ -907,8 +1160,8 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* 3.8 FEATURED LIVE PLACEMENT DRIVES (NEW SECTION) */}
-      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 6rem auto', padding: '0 1rem' }}>
+      {/* 3.8 FEATURED LIVE PLACEMENT DRIVES */}
+      <section id="drives" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 6rem auto', padding: '0 1rem' }}>
         <div className="text-center" style={{ marginBottom: '3rem' }}>
           <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3.5 py-2 rounded-pill d-inline-flex align-items-center gap-1.5" style={{ marginBottom: '1.25rem' }}>
             <Briefcase size={14} /> Active Campus Hiring Drives 2026
@@ -925,7 +1178,7 @@ const LandingPage = ({ onGetStarted }) => {
           {liveJobs.map((job, idx) => (
             <div 
               key={idx}
-              className="glass-card"
+              className="glass-card landing-card-hover"
               style={{
                 padding: '1.5rem',
                 borderRadius: '16px',
@@ -961,7 +1214,7 @@ const LandingPage = ({ onGetStarted }) => {
               </div>
 
               <button 
-                onClick={onGetStarted}
+                onClick={handleAction}
                 className="btn btn-outline"
                 style={{ width: '100%', padding: '0.65rem', borderRadius: '10px', fontSize: '0.82rem', fontWeight: 700, marginTop: '0.5rem' }}
               >
@@ -972,8 +1225,8 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* 3.9 VERIFIED STUDENT SUCCESS TESTIMONIALS (NEW SECTION) */}
-      <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 6rem auto', padding: '0 1rem' }}>
+      {/* 3.9 VERIFIED STUDENT SUCCESS TESTIMONIALS */}
+      <section id="testimonials" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 6rem auto', padding: '0 1rem' }}>
         <div className="text-center" style={{ marginBottom: '3rem' }}>
           <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3.5 py-2 rounded-pill d-inline-flex align-items-center gap-1.5" style={{ marginBottom: '1.25rem' }}>
             <Star size={14} fill="#ffffff" color="#ffffff" /> Alumni Placement Success Stories
@@ -990,7 +1243,7 @@ const LandingPage = ({ onGetStarted }) => {
           {studentTestimonials.map((item, idx) => (
             <div 
               key={idx}
-              className="glass-card"
+              className="glass-card landing-card-hover"
               style={{
                 padding: '1.75rem',
                 borderRadius: '18px',
@@ -1076,7 +1329,7 @@ const LandingPage = ({ onGetStarted }) => {
       </section>
 
       {/* 5. FAQ ACCORDION SECTION */}
-      <section className="faq-section" style={{ marginBottom: '4.5rem' }}>
+      <section id="faq" className="faq-section" style={{ marginBottom: '4.5rem' }}>
         <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#ffffff' }}>Frequently Asked Questions</h2>
         <div className="faq-accordion-container">
           {faqItems.map((item, idx) => (
@@ -1099,7 +1352,7 @@ const LandingPage = ({ onGetStarted }) => {
       {/* 6. BOTTOM CTA BANNER */}
       <section style={{ width: '100%', maxWidth: '1200px', margin: '0 auto 4rem auto', padding: '0 1rem' }}>
         <div 
-          className="glass-card text-center p-5 position-relative overflow-hidden" 
+          className="glass-card text-center p-5 position-relative overflow-hidden landing-card-hover" 
           style={{ 
             background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%)', 
             border: '1px solid rgba(255, 255, 255, 0.18)', 
@@ -1115,7 +1368,7 @@ const LandingPage = ({ onGetStarted }) => {
               Join thousands of students using ApexHire for AI resume parsing, voice mock interview practice, and direct campus placements.
             </p>
             <button 
-              onClick={onGetStarted} 
+              onClick={handleAction} 
               className="btn btn-primary"
               style={{ padding: '0.9rem 2.5rem', fontSize: '1rem', fontWeight: 800, background: '#ffffff', color: '#0b0f19', borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(255, 255, 255, 0.3)' }}
             >
@@ -1125,9 +1378,161 @@ const LandingPage = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* Footer Info */}
-      <footer style={{ marginTop: 'auto', padding: '2rem 0 1.5rem 0', color: 'var(--text-muted)', fontSize: '0.85rem', borderTop: '1px solid var(--border-color)', width: '100%', maxWidth: '1200px', textAlign: 'center' }}>
-        <p>© 2026 ApexHire Career & Placement Portal. Handcrafted with MERN & Gemini AI.</p>
+      {/* 7. RICH MULTI-COLUMN LANDING FOOTER */}
+      <footer style={{
+        width: '100%',
+        background: 'rgba(7, 10, 20, 0.95)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        paddingTop: '4rem',
+        paddingBottom: '2rem',
+        marginTop: 'auto',
+        position: 'relative'
+      }}>
+        <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '3rem',
+            marginBottom: '3.5rem'
+          }}>
+            {/* Col 1: Brand & Slogan */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+                <div style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Zap size={18} color="#0b0f19" />
+                </div>
+                <span style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px' }}>
+                  Apex<span style={{ color: '#38bdf8' }}>Hire</span>
+                </span>
+              </div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                The AI-powered campus placement & career acceleration engine. Transforming resume parsing, mock interviews, and applicant pipelines with Gemini AI.
+              </p>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(52, 211, 153, 0.08)', padding: '0.4rem 0.8rem', borderRadius: '20px', border: '1px solid rgba(52, 211, 153, 0.2)', width: 'fit-content', marginBottom: '1.25rem' }}>
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#34d399' }}>All Systems Operational ⚡</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                {[
+                  { icon: <Github size={16} />, href: 'https://github.com' },
+                  { icon: <Linkedin size={16} />, href: 'https://linkedin.com' },
+                  { icon: <Twitter size={16} />, href: 'https://twitter.com' },
+                  { icon: <Youtube size={16} />, href: 'https://youtube.com' }
+                ].map((s, i) => (
+                  <a
+                    key={i}
+                    href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '10px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: 'var(--text-secondary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {s.icon}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Col 2: AI Features */}
+            <div>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', marginBottom: '1.25rem', letterSpacing: '0.5px' }}>
+                AI FEATURE SUITE
+              </h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem' }}>
+                <li><a href="#coach" onClick={(e) => scrollToSection(e, '#features')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Gemini AI Resume Coach</a></li>
+                <li><a href="#mock" onClick={(e) => scrollToSection(e, '#features')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Ava AI Voice Mock Room</a></li>
+                <li><a href="#playground" onClick={(e) => scrollToSection(e, '#playground')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Skill Match Calibrator</a></li>
+                <li><a href="#estimator" onClick={(e) => scrollToSection(e, '#estimator')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Placement CTC Predictor</a></li>
+                <li><a href="#features" onClick={(e) => scrollToSection(e, '#features')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>ATS Score Keyword Parser</a></li>
+              </ul>
+            </div>
+
+            {/* Col 3: For Candidates */}
+            <div>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', marginBottom: '1.25rem', letterSpacing: '0.5px' }}>
+                PORTAL SECTIONS
+              </h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem' }}>
+                <li><a href="#drives" onClick={(e) => scrollToSection(e, '#drives')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Campus Hiring Drives 2026</a></li>
+                <li><a href="#testimonials" onClick={(e) => scrollToSection(e, '#testimonials')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Candidate Leaderboard & Badges</a></li>
+                <li><a href="#process" onClick={(e) => scrollToSection(e, '#process')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Recruiter Shortlist Pipeline</a></li>
+                <li><a href="#process" onClick={(e) => scrollToSection(e, '#process')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Placement Coordinator Hub</a></li>
+                <li><a href="#testimonials" onClick={(e) => scrollToSection(e, '#testimonials')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Alumni Placement Feed</a></li>
+              </ul>
+            </div>
+
+            {/* Col 4: Support & Legal */}
+            <div>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', marginBottom: '1.25rem', letterSpacing: '0.5px' }}>
+                SUPPORT & LEGAL
+              </h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem' }}>
+                <li><a href="#faq" onClick={(e) => scrollToSection(e, '#faq')} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Frequently Asked Questions</a></li>
+                <li><span style={{ color: 'var(--text-secondary)' }}>Campus Partner Colleges</span></li>
+                <li><span style={{ color: 'var(--text-secondary)' }}>Privacy Policy & Data Rights</span></li>
+                <li><span style={{ color: 'var(--text-secondary)' }}>Terms of Placement Service</span></li>
+                <li><span style={{ color: 'var(--text-secondary)' }}>Support & Helpdesk</span></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Footer Bottom Bar */}
+          <div style={{
+            paddingTop: '2rem',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            fontSize: '0.82rem',
+            color: 'var(--text-muted)'
+          }}>
+            <div>
+              © 2026 ApexHire Career & Placement Portal. Handcrafted with MERN Stack & Gemini AI.
+            </div>
+
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              style={{
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
+                padding: '0.45rem 0.9rem',
+                borderRadius: '10px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>Back to Top</span>
+              <ArrowUp size={14} />
+            </button>
+          </div>
+        </div>
       </footer>
     </div>
   );

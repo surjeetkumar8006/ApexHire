@@ -90,6 +90,7 @@ function App() {
             <Routes>
               {/* Redirect root based on role */}
               <Route path="/" element={<Navigate to={user.role === 'admin' ? '/admin/dashboard' : (user.role === 'recruiter' ? '/recruiter/dashboard' : '/student/dashboard')} replace />} />
+              <Route path="/landing" element={<LandingPage />} />
               <Route path="/login" element={<Navigate to="/" replace />} />
 
               {/* ----- Student Routes ----- */}
