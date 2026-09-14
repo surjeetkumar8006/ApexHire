@@ -115,16 +115,124 @@ function twoSum(nums, target) {
     }
   };
 
+  // --- TECH COURSES & EMI ENROLLMENT STATES ---
+  const [myEnrollments, setMyEnrollments] = useState([]);
+  const [selectedEmiPlanMap, setSelectedEmiPlanMap] = useState({});
+  const [enrollingId, setEnrollingId] = useState(null);
+
+  const dashboardCourses = [
+    {
+      id: 'ai-engineering',
+      title: 'AI Engineering & GenAI Agents',
+      subtitle: 'Live Mentor-Led Interactive Master Program',
+      duration: '7 Months',
+      icon: '🤖',
+      tags: ['LLM API', 'RAG', 'AI Agents', 'Spring Boot', 'Python', 'MCP'],
+      projects: '15+ Capstone Projects',
+      enrolledCount: '120+ Students',
+      emiPlans: [
+        { title: 'No-Cost EMI (6 Months)', emi: '₹4,999/mo', totalFee: '₹29,994', scholarship: false },
+        { title: 'Flexible EMI (12 Months)', emi: '₹2,799/mo', totalFee: '₹33,588', scholarship: false },
+        { title: 'One-Time Full Fee (50% Scholarship Applied)', emi: 'Full Fee', totalFee: '₹24,999', scholarship: true, discount: '50%' }
+      ]
+    },
+    {
+      id: 'full-stack-genai',
+      title: 'Full Stack Development With GenAI',
+      subtitle: 'MERN Stack, System Design & Artificial Intelligence',
+      duration: '8 Months',
+      icon: '</>',
+      tags: ['React', 'Node.js', 'Express', 'MongoDB', 'System Design', 'OpenAI API'],
+      projects: '60+ Projects',
+      enrolledCount: '180+ Students',
+      emiPlans: [
+        { title: 'No-Cost EMI (6 Months)', emi: '₹3,999/mo', totalFee: '₹23,994', scholarship: false },
+        { title: 'Flexible EMI (12 Months)', emi: '₹2,299/mo', totalFee: '₹27,588', scholarship: false },
+        { title: 'One-Time Full Fee (Flat ₹5,000 Off)', emi: 'Full Fee', totalFee: '₹19,999', scholarship: true, discount: '20%' }
+      ]
+    },
+    {
+      id: 'data-analytics',
+      title: 'Data Analytics & Business Intelligence',
+      subtitle: 'Hands-on Data Science & Visualizations',
+      duration: '6 Months',
+      icon: '📈',
+      tags: ['Excel', 'Power BI', 'SQL', 'Python', 'Tableau', 'Pandas'],
+      projects: '7+ Real Data Labs',
+      enrolledCount: '95+ Students',
+      emiPlans: [
+        { title: 'No-Cost EMI (6 Months)', emi: '₹3,499/mo', totalFee: '₹20,994', scholarship: false },
+        { title: 'Flexible EMI (12 Months)', emi: '₹1,999/mo', totalFee: '₹23,988', scholarship: false },
+        { title: 'One-Time Full Fee (100% Placement Assistance)', emi: 'Full Fee', totalFee: '₹17,999', scholarship: false }
+      ]
+    }
+  ];
+
+  const fetchMyEnrollments = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/courses/my`, {
+        headers: authHeader(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMyEnrollments(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch my enrollments:', err);
+    }
+  };
+
+  const handleEnrollCourse = async (course) => {
+    setEnrollingId(course.id);
+    const selectedPlanIdx = selectedEmiPlanMap[course.id] || 0;
+    const selectedPlanObj = course.emiPlans[selectedPlanIdx];
+
+    try {
+      const res = await fetch(`${API_BASE}/courses/enroll`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        body: JSON.stringify({
+          courseId: course.id,
+          courseTitle: course.title,
+          category: 'Online Live',
+          duration: course.duration,
+          selectedPlan: selectedPlanObj.title,
+          monthlyEmi: selectedPlanObj.emi,
+          totalFee: selectedPlanObj.totalFee,
+          scholarshipApplied: selectedPlanObj.scholarship,
+          scholarshipDiscount: selectedPlanObj.discount || '0%',
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        addToast(data.message || `Enrolled in ${course.title}! 🎉`, 'success');
+        fetchMyEnrollments();
+      } else {
+        addToast(data.message || 'Enrollment failed', 'error');
+      }
+    } catch (err) {
+      addToast('Error enrolling in course', 'error');
+    } finally {
+      setEnrollingId(null);
+    }
+  };
+
   useEffect(() => {
-    Promise.all([fetchProfile(), fetchApplications()]).finally(() => setLoading(false));
+    Promise.all([fetchProfile(), fetchApplications(), fetchMyEnrollments()]).finally(() => setLoading(false));
 
     // 4-second silent background auto-polling for real-time live achievement badges & status updates
     const interval = setInterval(() => {
       fetchProfile();
       fetchApplications();
+      fetchMyEnrollments();
     }, 4000);
     return () => clearInterval(interval);
   }, []);
+
 
   const handleOfferResponse = async (appId, response) => {
     try {
@@ -647,6 +755,188 @@ function twoSum(nums, target) {
       <div className="dashboard-main-layout">
         {/* Left Column: Activity & Overview */}
         <div style={styles.leftCol}>
+
+          {/* ========================================================================= */}
+          {/* TECH COURSES & EMI ENROLLMENT CARD */}
+          {/* ========================================================================= */}
+          <div className="glass-card" style={{ marginBottom: '1.5rem', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <GraduationCap size={24} color="#38bdf8" />
+                <div>
+                  <h3 style={{ ...styles.cardTitle, margin: 0, color: '#ffffff' }}>Job-Guaranteed Tech Courses & EMI Plans</h3>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
+                    Enroll in industry-aligned career tracks with flexible EMI & scholarship options
+                  </p>
+                </div>
+              </div>
+
+              {myEnrollments.length > 0 && (
+                <span className="badge bg-success-glow text-success font-bold" style={{ padding: '0.35rem 0.85rem', borderRadius: '20px', fontSize: '0.78rem' }}>
+                  ✓ {myEnrollments.length} Active Enrollment{myEnrollments.length > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+
+            {/* Active Student Enrollments List */}
+            {myEnrollments.length > 0 && (
+              <div style={{ background: 'rgba(56, 189, 248, 0.06)', border: '1px solid rgba(56, 189, 248, 0.2)', borderRadius: '14px', padding: '1rem', marginBottom: '1.5rem' }}>
+                <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.92rem', fontWeight: 800, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle2 size={16} /> My Enrolled Courses & EMI Details:
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
+                  {myEnrollments.map((en) => (
+                    <div key={en._id} style={{ background: 'rgba(7, 10, 20, 0.8)', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', padding: '0.85rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
+                        <h5 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#ffffff' }}>{en.courseTitle}</h5>
+                        <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '12px', background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', fontWeight: 700, border: '1px solid rgba(52, 211, 153, 0.3)' }}>
+                          {en.status}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                        <span>Plan: <strong>{en.selectedPlan}</strong></span>
+                        {en.monthlyEmi && (
+                          <span style={{ display: 'block', color: '#38bdf8', fontWeight: 700, marginTop: '2px' }}>
+                            💳 Rate: {en.monthlyEmi} (Total: {en.totalFee})
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.4rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Enrolled: {new Date(en.enrolledAt).toLocaleDateString()}</span>
+                        <a
+                          href={`/courses/${en.courseId}`}
+                          style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 800, textDecoration: 'none', background: 'rgba(255, 255, 255, 0.1)', padding: '0.25rem 0.65rem', borderRadius: '8px' }}
+                        >
+                          Access Details →
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Available Tech Courses Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+              {dashboardCourses.map((course) => {
+                const isEnrolled = myEnrollments.some(e => e.courseId === course.id);
+                const selectedPlanIdx = selectedEmiPlanMap[course.id] || 0;
+                const currentPlan = course.emiPlans[selectedPlanIdx];
+
+                return (
+                  <div
+                    key={course.id}
+                    style={{
+                      background: 'var(--bg-base)',
+                      border: isEnrolled ? '1px solid #34d399' : '1px solid var(--border-color)',
+                      borderRadius: '16px',
+                      padding: '1.15rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '0.85rem'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '1.2rem' }}>{course.icon}</span>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.12)', padding: '0.2rem 0.55rem', borderRadius: '8px' }}>
+                            ⏱️ {course.duration}
+                          </span>
+                        </div>
+                        {isEnrolled && (
+                          <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#34d399', background: 'rgba(52, 211, 153, 0.15)', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>
+                            ✓ ENROLLED
+                          </span>
+                        )}
+                      </div>
+
+                      <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 800, color: '#ffffff' }}>
+                        {course.title}
+                      </h4>
+                      <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        {course.subtitle}
+                      </p>
+
+                      {/* Tech stack tags */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.85rem' }}>
+                        {course.tags.slice(0, 5).map((t, idx) => (
+                          <span key={idx} style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: 'var(--text-primary)' }}>
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Select EMI Plan Dropdown */}
+                      <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px', padding: '0.65rem', marginBottom: '0.85rem' }}>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>
+                          Select Fee / EMI Plan:
+                        </label>
+                        <select
+                          value={selectedPlanIdx}
+                          onChange={(e) => setSelectedEmiPlanMap({ ...selectedEmiPlanMap, [course.id]: parseInt(e.target.value) })}
+                          style={{
+                            width: '100%',
+                            background: 'var(--bg-surface-elevated)',
+                            border: '1px solid var(--border-color)',
+                            color: '#ffffff',
+                            borderRadius: '8px',
+                            padding: '0.45rem 0.65rem',
+                            fontSize: '0.78rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          {course.emiPlans.map((plan, pIdx) => (
+                            <option key={pIdx} value={pIdx}>
+                              {plan.title} - {plan.emi}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <a
+                        href={`/courses/${course.id}`}
+                        style={{
+                          flex: 1,
+                          padding: '0.6rem',
+                          borderRadius: '10px',
+                          background: 'transparent',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          fontSize: '0.78rem',
+                          textDecoration: 'none',
+                          textAlign: 'center'
+                        }}
+                      >
+                        View Details
+                      </a>
+                      <button
+                        onClick={() => handleEnrollCourse(course)}
+                        disabled={enrollingId === course.id}
+                        style={{
+                          flex: 1.3,
+                          padding: '0.6rem',
+                          borderRadius: '10px',
+                          background: isEnrolled ? 'rgba(52, 211, 153, 0.2)' : '#ffffff',
+                          border: isEnrolled ? '1px solid #34d399' : 'none',
+                          color: isEnrolled ? '#34d399' : '#0b0f19',
+                          fontWeight: 900,
+                          fontSize: '0.78rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {enrollingId === course.id ? 'Enrolling...' : isEnrolled ? 'Update Plan' : 'Enroll Now →'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
           
           {/* Applications Pipeline Activity Feed */}
           <div className="glass-card">

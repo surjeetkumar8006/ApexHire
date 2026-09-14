@@ -54,13 +54,17 @@ const AdminDashboard = ({ view = 'overview' }) => {
   const [aiLeaderboard, setAiLeaderboard] = useState([]);
   const [leaderboardTierFilter, setLeaderboardTierFilter] = useState('All');
 
+  // Course Enrollments & Fee History States
+  const [courseEnrollments, setCourseEnrollments] = useState([]);
+
   const fetchData = async (isInitial = false) => {
     try {
-      const [profilesRes, jobsRes, appsRes, leaderboardRes] = await Promise.all([
+      const [profilesRes, jobsRes, appsRes, leaderboardRes, enrollmentsRes] = await Promise.all([
         fetch(`${API_BASE}/profile/all`, { headers: authHeader() }),
         fetch(`${API_BASE}/jobs`, { headers: authHeader() }),
         fetch(`${API_BASE}/applications/all`, { headers: authHeader() }),
         fetch(`${API_BASE}/ai/candidate-leaderboard`, { headers: authHeader() }),
+        fetch(`${API_BASE}/courses/admin`, { headers: authHeader() }),
       ]);
 
       if (profilesRes.ok && jobsRes.ok && appsRes.ok) {
@@ -75,6 +79,11 @@ const AdminDashboard = ({ view = 'overview' }) => {
         if (leaderboardRes && leaderboardRes.ok) {
           const lbData = await leaderboardRes.json();
           setAiLeaderboard(lbData);
+        }
+
+        if (enrollmentsRes && enrollmentsRes.ok) {
+          const enData = await enrollmentsRes.json();
+          setCourseEnrollments(enData);
         }
 
         // Calculate dynamic metrics
@@ -109,6 +118,31 @@ const AdminDashboard = ({ view = 'overview' }) => {
       if (isInitial) setLoading(false);
     }
   };
+
+  const handleUpdateEnrollmentStatus = async (enrollmentId, newStatus) => {
+    try {
+      const res = await fetch(`${API_BASE}/courses/admin/${enrollmentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        addToast(`Course enrollment status updated to ${newStatus}`, 'success');
+        setCourseEnrollments((prev) =>
+          prev.map((e) => (e._id === enrollmentId ? { ...e, status: newStatus } : e))
+        );
+      } else {
+        addToast('Failed to update status', 'error');
+      }
+    } catch (err) {
+      addToast('Error updating status', 'error');
+    }
+  };
+
 
   useEffect(() => {
     fetchData(true);
@@ -912,6 +946,111 @@ const AdminDashboard = ({ view = 'overview' }) => {
             <span>Export Student Directory</span>
           </button>
         </header>
+
+        {/* ========================================================================= */}
+        {/* ADMIN COURSE ENROLLMENTS & FEE HISTORY SECTION */}
+        {/* ========================================================================= */}
+        <div className="glass-card" style={{ marginBottom: '2rem', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8' }}>
+                <GraduationCap size={20} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                  Student Course Enrollments & EMI History ({courseEnrollments.length})
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
+                  Real-time record of student tech course registrations, EMI plans & payment statuses
+                </p>
+              </div>
+            </div>
+
+            <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3 py-1.5 rounded-pill">
+              🎓 Live Enrollment Log
+            </span>
+          </div>
+
+          <div className="table-responsive">
+            <table className="table-custom" style={{ width: '100%', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ background: 'rgba(255, 255, 255, 0.04)', color: 'var(--text-secondary)' }}>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Student</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Course Title</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Selected EMI Plan</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Monthly / Total Fee</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Enrolled Date</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courseEnrollments.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                      No course enrollments recorded yet.
+                    </td>
+                  </tr>
+                ) : (
+                  courseEnrollments.map((en) => (
+                    <tr key={en._id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                            {(en.student?.name || 'S').charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: '800', color: '#ffffff' }}>{en.student?.name || 'Candidate Student'}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{en.student?.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        <div style={{ fontWeight: '700', color: '#ffffff' }}>{en.courseTitle}</div>
+                        <div style={{ fontSize: '0.72rem', color: '#38bdf8' }}>{en.category} • {en.duration}</div>
+                      </td>
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{en.selectedPlan}</div>
+                        {en.scholarshipApplied && (
+                          <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(168, 85, 247, 0.2)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.3)', fontWeight: 700 }}>
+                            🎁 Scholarship Applied
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        <div style={{ fontWeight: '800', color: '#34d399' }}>{en.monthlyEmi || 'Full Fee'}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Total: {en.totalFee}</div>
+                      </td>
+                      <td style={{ padding: '0.85rem 1rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        {new Date(en.enrolledAt).toLocaleDateString()}
+                      </td>
+                      <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
+                        <select
+                          value={en.status}
+                          onChange={(e) => handleUpdateEnrollmentStatus(en._id, e.target.value)}
+                          style={{
+                            background: 'var(--bg-base)',
+                            border: '1px solid var(--border-color)',
+                            color: en.status === 'Active' ? '#34d399' : en.status === 'Completed' ? '#38bdf8' : '#ffffff',
+                            borderRadius: '8px',
+                            padding: '0.35rem 0.65rem',
+                            fontSize: '0.78rem',
+                            fontWeight: '700',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <option value="Enrolled">Enrolled</option>
+                          <option value="Active">Active</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Cancelled">Cancelled</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <div className="glass-card" style={{ ...styles.studentBlock, maxHeight: 'none' }}>
           <div style={styles.directoryHeader}>
