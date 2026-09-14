@@ -55,6 +55,7 @@ const LandingPage = ({ onGetStarted }) => {
   const courseData = {
     online: [
       {
+        id: 'ai-engineering',
         title: 'AI Engineering & GenAI Agents',
         subtitle: 'Live Mentor-Led Interactive Master Program',
         duration: '7 Months',
@@ -66,6 +67,7 @@ const LandingPage = ({ onGetStarted }) => {
         scholarship: 'SCHOLARSHIP UP TO 50% AVAILABLE'
       },
       {
+        id: 'data-analytics',
         title: 'Data Analytics & Business Intelligence',
         subtitle: 'Hands-on Data Science & Visualizations',
         duration: '6 Months',
@@ -77,6 +79,7 @@ const LandingPage = ({ onGetStarted }) => {
         scholarship: '100% PLACEMENT ASSISTANCE'
       },
       {
+        id: 'full-stack-genai',
         title: 'Full Stack Development With GenAI',
         subtitle: 'MERN Stack & Artificial Intelligence',
         duration: '8 Months',
@@ -90,6 +93,7 @@ const LandingPage = ({ onGetStarted }) => {
     ],
     offline: [
       {
+        id: 'full-stack-genai',
         title: 'Full Stack Web Development (Classroom)',
         subtitle: 'Bangalore & Noida Physical Training Centers',
         duration: '6 Months',
@@ -101,6 +105,7 @@ const LandingPage = ({ onGetStarted }) => {
         scholarship: 'OFFLINE CENTER SCHOLARSHIP AVAILABLE'
       },
       {
+        id: 'data-analytics',
         title: 'Data Science & Machine Learning Lab',
         subtitle: 'In-person Mentor Guided Labs',
         duration: '7 Months',
@@ -114,6 +119,7 @@ const LandingPage = ({ onGetStarted }) => {
     ],
     selfPaced: [
       {
+        id: 'ai-engineering',
         title: 'System Design & Microservices Mastery',
         subtitle: 'Comprehensive Self-Paced Video Track',
         duration: 'Self Paced',
@@ -125,6 +131,7 @@ const LandingPage = ({ onGetStarted }) => {
         scholarship: 'FLAT 40% OFF THIS WEEK'
       },
       {
+        id: 'full-stack-genai',
         title: 'DSA & Coding Interview Bootcamp',
         subtitle: '450+ LeetCode Solutions with Video Notes',
         duration: 'Self Paced',
@@ -881,7 +888,7 @@ const LandingPage = ({ onGetStarted }) => {
                   <FileText size={14} /> Brochure
                 </button>
                 <button
-                  onClick={() => setSelectedCourseModal(course)}
+                  onClick={() => window.location.href = `/courses/${course.id || 'ai-engineering'}`}
                   style={{
                     flex: 1.3,
                     padding: '0.65rem',

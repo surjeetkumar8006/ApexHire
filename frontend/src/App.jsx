@@ -11,6 +11,7 @@ import SettingsPage from './pages/shared/SettingsPage';
 import ComingSoon from './pages/shared/ComingSoon';
 import ChatPortal from './pages/shared/ChatPortal';
 import ForumAndCommunity from './pages/shared/ForumAndCommunity';
+import CourseDetailsPage from './pages/shared/CourseDetailsPage';
 
 // Student Pages
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -74,6 +75,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<AuthPage onBack={() => setScreen('landing')} />} />
+          <Route path="/courses/:courseId" element={<CourseDetailsPage />} />
           <Route path="*" element={<LandingPage onGetStarted={() => window.location.href = '/login'} />} />
         </Routes>
       </BrowserRouter>
@@ -88,9 +90,10 @@ function App() {
         <main className={`main-content ${isMobileMenuOpen ? 'sidebar-open' : ''}`}>
           <div style={{ marginTop: '70px', minWidth: 0, width: '100%' }} className="animate-fade-in">
             <Routes>
-              {/* Redirect root based on role */}
+              {/* Shared Course Details & Redirects */}
               <Route path="/" element={<Navigate to={user.role === 'admin' ? '/admin/dashboard' : (user.role === 'recruiter' ? '/recruiter/dashboard' : '/student/dashboard')} replace />} />
               <Route path="/landing" element={<LandingPage />} />
+              <Route path="/courses/:courseId" element={<CourseDetailsPage />} />
               <Route path="/login" element={<Navigate to="/" replace />} />
 
               {/* ----- Student Routes ----- */}
