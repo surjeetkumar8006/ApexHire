@@ -435,13 +435,25 @@ const LandingPage = ({ onGetStarted }) => {
             margin-bottom: 2.5rem !important;
           }
           .landing-header-wrap {
-            padding: 0 0.85rem !important;
+            padding: 0 0.6rem !important;
+          }
+          .landing-nav-center {
+            gap: 0.35rem !important;
+          }
+          .landing-nav-item {
+            font-size: 0.76rem !important;
+            padding: 0.25rem 0.45rem !important;
+            border-radius: 6px !important;
+          }
+          .landing-nav-item svg {
+            width: 14px !important;
+            height: 14px !important;
           }
           .logo-subtext {
             display: none !important;
           }
           .logo-title-text {
-            font-size: 1.15rem !important;
+            font-size: 1.1rem !important;
           }
           .hero-badge {
             padding: 0.35rem 0.75rem !important;
@@ -474,12 +486,12 @@ const LandingPage = ({ onGetStarted }) => {
             display: none !important;
           }
           .btn-header-signin {
-            padding: 0.4rem 0.75rem !important;
-            font-size: 0.78rem !important;
+            padding: 0.35rem 0.6rem !important;
+            font-size: 0.75rem !important;
           }
           .btn-header-getstarted {
-            padding: 0.45rem 0.85rem !important;
-            font-size: 0.78rem !important;
+            padding: 0.4rem 0.75rem !important;
+            font-size: 0.75rem !important;
             white-space: nowrap !important;
           }
           .glass-card {
@@ -541,6 +553,54 @@ const LandingPage = ({ onGetStarted }) => {
                 AI CAREER ENGINE
               </span>
             </div>
+          </div>
+
+          {/* Middle Nav Links (Exactly 2: Courses & Drives) */}
+          <div className="landing-nav-center" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <a
+              href="#courses"
+              onClick={(e) => scrollToSection(e, '#courses')}
+              className="landing-nav-item"
+              style={{
+                color: '#ffffff',
+                fontSize: '0.86rem',
+                fontWeight: 800,
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '0.35rem 0.75rem',
+                borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <GraduationCap size={16} color="#38bdf8" />
+              <span>Courses</span>
+            </a>
+            <a
+              href="#drives"
+              onClick={(e) => scrollToSection(e, '#drives')}
+              className="landing-nav-item"
+              style={{
+                color: '#ffffff',
+                fontSize: '0.86rem',
+                fontWeight: 800,
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '0.35rem 0.75rem',
+                borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Briefcase size={16} color="#34d399" />
+              <span>Drives</span>
+            </a>
           </div>
 
           {/* Action Buttons */}
