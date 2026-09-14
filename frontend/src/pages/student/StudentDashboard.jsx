@@ -117,6 +117,13 @@ function twoSum(nums, target) {
 
   useEffect(() => {
     Promise.all([fetchProfile(), fetchApplications()]).finally(() => setLoading(false));
+
+    // 4-second silent background auto-polling for real-time live achievement badges & status updates
+    const interval = setInterval(() => {
+      fetchProfile();
+      fetchApplications();
+    }, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleOfferResponse = async (appId, response) => {
@@ -991,35 +998,102 @@ function twoSum(nums, target) {
               </div>
 
               {/* Badges Panel */}
-              <div className="glass-card" style={{ marginTop: '0rem' }}>
-                <h3 style={styles.cardTitle}>Achievement Badges</h3>
-                <p style={styles.cardDesc}>Gamified campus achievements unlocked based on progress:</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div style={{ padding: '0.5rem', borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
-                    <span style={{ fontSize: '1.5rem', display: 'block' }}>🚀</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', color: '#ffffff' }}>Active Profile</span>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Verified Candidate</span>
-                  </div>
+              {(() => {
+                const skillCount = profile?.skills?.length || 0;
+                const aiScore = profile?.aiFeedback?.score || 0;
+                const isVerified = profile?.isVerified || false;
+                const hasResume = !!profile?.resumeUrl;
 
-                  <div style={{ padding: '0.5rem', borderRadius: 8, backgroundColor: completeness === 100 ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', textAlign: 'center', opacity: completeness === 100 ? 1 : 0.5 }}>
-                    <span style={{ fontSize: '1.5rem', display: 'block' }}>🏆</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', color: '#ffffff' }}>Complete</span>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>100% Filled</span>
-                  </div>
+                let completeness = 0;
+                if (user?.name) completeness += 25;
+                if (skillCount > 0) completeness += 25;
+                if (hasResume) completeness += 25;
+                if (isVerified || (profile?.education?.length || 0) > 0 || (profile?.experience?.length || 0) > 0) completeness += 25;
 
-                  <div style={{ padding: '0.5rem', borderRadius: 8, backgroundColor: aiScore >= 85 ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', textAlign: 'center', opacity: aiScore >= 85 ? 1 : 0.5 }}>
-                    <span style={{ fontSize: '1.5rem', display: 'block' }}>⚡</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', color: '#ffffff' }}>Resume Star</span>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{"ATS Score >= 85"}</span>
-                  </div>
+                return (
+                  <div className="glass-card" style={{ marginTop: '0rem' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                      <div>
+                        <h3 style={styles.cardTitle} className="mb-0">Achievement Badges</h3>
+                        <p style={styles.cardDesc} className="mb-0 mt-1">Gamified campus achievements unlocked based on progress:</p>
+                      </div>
+                      <span className="badge bg-primary-glow text-primary text-xs" style={{ borderRadius: '20px', padding: '0.3rem 0.65rem', fontWeight: '700' }}>
+                        ⚡ Real-Time Live
+                      </span>
+                    </div>
 
-                  <div style={{ padding: '0.5rem', borderRadius: 8, backgroundColor: (profile?.skills?.length || 0) >= 6 ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', textAlign: 'center', opacity: (profile?.skills?.length || 0) >= 6 ? 1 : 0.5 }}>
-                    <span style={{ fontSize: '1.5rem', display: 'block' }}>🔥</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', display: 'block', color: '#ffffff' }}>Tech Buff</span>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>6+ skills listed</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '1rem' }}>
+                      {/* 1. Active Profile */}
+                      <div style={{ 
+                        padding: '0.75rem 0.6rem', 
+                        borderRadius: 12, 
+                        backgroundColor: (isVerified || hasResume) ? 'rgba(52, 211, 153, 0.09)' : 'rgba(255,255,255,0.02)', 
+                        border: (isVerified || hasResume) ? '1px solid rgba(52, 211, 153, 0.35)' : '1px solid var(--border-color)', 
+                        textAlign: 'center', 
+                        opacity: (isVerified || hasResume) ? 1 : 0.6,
+                        transition: 'all 0.3s ease'
+                      }}>
+                        <span style={{ fontSize: '1.6rem', display: 'block', marginBottom: '0.2rem' }}>🚀</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', color: '#ffffff' }}>Active Profile</span>
+                        <span style={{ fontSize: '0.7rem', color: (isVerified || hasResume) ? '#34d399' : 'var(--text-muted)', fontWeight: '700', display: 'block', marginTop: '0.15rem' }}>
+                          {isVerified ? '✓ Verified Candidate' : hasResume ? '✓ Active Candidate' : '🔒 Pending Verification'}
+                        </span>
+                      </div>
+
+                      {/* 2. Complete Profile */}
+                      <div style={{ 
+                        padding: '0.75rem 0.6rem', 
+                        borderRadius: 12, 
+                        backgroundColor: completeness >= 90 ? 'rgba(245, 158, 11, 0.09)' : 'rgba(255,255,255,0.02)', 
+                        border: completeness >= 90 ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid var(--border-color)', 
+                        textAlign: 'center', 
+                        opacity: completeness >= 90 ? 1 : 0.6,
+                        transition: 'all 0.3s ease'
+                      }}>
+                        <span style={{ fontSize: '1.6rem', display: 'block', marginBottom: '0.2rem' }}>🏆</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', color: '#ffffff' }}>Complete</span>
+                        <span style={{ fontSize: '0.7rem', color: completeness >= 90 ? '#f59e0b' : 'var(--text-muted)', fontWeight: '700', display: 'block', marginTop: '0.15rem' }}>
+                          {completeness >= 90 ? '✓ 100% Profile Completed' : `${completeness}% Filled`}
+                        </span>
+                      </div>
+
+                      {/* 3. Resume Star */}
+                      <div style={{ 
+                        padding: '0.75rem 0.6rem', 
+                        borderRadius: 12, 
+                        backgroundColor: aiScore >= 85 ? 'rgba(129, 140, 248, 0.09)' : 'rgba(255,255,255,0.02)', 
+                        border: aiScore >= 85 ? '1px solid rgba(129, 140, 248, 0.35)' : '1px solid var(--border-color)', 
+                        textAlign: 'center', 
+                        opacity: aiScore >= 85 ? 1 : 0.6,
+                        transition: 'all 0.3s ease'
+                      }}>
+                        <span style={{ fontSize: '1.6rem', display: 'block', marginBottom: '0.2rem' }}>⚡</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', color: '#ffffff' }}>Resume Star</span>
+                        <span style={{ fontSize: '0.7rem', color: aiScore >= 85 ? '#818cf8' : 'var(--text-muted)', fontWeight: '700', display: 'block', marginTop: '0.15rem' }}>
+                          {aiScore >= 85 ? `✓ ATS Score: ${aiScore}/100` : aiScore > 0 ? `ATS Score: ${aiScore}/85 Target` : '🔒 Upload PDF Resume'}
+                        </span>
+                      </div>
+
+                      {/* 4. Tech Buff */}
+                      <div style={{ 
+                        padding: '0.75rem 0.6rem', 
+                        borderRadius: 12, 
+                        backgroundColor: skillCount >= 6 ? 'rgba(249, 115, 22, 0.09)' : 'rgba(255,255,255,0.02)', 
+                        border: skillCount >= 6 ? '1px solid rgba(249, 115, 22, 0.35)' : '1px solid var(--border-color)', 
+                        textAlign: 'center', 
+                        opacity: skillCount >= 6 ? 1 : 0.6,
+                        transition: 'all 0.3s ease'
+                      }}>
+                        <span style={{ fontSize: '1.6rem', display: 'block', marginBottom: '0.2rem' }}>🔥</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', color: '#ffffff' }}>Tech Buff</span>
+                        <span style={{ fontSize: '0.7rem', color: skillCount >= 6 ? '#f97316' : 'var(--text-muted)', fontWeight: '700', display: 'block', marginTop: '0.15rem' }}>
+                          {skillCount >= 6 ? `✓ Unlocked (${skillCount} Skills)` : `${skillCount}/6 Skills Listed`}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                );
+              })()}
             </>
           )}
         </div>
