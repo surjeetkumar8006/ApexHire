@@ -24,11 +24,109 @@
 
 @media (min-width: 993px) {
   .app-sidebar {
-    width: 250px !important;
+    width: 72px !important;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease !important;
+    overflow-x: hidden !important;
   }
+
   .main-content {
-    margin-left: 250px !important;
-    transition: margin-left 0.3s ease;
+    margin-left: 72px !important;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Hover Expansion */
+  .app-sidebar:hover {
+    width: 260px !important;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.9) !important;
+  }
+
+  .app-sidebar:hover ~ .main-content {
+    margin-left: 260px !important;
+  }
+
+  /* Hide labels in collapsed state */
+  .app-sidebar:not(:hover) {
+    padding: 0.85rem 0.4rem !important;
+  }
+
+  .app-sidebar:not(:hover) .sidebar-link-text {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    display: none !important;
+  }
+
+  .app-sidebar:not(:hover) .sidebar-profile-info {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    display: none !important;
+  }
+
+  .app-sidebar:not(:hover) .sidebar-profile-card {
+    padding: 0.4rem 0 !important;
+    justify-content: center !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .app-sidebar:not(:hover) .sidebar-menu-item {
+    justify-content: center !important;
+    padding: 0.75rem 0 !important;
+    gap: 0 !important;
+    width: 100% !important;
+  }
+
+  .app-sidebar:not(:hover) .sidebar-logout-btn {
+    justify-content: center !important;
+    padding: 0.75rem 0 !important;
+    gap: 0 !important;
+    width: 100% !important;
+  }
+
+  .app-sidebar:not(:hover) .sidebar-menu-item svg,
+  .app-sidebar:not(:hover) .sidebar-menu-item span {
+    margin: 0 auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Show labels on hover */
+  .app-sidebar:hover {
+    padding: 0.85rem !important;
+  }
+
+  .app-sidebar:hover .sidebar-link-text {
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: auto !important;
+    display: inline-block !important;
+  }
+
+  .app-sidebar:hover .sidebar-profile-info {
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: auto !important;
+    display: flex !important;
+  }
+
+  .app-sidebar:hover .sidebar-profile-card {
+    padding: 0.65rem 0.85rem !important;
+    justify-content: flex-start !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .app-sidebar:hover .sidebar-menu-item {
+    justify-content: flex-start !important;
+    padding: 0.75rem 1rem !important;
+    gap: 0.85rem !important;
+  }
+
+  .app-sidebar:hover .sidebar-logout-btn {
+    justify-content: flex-start !important;
+    padding: 0.75rem 1rem !important;
+    gap: 0.85rem !important;
   }
 }
 
@@ -342,8 +440,47 @@
   .logo-title-text {
     font-size: 1.15rem !important;
   }
-  .landing-header-wrap {
-    padding: 0 0.85rem !important;
+
+/* ==========================================================================
+   COURSE DETAILS MOBILE RESPONSIVE STYLES
+   ========================================================================== */
+@media (max-width: 768px) {
+  .course-details-container {
+    padding: 1.5rem 0.85rem 3rem 0.85rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .course-details-header-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .course-details-header-bar > button,
+  .course-details-header-bar > div {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .course-hero-title {
+    font-size: 1.65rem !important;
+    line-height: 1.25 !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .course-hero-card {
+    padding: 1.25rem 1rem !important;
+    border-radius: 16px !important;
+  }
+
+  .course-btn-group {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .course-btn-group button {
+    width: 100% !important;
+    justify-content: center !important;
   }
 }
 

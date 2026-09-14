@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
   GraduationCap, 
   Clock, 
@@ -27,6 +27,7 @@ import {
   Database
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import bgImage from '../../assets/home_bg.jpg';
 
 // Master Course Details Dataset
 const coursesDatabase = {
@@ -183,7 +184,12 @@ const coursesDatabase = {
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
+
+  const isStudentRoute = location.pathname.startsWith('/student');
+  const backPath = isStudentRoute ? '/student/courses' : (user ? '/student/courses' : '/landing');
+  const backText = isStudentRoute ? 'Back to Tech Courses' : (user ? 'Back to Portal' : 'Back to Home');
 
   const [activeCurriculumIndex, setActiveCurriculumIndex] = useState(0);
   const [showApplyModal, setShowApplyModal] = useState(false);
@@ -206,64 +212,73 @@ const CourseDetailsPage = () => {
   };
 
   return (
-    <div style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100vh', paddingBottom: '4rem' }}>
-      {/* 1. TOP FLOATING STICKY BAR */}
-      <div style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 1000,
-        background: 'rgba(7, 10, 20, 0.92)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '0.85rem 1.5rem'
-      }}>
-        <div style={{ maxWidth: '1240px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div 
+      style={{ 
+        position: 'relative', 
+        minHeight: '100vh', 
+        width: '100%', 
+        backgroundImage: `linear-gradient(180deg, rgba(5, 7, 13, 0.78) 0%, rgba(5, 7, 13, 0.92) 100%), radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), url(${bgImage})`,
+        backgroundSize: 'cover, 28px 28px, cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        color: 'var(--text-primary)',
+        overflow: 'hidden'
+      }} 
+      className="animate-fade-in"
+    >
+      {/* Background Ambient Glow Blobs */}
+      <div style={{ position: 'absolute', top: '5%', left: '10%', width: '450px', height: '450px', background: 'radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, rgba(0, 0, 0, 0) 70%)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'absolute', top: '35%', right: '5%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(168, 85, 247, 0.14) 0%, rgba(0, 0, 0, 0) 70%)', pointerEvents: 'none', zIndex: 0 }} />
+
+      <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '1.75rem 1.5rem 4rem 1.5rem', position: 'relative', zIndex: 1 }} className="course-details-container">
+      {/* 1. TOP HEADER NAVIGATION BAR */}
+      <div className="course-details-header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <button
+          onClick={() => navigate(backPath)}
+          style={{
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            color: '#ffffff',
+            padding: '0.5rem 1rem',
+            borderRadius: '12px',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <ArrowLeft size={16} /> {backText}
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.82rem', color: '#34d399', fontWeight: 800 }}>
+            ⚡ Next Batch: {course.nextBatch}
+          </span>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => setShowApplyModal(true)}
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#ffffff',
-              padding: '0.45rem 0.9rem',
+              padding: '0.55rem 1.25rem',
               borderRadius: '10px',
-              fontSize: '0.82rem',
-              fontWeight: 700,
+              background: '#ffffff',
+              color: '#0b0f19',
+              fontWeight: 900,
+              fontSize: '0.85rem',
+              border: 'none',
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
+              boxShadow: '0 4px 14px rgba(255, 255, 255, 0.25)'
             }}
           >
-            <ArrowLeft size={16} /> Back to Portal
+            Enroll Now →
           </button>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span style={{ fontSize: '0.82rem', color: '#34d399', fontWeight: 800 }} className="d-none d-sm-inline">
-              ⚡ Next Batch: {course.nextBatch}
-            </span>
-            <button
-              onClick={() => setShowApplyModal(true)}
-              style={{
-                padding: '0.5rem 1.25rem',
-                borderRadius: '10px',
-                background: '#ffffff',
-                color: '#0b0f19',
-                fontWeight: 900,
-                fontSize: '0.85rem',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(255, 255, 255, 0.25)'
-              }}
-            >
-              Enroll Now →
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* 2. HERO HEADER SECTION */}
-      <section style={{ background: 'linear-gradient(180deg, rgba(56, 189, 248, 0.08) 0%, rgba(7, 10, 20, 0) 100%)', paddingTop: '3rem', paddingBottom: '3.5rem', borderBottom: '1px solid var(--border-color)' }}>
-        <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 1.5rem' }}>
+      {/* 2. HERO HEADER SECTION CARD */}
+      <div className="glass-card mb-4 course-hero-card" style={{ background: 'rgba(11, 15, 25, 0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '24px', padding: '2rem', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' }}>
+        <div style={{ padding: 0 }}>
+
           <div className="row g-4 align-items-center">
             <div className="col-lg-8">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -276,7 +291,7 @@ const CourseDetailsPage = () => {
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>• {course.enrolled}</span>
               </div>
 
-              <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#ffffff', lineHeight: 1.2, marginBottom: '1rem', letterSpacing: '-0.5px' }}>
+              <h1 className="course-hero-title" style={{ fontSize: '2.5rem', fontWeight: 900, color: '#ffffff', lineHeight: 1.2, marginBottom: '1rem', letterSpacing: '-0.5px' }}>
                 {course.title}
               </h1>
 
@@ -298,7 +313,7 @@ const CourseDetailsPage = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <div className="course-btn-group" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <button
                   onClick={() => setShowApplyModal(true)}
                   style={{ padding: '0.85rem 2rem', borderRadius: '12px', background: '#ffffff', color: '#0b0f19', fontWeight: 900, fontSize: '0.95rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(255, 255, 255, 0.25)' }}
@@ -360,7 +375,7 @@ const CourseDetailsPage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* 3. PROGRAM OVERVIEW & HIGHLIGHTS */}
       <section style={{ maxWidth: '1240px', margin: '4rem auto', padding: '0 1.5rem' }}>
@@ -576,6 +591,7 @@ const CourseDetailsPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

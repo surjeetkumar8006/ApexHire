@@ -39,6 +39,8 @@ import {
   ArrowUp
 } from 'lucide-react';
 import { useAuth, API_BASE } from '../../context/AuthContext';
+import homeBg from '../../assets/home_bg.jpg';
+import ApexHireLogo from '../../components/ApexHireLogo';
 
 const LandingPage = ({ onGetStarted }) => {
   const authContext = useAuth();
@@ -408,7 +410,20 @@ const LandingPage = ({ onGetStarted }) => {
   };
 
   return (
-    <div className="landing-container animate-fade-in" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', overflowX: 'hidden', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div 
+      className="landing-container animate-fade-in" 
+      style={{ 
+        backgroundImage: `linear-gradient(180deg, rgba(5, 7, 13, 0.8) 0%, rgba(5, 7, 13, 0.94) 100%), radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), url(${homeBg})`,
+        backgroundSize: 'cover, 28px 28px, cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        color: 'var(--text-primary)', 
+        overflowX: 'hidden', 
+        minHeight: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column' 
+      }}
+    >
       <style>{`
         @media (max-width: 768px) {
           .nav-links-desktop {
@@ -527,32 +542,7 @@ const LandingPage = ({ onGetStarted }) => {
           justifyContent: 'space-between'
         }}>
           {/* Brand Logo */}
-          <div 
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}
-          >
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 15px rgba(255, 255, 255, 0.2)',
-              flexShrink: 0
-            }}>
-              <Zap size={20} color="#0b0f19" />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span className="logo-title-text" style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px', lineHeight: 1 }}>
-                Apex<span style={{ color: '#38bdf8' }}>Hire</span>
-              </span>
-              <span className="logo-subtext" style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.6px' }}>
-                AI CAREER ENGINE
-              </span>
-            </div>
-          </div>
+          <ApexHireLogo size="md" subtext="AI CAREER ENGINE" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
 
           {/* Action & Nav Links Group on Desktop */}
           <div className="landing-header-desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>

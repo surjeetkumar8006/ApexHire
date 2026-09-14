@@ -4,6 +4,7 @@ import { Bell, User, LogOut, CheckSquare, Menu, Camera, Settings, X, Upload, Spa
 import { useAuth, API_BASE } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { compressImage } from '../utils/imageCompressor';
+import ApexHireLogo from './ApexHireLogo';
 
 const Navbar = ({ onMenuClick }) => {
   const { user, updateUser, logout, authHeader } = useAuth();
@@ -207,10 +208,7 @@ const Navbar = ({ onMenuClick }) => {
         <button className="mobile-menu-btn" onClick={onMenuClick}>
           <Menu size={24} />
         </button>
-        <div style={styles.brand} onClick={() => navigate('/')} style={{ ...styles.brand, cursor: 'pointer' }}>
-          <span style={styles.logoGradient}>ApexHire</span>
-          <span style={styles.subBrand}>Portal</span>
-        </div>
+        <ApexHireLogo size="md" subtext="PORTAL" onClick={() => navigate('/')} />
       </div>
 
       {user && (

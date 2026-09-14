@@ -99,6 +99,7 @@ function App() {
               {/* ----- Student Routes ----- */}
               <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
               <Route path="/student/courses" element={<ProtectedRoute allowedRoles={['student']}><StudentCourses /></ProtectedRoute>} />
+              <Route path="/student/courses/:courseId" element={<ProtectedRoute allowedRoles={['student']}><CourseDetailsPage /></ProtectedRoute>} />
               <Route path="/student/open-editor" element={<ProtectedRoute allowedRoles={['student']}><OpenEditor /></ProtectedRoute>} />
               <Route path="/student/gym" element={<ProtectedRoute allowedRoles={['student']}><OpenEditor /></ProtectedRoute>} />
               <Route path="/student/jobs" element={<ProtectedRoute allowedRoles={['student']}><JobBoard /></ProtectedRoute>} />

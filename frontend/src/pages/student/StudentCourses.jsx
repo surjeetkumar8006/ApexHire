@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GraduationCap, CheckCircle2, Clock, Sparkles, ArrowRight, FileText, Zap, BookOpen, Shield, ChevronRight } from 'lucide-react';
 import { useAuth, API_BASE } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import LiveTicker from '../../components/LiveTicker';
 
 const StudentCourses = () => {
+  const navigate = useNavigate();
   const { user, authHeader } = useAuth();
   const { addToast } = useNotification();
 
@@ -261,7 +263,7 @@ const StudentCourses = () => {
                     Enrolled: {new Date(en.enrolledAt).toLocaleDateString()}
                   </span>
                   <button
-                    onClick={() => window.location.href = `/courses/${en.courseId}`}
+                    onClick={() => navigate(`/student/courses/${en.courseId}`)}
                     style={{
                       padding: '0.45rem 0.85rem',
                       borderRadius: '8px',
@@ -425,7 +427,7 @@ const StudentCourses = () => {
                 {/* Footer buttons */}
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                   <button
-                    onClick={() => window.location.href = `/courses/${course.id}`}
+                    onClick={() => navigate(`/student/courses/${course.id}`)}
                     style={{
                       flex: 1,
                       padding: '0.7rem',

@@ -186,20 +186,6 @@ const Sidebar = ({ isOpen, onClose }) => {
               }}
               title={link.name}
             >
-              {isActive && (
-                <span 
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: '15%',
-                    bottom: '15%',
-                    width: '4px',
-                    borderRadius: '0 4px 4px 0',
-                    background: '#38bdf8',
-                    boxShadow: '0 0 10px #38bdf8'
-                  }}
-                />
-              )}
               <span style={isActive ? styles.activeIcon : styles.icon}>
                 {link.icon}
               </span>
@@ -279,9 +265,9 @@ const styles = {
   },
   activeMenuItem: {
     color: '#ffffff',
-    background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.18) 0%, rgba(99, 102, 241, 0.18) 100%)',
-    border: '1px solid rgba(56, 189, 248, 0.4)',
-    boxShadow: '0 4px 16px rgba(56, 189, 248, 0.15)',
+    background: 'rgba(255, 255, 255, 0.12)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
   },
   icon: {
     color: '#ffffff',
@@ -301,8 +287,8 @@ const styles = {
     fontSize: '0.95rem',
   },
   footer: {
-    borderTop: '1px solid var(--border-color)',
-    paddingTop: '1.5rem',
+    borderTop: 'none',
+    paddingTop: '0.85rem',
   },
   logoutBtn: {
     width: '100%',
