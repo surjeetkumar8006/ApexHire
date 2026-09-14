@@ -555,23 +555,26 @@ const LandingPage = ({ onGetStarted }) => {
           </div>
 
           {/* Action & Nav Links Group on the Right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <a
               href="#courses"
               onClick={(e) => scrollToSection(e, '#courses')}
               className="landing-nav-item"
               style={{
-                color: '#ffffff',
-                fontSize: '0.86rem',
-                fontWeight: 800,
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '0.35rem 0.75rem',
-                borderRadius: '8px',
+                height: '38px',
+                padding: '0 0.95rem',
+                borderRadius: '10px',
                 background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                boxSizing: 'border-box',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -583,17 +586,20 @@ const LandingPage = ({ onGetStarted }) => {
               onClick={(e) => scrollToSection(e, '#drives')}
               className="landing-nav-item"
               style={{
-                color: '#ffffff',
-                fontSize: '0.86rem',
-                fontWeight: 800,
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '0.35rem 0.75rem',
-                borderRadius: '8px',
+                height: '38px',
+                padding: '0 0.95rem',
+                borderRadius: '10px',
                 background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                boxSizing: 'border-box',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -606,17 +612,20 @@ const LandingPage = ({ onGetStarted }) => {
                 onClick={handleAction}
                 className="btn-header-getstarted"
                 style={{
-                  padding: '0.55rem 1.25rem',
+                  height: '38px',
+                  padding: '0 1.25rem',
                   borderRadius: '10px',
                   background: '#ffffff',
                   color: '#0b0f19',
-                  fontWeight: 800,
+                  fontWeight: 700,
                   fontSize: '0.85rem',
                   border: 'none',
                   cursor: 'pointer',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '6px',
+                  boxSizing: 'border-box',
                   boxShadow: '0 4px 14px rgba(255, 255, 255, 0.2)'
                 }}
               >
@@ -629,14 +638,19 @@ const LandingPage = ({ onGetStarted }) => {
                   onClick={handleAction}
                   className="btn-header-signin"
                   style={{
-                    padding: '0.55rem 1.1rem',
+                    height: '38px',
+                    padding: '0 1.1rem',
                     borderRadius: '10px',
                     background: 'transparent',
                     color: '#ffffff',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontSize: '0.85rem',
                     border: '1px solid rgba(255, 255, 255, 0.2)',
                     cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxSizing: 'border-box',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -646,17 +660,20 @@ const LandingPage = ({ onGetStarted }) => {
                   onClick={handleAction}
                   className="btn-header-getstarted"
                   style={{
-                    padding: '0.55rem 1.25rem',
+                    height: '38px',
+                    padding: '0 1.25rem',
                     borderRadius: '10px',
                     background: '#ffffff',
                     color: '#0b0f19',
-                    fontWeight: 800,
+                    fontWeight: 700,
                     fontSize: '0.85rem',
                     border: 'none',
                     cursor: 'pointer',
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px',
+                    boxSizing: 'border-box',
                     boxShadow: '0 4px 14px rgba(255, 255, 255, 0.25)'
                   }}
                 >
