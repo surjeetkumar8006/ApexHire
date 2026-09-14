@@ -48,6 +48,96 @@ const LandingPage = ({ onGetStarted }) => {
   const [openFaq, setOpenFaq] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // AccioJob Inspired Featured Courses State
+  const [selectedCourseTab, setSelectedCourseTab] = useState('online');
+  const [selectedCourseModal, setSelectedCourseModal] = useState(null);
+
+  const courseData = {
+    online: [
+      {
+        title: 'AI Engineering & GenAI Agents',
+        subtitle: 'Live Mentor-Led Interactive Master Program',
+        duration: '7 Months',
+        icon: '</>',
+        tags: ['Java', 'Spring Boot', 'SQL', 'MongoDB', 'JavaScript', 'LLM API', 'RAG', 'AI Agents', 'MCP'],
+        projects: '15+',
+        enrolled: '50 Students',
+        nextBatch: '8th Oct 2026',
+        scholarship: 'SCHOLARSHIP UP TO 50% AVAILABLE'
+      },
+      {
+        title: 'Data Analytics & Business Intelligence',
+        subtitle: 'Hands-on Data Science & Visualizations',
+        duration: '6 Months',
+        icon: '📈',
+        tags: ['Microsoft Excel', 'Power BI', 'Python', 'SQL', 'Tableau', 'Pandas'],
+        projects: '7+',
+        enrolled: '70 Students',
+        nextBatch: '23rd Oct 2026',
+        scholarship: '100% PLACEMENT ASSISTANCE'
+      },
+      {
+        title: 'Full Stack Development With GenAI',
+        subtitle: 'MERN Stack & Artificial Intelligence',
+        duration: '8 Months',
+        icon: '</>',
+        tags: ['Java Spring Boot', 'MySQL', 'React', 'OpenAI / GenAI', 'MongoDB', 'Node.js', 'Express.js'],
+        projects: '60+',
+        enrolled: '50 Students',
+        nextBatch: '8th Oct 2026',
+        scholarship: 'SCHOLARSHIP UP TO 50% AVAILABLE'
+      }
+    ],
+    offline: [
+      {
+        title: 'Full Stack Web Development (Classroom)',
+        subtitle: 'Bangalore & Noida Physical Training Centers',
+        duration: '6 Months',
+        icon: '🏢',
+        tags: ['HTML/CSS', 'JavaScript', 'React', 'Node.js', 'DSA', 'System Design'],
+        projects: '10+',
+        enrolled: '120 Students',
+        nextBatch: '1st Nov 2026',
+        scholarship: 'OFFLINE CENTER SCHOLARSHIP AVAILABLE'
+      },
+      {
+        title: 'Data Science & Machine Learning Lab',
+        subtitle: 'In-person Mentor Guided Labs',
+        duration: '7 Months',
+        icon: '🔬',
+        tags: ['Python', 'PyTorch', 'TensorFlow', 'Scikit-learn', 'Statistics', 'NLP'],
+        projects: '14+',
+        enrolled: '80 Students',
+        nextBatch: '15th Nov 2026',
+        scholarship: 'FREE LAPTOP FOR TOP 10% CANDIDATES'
+      }
+    ],
+    selfPaced: [
+      {
+        title: 'System Design & Microservices Mastery',
+        subtitle: 'Comprehensive Self-Paced Video Track',
+        duration: 'Self Paced',
+        icon: '⚡',
+        tags: ['System Design', 'Kafka', 'Redis', 'Docker', 'Kubernetes', 'REST APIs'],
+        projects: '8+',
+        enrolled: '200+ Learners',
+        nextBatch: 'Instant Access',
+        scholarship: 'FLAT 40% OFF THIS WEEK'
+      },
+      {
+        title: 'DSA & Coding Interview Bootcamp',
+        subtitle: '450+ LeetCode Solutions with Video Notes',
+        duration: 'Self Paced',
+        icon: '💻',
+        tags: ['Java', 'C++', 'Python', 'Trees', 'Graphs', 'Dynamic Programming'],
+        projects: '500+ Qs',
+        enrolled: '350+ Learners',
+        nextBatch: 'Instant Access',
+        scholarship: 'CERTIFICATE & ATS RESUME TEMPLATES'
+      }
+    ]
+  };
+
   // Real-Time Skill Match Calculator Playground State
   const [calcRole, setCalcRole] = useState('Full Stack Engineer');
   const [userSkills, setUserSkills] = useState(['React', 'Node.js', 'System Design']);
@@ -332,6 +422,63 @@ const LandingPage = ({ onGetStarted }) => {
           border-color: rgba(255, 255, 255, 0.22) !important;
           box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4) !important;
         }
+        @media (max-width: 640px) {
+          .landing-hero {
+            padding-top: 5rem !important;
+            margin-bottom: 2.5rem !important;
+          }
+          .landing-header-wrap {
+            padding: 0 0.85rem !important;
+          }
+          .logo-subtext {
+            display: none !important;
+          }
+          .logo-title-text {
+            font-size: 1.15rem !important;
+          }
+          .hero-badge {
+            padding: 0.35rem 0.75rem !important;
+            font-size: 0.72rem !important;
+            max-width: 100% !important;
+            text-align: center !important;
+            box-sizing: border-box !important;
+          }
+          .hero-title {
+            font-size: 1.75rem !important;
+            line-height: 1.25 !important;
+          }
+          .hero-subtitle {
+            font-size: 0.88rem !important;
+          }
+          .hero-ctas {
+            flex-direction: column !important;
+            width: 100% !important;
+          }
+          .hero-ctas .btn {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+          .quick-metrics-bar {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.85rem !important;
+          }
+          .metrics-divider {
+            display: none !important;
+          }
+          .btn-header-signin {
+            padding: 0.4rem 0.75rem !important;
+            font-size: 0.78rem !important;
+          }
+          .btn-header-getstarted {
+            padding: 0.45rem 0.85rem !important;
+            font-size: 0.78rem !important;
+            white-space: nowrap !important;
+          }
+          .glass-card {
+            padding: 1.25rem !important;
+          }
+        }
       `}</style>
 
       {/* Ambient background blobs */}
@@ -352,7 +499,7 @@ const LandingPage = ({ onGetStarted }) => {
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         width: '100%'
       }}>
-        <div style={{
+        <div className="landing-header-wrap" style={{
           maxWidth: '1240px',
           margin: '0 auto',
           padding: '0 1.5rem',
@@ -367,32 +514,34 @@ const LandingPage = ({ onGetStarted }) => {
             style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}
           >
             <div style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '12px',
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
               background: 'linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
+              boxShadow: '0 0 15px rgba(255, 255, 255, 0.2)',
+              flexShrink: 0
             }}>
-              <Zap size={22} color="#0b0f19" />
+              <Zap size={20} color="#0b0f19" />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px', lineHeight: 1 }}>
+              <span className="logo-title-text" style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px', lineHeight: 1 }}>
                 Apex<span style={{ color: '#38bdf8' }}>Hire</span>
               </span>
-              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.6px' }}>
+              <span className="logo-subtext" style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.6px' }}>
                 AI CAREER ENGINE
               </span>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {user ? (
               <button
                 onClick={handleAction}
+                className="btn-header-getstarted"
                 style={{
                   padding: '0.55rem 1.25rem',
                   borderRadius: '10px',
@@ -415,6 +564,7 @@ const LandingPage = ({ onGetStarted }) => {
               <>
                 <button
                   onClick={handleAction}
+                  className="btn-header-signin"
                   style={{
                     padding: '0.55rem 1.1rem',
                     borderRadius: '10px',
@@ -431,6 +581,7 @@ const LandingPage = ({ onGetStarted }) => {
                 </button>
                 <button
                   onClick={handleAction}
+                  className="btn-header-getstarted"
                   style={{
                     padding: '0.55rem 1.25rem',
                     borderRadius: '10px',
@@ -486,22 +637,22 @@ const LandingPage = ({ onGetStarted }) => {
           </div>
 
           {/* Quick Metrics Bar */}
-          <div style={{ display: 'flex', gap: '1.25rem', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="quick-metrics-bar" style={{ display: 'flex', gap: '1.25rem', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', flexWrap: 'wrap', alignItems: 'center' }}>
             <div>
               <h4 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>₹65 LPA</h4>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Highest Package 2026</p>
             </div>
-            <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.1)' }} />
+            <div className="metrics-divider" style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.1)' }} />
             <div>
               <h4 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>{stats.activeJobsCount || liveJobs.length || 12}+</h4>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Active Drive Vacancies</p>
             </div>
-            <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.1)' }} />
+            <div className="metrics-divider" style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.1)' }} />
             <div>
               <h4 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>{stats.placementRate || 95}%</h4>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Verified Placement Rate</p>
             </div>
-            <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.1)' }} />
+            <div className="metrics-divider" style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.1)' }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', background: 'rgba(52, 211, 153, 0.08)', padding: '0.35rem 0.75rem', borderRadius: '20px', border: '1px solid rgba(52, 211, 153, 0.25)' }}>
               <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399', display: 'inline-block' }} />
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#34d399' }}>{onlineUsers} Online Active</span>
@@ -596,6 +747,167 @@ const LandingPage = ({ onGetStarted }) => {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* 1.2 FEATURED INDUSTRY CAREER COURSES (ACCIOJOB INSPIRED) */}
+      <section id="courses" style={{ width: '100%', maxWidth: '1240px', margin: '0 auto 5rem auto', padding: '0 1rem' }}>
+        <div className="text-center mb-4">
+          <span className="badge bg-primary-glow text-primary font-semibold text-xs px-3.5 py-1.5 rounded-pill d-inline-flex align-items-center gap-1.5 mb-2">
+            <GraduationCap size={15} /> Industry Career Programs 2026
+          </span>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#ffffff', margin: '0 0 0.5rem 0' }}>
+            Job-Guaranteed Tech Courses
+          </h2>
+          <p className="text-xs text-muted" style={{ maxWidth: '650px', margin: '0 auto' }}>
+            Accelerate your career with live mentor-led training, 15+ capstone projects, and guaranteed placement drives:
+          </p>
+        </div>
+
+        {/* Tab Filters: Online Courses, Offline Hybrid, Self Paced */}
+        <div className="d-flex justify-content-center gap-2 mb-4 flex-wrap">
+          {[
+            { id: 'online', label: '💻 Online Courses' },
+            { id: 'offline', label: '🏢 Offline Hybrid Centers' },
+            { id: 'selfPaced', label: '⚡ Self Paced Tracks' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedCourseTab(tab.id)}
+              style={{
+                padding: '0.55rem 1.25rem',
+                borderRadius: '30px',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                background: selectedCourseTab === tab.id ? '#ffffff' : 'rgba(255, 255, 255, 0.05)',
+                color: selectedCourseTab === tab.id ? '#0b0f19' : 'var(--text-secondary)',
+                border: selectedCourseTab === tab.id ? '1px solid #ffffff' : '1px solid var(--border-color)',
+                boxShadow: selectedCourseTab === tab.id ? '0 4px 14px rgba(255, 255, 255, 0.25)' : 'none'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Course Cards Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.75rem' }}>
+          {courseData[selectedCourseTab].map((course, idx) => (
+            <div
+              key={idx}
+              className="glass-card landing-card-hover"
+              style={{
+                background: 'var(--bg-surface-elevated)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative'
+              }}
+            >
+              {/* Header block with gradient accent */}
+              <div style={{ padding: '1.5rem 1.5rem 1rem 1.5rem', background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                    {course.icon}
+                  </div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#ffffff', background: 'rgba(255, 255, 255, 0.08)', padding: '0.3rem 0.75rem', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                    ⏱️ {course.duration}
+                  </span>
+                </div>
+
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: '0 0 0.35rem 0' }}>
+                  {course.title}
+                </h3>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '1rem' }}>
+                  {course.subtitle}
+                </span>
+
+                {/* Tech Stack Pills */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>
+                    Tech Stack Covered
+                  </span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                    {course.tags.map((tag, tIdx) => (
+                      <span key={tIdx} style={{ fontSize: '0.72rem', padding: '0.2rem 0.55rem', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.06)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontWeight: 600 }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Footer Row (Projects, Students, Next Batch) */}
+              <div style={{ padding: '0.85rem 1.25rem', background: 'rgba(255, 255, 255, 0.02)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', textAlign: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#ffffff' }}>{course.projects}</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Projects</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#38bdf8' }}>{course.enrolled}</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Enrolled</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#34d399' }}>{course.nextBatch}</div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Next Batch</div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ padding: '1.25rem', display: 'flex', gap: '0.75rem' }}>
+                <button
+                  onClick={() => setSelectedCourseModal(course)}
+                  style={{
+                    flex: 1,
+                    padding: '0.65rem',
+                    borderRadius: '10px',
+                    background: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <FileText size={14} /> Brochure
+                </button>
+                <button
+                  onClick={() => setSelectedCourseModal(course)}
+                  style={{
+                    flex: 1.3,
+                    padding: '0.65rem',
+                    borderRadius: '10px',
+                    background: '#ffffff',
+                    border: 'none',
+                    color: '#0b0f19',
+                    fontWeight: 800,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  View Program <ArrowRight size={14} />
+                </button>
+              </div>
+
+              {/* Bottom Scholarship Banner */}
+              <div style={{ background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)', color: '#ffffff', fontSize: '0.72rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', textAlign: 'center', padding: '0.4rem' }}>
+                🎁 {course.scholarship || 'SCHOLARSHIP AVAILABLE (UP TO 50%)'}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -1451,6 +1763,73 @@ const LandingPage = ({ onGetStarted }) => {
           </div>
         </div>
       </footer>
+
+      {/* COURSE DETAILS & BROCHURE MODAL */}
+      {selectedCourseModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(5, 8, 18, 0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }} onClick={() => setSelectedCourseModal(null)}>
+          <div className="animate-fade-in" style={{ width: '100%', maxWidth: '540px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '2rem', color: '#ffffff', position: 'relative' }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedCourseModal(null)} style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.15)', color: '#ffffff', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <X size={18} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                {selectedCourseModal.icon}
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900 }}>{selectedCourseModal.title}</h3>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⏱️ {selectedCourseModal.duration} • {selectedCourseModal.subtitle}</span>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1rem', marginBottom: '1.25rem' }}>
+              <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.88rem', fontWeight: 800, color: '#38bdf8' }}>Curriculum & Tech Stack Highlights:</h4>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                {selectedCourseModal.tags.map((tag, idx) => (
+                  <span key={idx} style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid var(--border-color)' }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ background: 'var(--bg-base)', padding: '0.75rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontWeight: 900, color: '#ffffff' }}>{selectedCourseModal.projects}</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Projects</div>
+              </div>
+              <div style={{ background: 'var(--bg-base)', padding: '0.75rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontWeight: 900, color: '#38bdf8' }}>{selectedCourseModal.enrolled}</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Enrolled</div>
+              </div>
+              <div style={{ background: 'var(--bg-base)', padding: '0.75rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontWeight: 900, color: '#34d399' }}>{selectedCourseModal.nextBatch}</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Next Batch</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.85rem' }}>
+              <button
+                onClick={() => {
+                  alert(`Brochure for ${selectedCourseModal.title} has been downloaded!`);
+                }}
+                style={{ flex: 1, padding: '0.75rem', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.2)', color: '#ffffff', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer' }}
+              >
+                📥 Download Syllabus
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedCourseModal(null);
+                  handleAction();
+                }}
+                style={{ flex: 1.2, padding: '0.75rem', borderRadius: '12px', background: '#ffffff', border: 'none', color: '#0b0f19', fontWeight: 900, fontSize: '0.88rem', cursor: 'pointer' }}
+              >
+                Apply For Program →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
