@@ -338,12 +338,15 @@ const LandingPage = ({ onGetStarted }) => {
       <div className="blob1"></div>
       <div className="blob2"></div>
 
-      {/* 0. STICKY TOP LANDING NAVBAR */}
+      {/* 0. FIXED TOP LANDING NAVBAR */}
       <header style={{
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 1000,
-        background: 'rgba(7, 10, 20, 0.88)',
+        height: '70px',
+        background: 'rgba(7, 10, 20, 0.92)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
@@ -352,7 +355,8 @@ const LandingPage = ({ onGetStarted }) => {
         <div style={{
           maxWidth: '1240px',
           margin: '0 auto',
-          padding: '0.85rem 1.5rem',
+          padding: '0 1.5rem',
+          height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
@@ -383,27 +387,6 @@ const LandingPage = ({ onGetStarted }) => {
               </span>
             </div>
           </div>
-
-          {/* Desktop Navigation Links */}
-          <nav className="nav-links-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
-            {navLinks.map(link => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => scrollToSection(e, link.href)}
-                className="landing-nav-link"
-                style={{
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.88rem',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  transition: 'color 0.2s ease',
-                }}
-              >
-                {link.name}
-              </a>
-            ))}
-          </nav>
 
           {/* Action Buttons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -468,78 +451,12 @@ const LandingPage = ({ onGetStarted }) => {
                 </button>
               </>
             )}
-
-            {/* Mobile Hamburger Toggle */}
-            <button
-              className="mobile-nav-toggle"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                color: '#ffffff',
-                padding: '0.45rem',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'none'
-              }}
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
           </div>
         </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div 
-            className="animate-fade-in"
-            style={{
-              background: 'rgba(11, 15, 25, 0.98)',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
-              padding: '1.25rem 1.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem'
-            }}
-          >
-            {navLinks.map(link => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => scrollToSection(e, link.href)}
-                style={{
-                  color: 'var(--text-primary)',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  padding: '0.4rem 0'
-                }}
-              >
-                {link.name}
-              </a>
-            ))}
-            <div style={{ paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', gap: '0.75rem' }}>
-              <button
-                onClick={handleAction}
-                style={{
-                  flex: 1,
-                  padding: '0.75rem',
-                  borderRadius: '10px',
-                  background: '#ffffff',
-                  color: '#0b0f19',
-                  fontWeight: 800,
-                  fontSize: '0.9rem',
-                  border: 'none'
-                }}
-              >
-                Launch Portal Free
-              </button>
-            </div>
-          </div>
-        )}
       </header>
 
       {/* 1. HERO SECTION */}
-      <section className="landing-hero" style={{ paddingTop: '2.5rem', marginBottom: '4rem' }}>
+      <section className="landing-hero" style={{ paddingTop: '6.5rem', marginBottom: '4rem' }}>
         <div className="landing-hero-left">
           <div className="hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.45rem 1.1rem', borderRadius: '50px', background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.16)' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 10px #34d399', display: 'inline-block' }}></span>
