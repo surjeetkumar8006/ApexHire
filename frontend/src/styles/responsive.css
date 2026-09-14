@@ -319,30 +319,32 @@
   }
 }
 
-/* Landing Header Mobile Responsiveness */
-@media (max-width: 640px) {
+/* Landing Header Desktop vs Mobile Hamburger Menu Toggle */
+@media (min-width: 769px) {
+  .landing-header-desktop-actions {
+    display: flex !important;
+  }
+  .landing-mobile-menu-toggle {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-header-desktop-actions {
+    display: none !important;
+  }
+  .landing-mobile-menu-toggle {
+    display: flex !important;
+  }
   .logo-subtext {
     display: none !important;
   }
   .logo-title-text {
-    font-size: 1.1rem !important;
+    font-size: 1.15rem !important;
   }
   .landing-header-wrap {
-    padding: 0 0.5rem !important;
-  }
-  .btn-header-signin {
-    display: none !important;
-  }
-  .landing-nav-item, 
-  .btn-header-getstarted {
-    height: 34px !important;
-    padding: 0 0.45rem !important;
-    font-size: 0.74rem !important;
-  }
-  .landing-nav-item svg, 
-  .btn-header-getstarted svg {
-    width: 14px !important;
-    height: 14px !important;
+    padding: 0 0.85rem !important;
   }
 }
+
 

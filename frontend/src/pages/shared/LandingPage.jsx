@@ -554,8 +554,8 @@ const LandingPage = ({ onGetStarted }) => {
             </div>
           </div>
 
-          {/* Action & Nav Links Group on the Right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          {/* Action & Nav Links Group on Desktop */}
+          <div className="landing-header-desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <a
               href="#courses"
               onClick={(e) => scrollToSection(e, '#courses')}
@@ -683,8 +683,291 @@ const LandingPage = ({ onGetStarted }) => {
               </>
             )}
           </div>
+
+          {/* 3-Lines Hamburger Menu Button for Mobile */}
+          <button
+            className="landing-mobile-menu-toggle"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle Navigation Menu"
+            style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              color: '#ffffff',
+              borderRadius: '10px',
+              width: '40px',
+              height: '40px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {mobileMenuOpen ? <X size={22} color="#ffffff" /> : <Menu size={22} color="#ffffff" />}
+          </button>
         </div>
       </header>
+
+      {/* MOBILE NAVIGATION DRAWER */}
+      {mobileMenuOpen && (
+        <div
+          className="landing-mobile-drawer"
+          style={{
+            position: 'fixed',
+            top: '70px',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(7, 10, 20, 0.98)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            zIndex: 999,
+            padding: '1.25rem 1.5rem 2.5rem 1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.85rem',
+            overflowY: 'auto',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+          }}
+        >
+          <a
+            href="#courses"
+            onClick={(e) => scrollToSection(e, '#courses')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.85rem',
+              padding: '0.9rem 1.1rem',
+              borderRadius: '14px',
+              background: 'rgba(56, 189, 248, 0.1)',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
+              color: '#ffffff',
+              fontWeight: 800,
+              textDecoration: 'none',
+              fontSize: '1.05rem'
+            }}
+          >
+            <GraduationCap size={22} color="#38bdf8" />
+            <span>Courses (Programs & Details)</span>
+          </a>
+
+          <a
+            href="#drives"
+            onClick={(e) => scrollToSection(e, '#drives')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.85rem',
+              padding: '0.9rem 1.1rem',
+              borderRadius: '14px',
+              background: 'rgba(52, 211, 153, 0.1)',
+              border: '1px solid rgba(52, 211, 153, 0.25)',
+              color: '#ffffff',
+              fontWeight: 800,
+              textDecoration: 'none',
+              fontSize: '1.05rem'
+            }}
+          >
+            <Briefcase size={22} color="#34d399" />
+            <span>Active Placement Drives</span>
+          </a>
+
+          <div style={{ margin: '0.25rem 0', height: '1px', background: 'rgba(255, 255, 255, 0.08)' }}></div>
+
+          <a
+            href="#features"
+            onClick={(e) => scrollToSection(e, '#features')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: 'var(--text-primary)',
+              fontWeight: 600,
+              textDecoration: 'none',
+              fontSize: '0.95rem'
+            }}
+          >
+            <Sparkles size={18} color="#a1a1aa" />
+            <span>Features Showcase</span>
+          </a>
+
+          <a
+            href="#playground"
+            onClick={(e) => scrollToSection(e, '#playground')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: 'var(--text-primary)',
+              fontWeight: 600,
+              textDecoration: 'none',
+              fontSize: '0.95rem'
+            }}
+          >
+            <Cpu size={18} color="#a1a1aa" />
+            <span>AI Match Calibrator</span>
+          </a>
+
+          <a
+            href="#process"
+            onClick={(e) => scrollToSection(e, '#process')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: 'var(--text-primary)',
+              fontWeight: 600,
+              textDecoration: 'none',
+              fontSize: '0.95rem'
+            }}
+          >
+            <TrendingUp size={18} color="#a1a1aa" />
+            <span>Placement Workflow</span>
+          </a>
+
+          <a
+            href="#estimator"
+            onClick={(e) => scrollToSection(e, '#estimator')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: 'var(--text-primary)',
+              fontWeight: 600,
+              textDecoration: 'none',
+              fontSize: '0.95rem'
+            }}
+          >
+            <DollarSign size={18} color="#a1a1aa" />
+            <span>CTC Estimator</span>
+          </a>
+
+          <a
+            href="#testimonials"
+            onClick={(e) => scrollToSection(e, '#testimonials')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: 'var(--text-primary)',
+              fontWeight: 600,
+              textDecoration: 'none',
+              fontSize: '0.95rem'
+            }}
+          >
+            <Star size={18} color="#a1a1aa" />
+            <span>Alumni Stories</span>
+          </a>
+
+          <a
+            href="#faq"
+            onClick={(e) => scrollToSection(e, '#faq')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: 'var(--text-primary)',
+              fontWeight: 600,
+              textDecoration: 'none',
+              fontSize: '0.95rem'
+            }}
+          >
+            <HelpCircle size={18} color="#a1a1aa" />
+            <span>FAQ</span>
+          </a>
+
+          <div style={{ margin: '0.4rem 0', height: '1px', background: 'rgba(255, 255, 255, 0.1)' }}></div>
+
+          {user ? (
+            <button
+              onClick={() => { setMobileMenuOpen(false); handleAction(); }}
+              style={{
+                width: '100%',
+                padding: '0.9rem',
+                borderRadius: '12px',
+                background: '#ffffff',
+                color: '#0b0f19',
+                fontWeight: 900,
+                fontSize: '1rem',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+            >
+              <span>Go To Dashboard</span>
+              <ArrowRight size={18} />
+            </button>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleAction(); }}
+                style={{
+                  width: '100%',
+                  padding: '0.85rem',
+                  borderRadius: '12px',
+                  background: 'transparent',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  cursor: 'pointer'
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleAction(); }}
+                style={{
+                  width: '100%',
+                  padding: '0.9rem',
+                  borderRadius: '12px',
+                  background: '#ffffff',
+                  color: '#0b0f19',
+                  fontWeight: 900,
+                  fontSize: '1rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 16px rgba(255, 255, 255, 0.25)'
+                }}
+              >
+                <span>Get Started Free</span>
+                <ArrowRight size={18} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 1. HERO SECTION */}
       <section className="landing-hero" style={{ paddingTop: '6.5rem', marginBottom: '4rem' }}>
