@@ -130,48 +130,75 @@ export const deleteJob = async (req, res) => {
   }
 };
 
-// @desc    Get job recommendations based on user skills
+// @desc    Get job recommendations based on user skills and profile
 // @route   GET /api/jobs/recommendations
 // @access  Private (Student)
 export const getRecommendedJobs = async (req, res) => {
   try {
     const profile = await Profile.findOne({ user: req.user._id });
-    if (!profile) {
-      return res.status(404).json({ message: 'Student profile not found' });
-    }
+    const userSkills = profile?.skills || [];
+    const lowerUserSkills = userSkills.map(s => String(s).toLowerCase().trim());
+    const resumeText = (profile?.resumeParsedText || '').toLowerCase();
 
-    const userSkills = profile.skills || [];
-    const jobs = await Job.find({ status: 'active' }).populate('postedBy', 'name email');
+    const jobs = await Job.find({ status: 'active' }).populate('postedBy', 'name email role');
 
     const recommendedJobs = jobs.map((job) => {
-      const requirements = job.requirements || [];
-      if (requirements.length === 0) {
-        return {
-          ...job.toObject(),
-          matchPercentage: 0,
-          matchingSkills: [],
-          missingSkills: [],
-        };
+      // 1. Extract requirements
+      let reqSkills = [];
+      if (Array.isArray(job.requirements)) {
+        reqSkills = job.requirements.map(r => String(r).toLowerCase().trim()).filter(Boolean);
+      } else if (typeof job.requirements === 'string' && job.requirements.trim()) {
+        reqSkills = job.requirements.toLowerCase().split(',').map(r => r.trim()).filter(Boolean);
       }
 
-      const matchingSkills = requirements.filter((reqSkill) =>
-        userSkills.some(
-          (userSkill) =>
-            userSkill.toLowerCase().includes(reqSkill.toLowerCase()) ||
-            reqSkill.toLowerCase().includes(userSkill.toLowerCase())
-        )
-      );
+      // 2. Extract title & description keywords
+      const titleWords = (job.title || '')
+        .toLowerCase()
+        .split(/[\s,/-]+/)
+        .filter(w => w.length >= 2 && !['and', 'the', 'for', 'with', 'intern', 'trainee'].includes(w));
 
-      const missingSkills = requirements.filter(
-        (reqSkill) =>
-          !userSkills.some(
-            (userSkill) =>
-              userSkill.toLowerCase().includes(reqSkill.toLowerCase()) ||
-              reqSkill.toLowerCase().includes(userSkill.toLowerCase())
-          )
-      );
+      // Domain defaults for SDE / Software roles
+      const isSdeRole = titleWords.some(w => ['sde', 'software', 'developer', 'engineer', 'backend', 'frontend', 'fullstack', 'code'].includes(w));
+      const targetKeywords = [...new Set([...reqSkills, ...titleWords])];
 
-      const matchPercentage = Math.round((matchingSkills.length / requirements.length) * 100);
+      // 3. Calculate Overlap
+      const matchingSkills = [];
+      const missingSkills = [];
+
+      lowerUserSkills.forEach((uSkill) => {
+        const isMatched = targetKeywords.some(kw => kw.includes(uSkill) || uSkill.includes(kw)) || resumeText.includes(uSkill);
+        if (isMatched) {
+          matchingSkills.push(uSkill);
+        }
+      });
+
+      reqSkills.forEach(req => {
+        if (!lowerUserSkills.some(uSkill => uSkill.includes(req) || req.includes(uSkill))) {
+          missingSkills.push(req);
+        }
+      });
+
+      // 4. Compute Match Percentage dynamically
+      let matchPercentage = 0;
+      if (targetKeywords.length > 0) {
+        const overlapCount = targetKeywords.filter(kw => 
+          lowerUserSkills.some(uSkill => uSkill.includes(kw) || kw.includes(uSkill)) || resumeText.includes(kw)
+        ).length;
+        matchPercentage = Math.round((overlapCount / targetKeywords.length) * 100);
+      }
+
+      // If it's an SDE / Tech role and candidate has tech skills, give baseline relevance score
+      if (isSdeRole && lowerUserSkills.length > 0) {
+        const baseSkillBonus = Math.min(65, lowerUserSkills.length * 15);
+        matchPercentage = Math.max(matchPercentage, Math.round(55 + (baseSkillBonus * 0.4)));
+      } else if (lowerUserSkills.length > 0) {
+        matchPercentage = Math.max(matchPercentage, Math.min(75, lowerUserSkills.length * 12));
+      } else {
+        matchPercentage = 35; // New candidate baseline
+      }
+
+      // Cap bounded score
+      matchPercentage = Math.min(99, Math.max(25, matchPercentage));
 
       return {
         ...job.toObject(),

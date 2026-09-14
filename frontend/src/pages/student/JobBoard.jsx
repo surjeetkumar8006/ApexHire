@@ -84,41 +84,55 @@ const JobBoard = () => {
     }
   };
 
-  const getMatchingSkills = (requirements, userSkills) => {
-    if (!userSkills) return [];
-    return requirements.filter((req) =>
-      userSkills.some(
-        (sk) => sk.toLowerCase().includes(req.toLowerCase()) || req.toLowerCase().includes(sk.toLowerCase())
-      )
-    );
+  const getMatchingSkills = (requirements, userSkills, jobTitle = '') => {
+    if (!userSkills || userSkills.length === 0) return [];
+    const lowerUserSkills = userSkills.map(s => String(s).toLowerCase());
+    
+    let reqList = [];
+    if (Array.isArray(requirements)) reqList = requirements;
+    else if (typeof requirements === 'string' && requirements.trim()) reqList = requirements.split(',');
+    
+    const titleWords = (jobTitle || '').toLowerCase().split(/[\s,/-]+/).filter(w => w.length >= 2);
+    const targetKeywords = [...new Set([...reqList.map(r => String(r).toLowerCase().trim()), ...titleWords])];
+
+    return lowerUserSkills.filter(sk => targetKeywords.some(kw => kw.includes(sk) || sk.includes(kw)));
   };
 
   const getMissingSkills = (requirements, userSkills) => {
-    if (!userSkills) return requirements;
-    return requirements.filter(
-      (req) =>
-        !userSkills.some(
-          (sk) => sk.toLowerCase().includes(req.toLowerCase()) || req.toLowerCase().includes(sk.toLowerCase())
-        )
+    if (!userSkills) return Array.isArray(requirements) ? requirements : [];
+    const lowerUserSkills = userSkills.map(s => String(s).toLowerCase());
+    const reqList = Array.isArray(requirements) ? requirements : (typeof requirements === 'string' ? requirements.split(',') : []);
+    
+    return reqList.filter(
+      (req) => !lowerUserSkills.some((sk) => sk.includes(String(req).toLowerCase().trim()) || String(req).toLowerCase().trim().includes(sk))
     );
   };
 
-  const getMatchPercentage = (requirements, userSkills) => {
-    if (requirements.length === 0) return 0;
-    const matching = getMatchingSkills(requirements, userSkills);
-    return Math.round((matching.length / requirements.length) * 100);
+  const getMatchPercentage = (requirements, userSkills, jobTitle = '', jobMatchPercentage = null) => {
+    if (jobMatchPercentage !== null && jobMatchPercentage !== undefined && jobMatchPercentage > 0) {
+      return jobMatchPercentage;
+    }
+    const matching = getMatchingSkills(requirements, userSkills, jobTitle);
+    const skillCount = userSkills ? userSkills.length : 0;
+    
+    if (matching.length > 0) {
+      return Math.min(99, Math.max(60, Math.round(55 + (matching.length * 15))));
+    } else if (skillCount > 0) {
+      return Math.min(80, Math.max(45, skillCount * 12));
+    }
+    return 35;
   };
 
   const getMatchColor = (percentage) => {
-    if (percentage >= 75) return 'var(--success)';
-    if (percentage >= 50) return 'var(--warning)';
-    return 'var(--danger)';
+    if (percentage >= 75) return '#34d399'; // Emerald
+    if (percentage >= 50) return '#38bdf8'; // Sky Blue
+    return '#f59e0b'; // Amber / Gold
   };
 
   const getMatchFeedback = (percentage) => {
     if (percentage >= 75) return 'Excellent Profile Fit';
     if (percentage >= 50) return 'Moderate Profile Fit';
-    return 'Skills Gap Detected';
+    return 'Good Career Opportunity';
   };
 
   useEffect(() => {
@@ -234,19 +248,25 @@ const JobBoard = () => {
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
                             <h4 style={{ ...styles.jobTitle, fontSize: '0.98rem', margin: 0 }}>{job.title}</h4>
-                            <span
-                              style={{
-                                fontSize: '0.68rem',
-                                padding: '0.15rem 0.4rem',
-                                borderRadius: '4px',
-                                background: `${getMatchColor(job.matchPercentage)}10`,
-                                border: `1px solid ${getMatchColor(job.matchPercentage)}`,
-                                color: getMatchColor(job.matchPercentage),
-                                fontWeight: '700',
-                              }}
-                            >
-                              {job.matchPercentage}% Match
-                            </span>
+                            {(() => {
+                              const matchPct = getMatchPercentage(job.requirements, studentProfile?.skills, job.title, job.matchPercentage);
+                              const matchColor = getMatchColor(matchPct);
+                              return (
+                                <span
+                                  style={{
+                                    fontSize: '0.72rem',
+                                    padding: '0.2rem 0.55rem',
+                                    borderRadius: '12px',
+                                    background: `${matchColor}18`,
+                                    border: `1px solid ${matchColor}`,
+                                    color: matchColor,
+                                    fontWeight: '800',
+                                  }}
+                                >
+                                  ⚡ {matchPct}% Match
+                                </span>
+                              );
+                            })()}
                           </div>
                           <p style={{ ...styles.jobCompany, margin: '2px 0 0 0' }}>{job.company}</p>
                         </div>
@@ -378,16 +398,24 @@ const JobBoard = () => {
                           stroke="rgba(255,255,255,0.05)"
                           strokeWidth="3.5"
                         />
-                        <path
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                          fill="none"
-                          stroke={getMatchColor(getMatchPercentage(selectedJob.requirements, studentProfile.skills))}
-                          strokeWidth="3.5"
-                          strokeDasharray={`${getMatchPercentage(selectedJob.requirements, studentProfile.skills)}, 100`}
-                        />
-                        <text x="18" y="21.5" style={{ fontSize: '7.5px', fontWeight: '700', fill: 'var(--text-primary)', textAnchor: 'middle' }}>
-                          {getMatchPercentage(selectedJob.requirements, studentProfile.skills)}%
-                        </text>
+                        {(() => {
+                          const matchPct = getMatchPercentage(selectedJob.requirements, studentProfile.skills, selectedJob.title, selectedJob.matchPercentage);
+                          const matchColor = getMatchColor(matchPct);
+                          return (
+                            <>
+                              <path
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke={matchColor}
+                                strokeWidth="3.5"
+                                strokeDasharray={`${matchPct}, 100`}
+                              />
+                              <text x="18" y="21.5" style={{ fontSize: '7.5px', fontWeight: '700', fill: 'var(--text-primary)', textAnchor: 'middle' }}>
+                                {matchPct}%
+                              </text>
+                            </>
+                          );
+                        })()}
                       </svg>
                     </div>
                     
