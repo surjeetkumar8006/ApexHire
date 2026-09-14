@@ -435,25 +435,33 @@ const LandingPage = ({ onGetStarted }) => {
             margin-bottom: 2.5rem !important;
           }
           .landing-header-wrap {
-            padding: 0 0.6rem !important;
+            padding: 0 0.5rem !important;
           }
           .landing-nav-center {
-            gap: 0.35rem !important;
+            gap: 0.25rem !important;
           }
           .landing-nav-item {
-            font-size: 0.76rem !important;
-            padding: 0.25rem 0.45rem !important;
+            font-size: 0.72rem !important;
+            padding: 0.25rem 0.4rem !important;
             border-radius: 6px !important;
           }
           .landing-nav-item svg {
-            width: 14px !important;
-            height: 14px !important;
+            width: 13px !important;
+            height: 13px !important;
           }
           .logo-subtext {
             display: none !important;
           }
           .logo-title-text {
-            font-size: 1.1rem !important;
+            font-size: 1rem !important;
+          }
+          .btn-header-signin {
+            display: none !important;
+          }
+          .btn-header-getstarted {
+            padding: 0.35rem 0.65rem !important;
+            font-size: 0.72rem !important;
+            white-space: nowrap !important;
           }
           .hero-badge {
             padding: 0.35rem 0.75rem !important;
@@ -463,7 +471,7 @@ const LandingPage = ({ onGetStarted }) => {
             box-sizing: border-box !important;
           }
           .hero-title {
-            font-size: 1.75rem !important;
+            font-size: 1.65rem !important;
             line-height: 1.25 !important;
           }
           .hero-subtitle {
@@ -484,15 +492,6 @@ const LandingPage = ({ onGetStarted }) => {
           }
           .metrics-divider {
             display: none !important;
-          }
-          .btn-header-signin {
-            padding: 0.35rem 0.6rem !important;
-            font-size: 0.75rem !important;
-          }
-          .btn-header-getstarted {
-            padding: 0.4rem 0.75rem !important;
-            font-size: 0.75rem !important;
-            white-space: nowrap !important;
           }
           .glass-card {
             padding: 1.25rem !important;
@@ -555,8 +554,8 @@ const LandingPage = ({ onGetStarted }) => {
             </div>
           </div>
 
-          {/* Middle Nav Links (Exactly 2: Courses & Drives) */}
-          <div className="landing-nav-center" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          {/* Action & Nav Links Group on the Right */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <a
               href="#courses"
               onClick={(e) => scrollToSection(e, '#courses')}
@@ -601,10 +600,7 @@ const LandingPage = ({ onGetStarted }) => {
               <Briefcase size={16} color="#34d399" />
               <span>Drives</span>
             </a>
-          </div>
 
-          {/* Action Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {user ? (
               <button
                 onClick={handleAction}
