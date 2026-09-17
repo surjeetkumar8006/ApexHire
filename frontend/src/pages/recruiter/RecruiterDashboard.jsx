@@ -201,8 +201,8 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
         headers: { 'Content-Type': 'application/json', ...authHeader() },
         body: JSON.stringify({
           studentId: selectedApp.student._id,
-          jobTitle: selectedApp.job.title,
-          company: selectedApp.job.company,
+          jobTitle: selectedApp.job?.title || 'Position',
+          company: selectedApp.job?.company || 'Company',
           date: interviewForm.date,
           time: interviewForm.time,
           type: interviewForm.type
@@ -392,7 +392,7 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                               </div>
                               <div>
                                 <span className="h6 font-bold d-block mb-1">{app.student.name}</span>
-                                <span className="text-muted text-xs d-block">Applied for: <span className="text-primary font-semibold">{app.job.title}</span></span>
+                                <span className="text-muted text-xs d-block">Applied for: <span className="text-primary font-semibold">{app.job?.title || 'Applied Position'}</span></span>
                               </div>
                             </div>
 

@@ -118,18 +118,26 @@ export const updateApplicationStatus = async (req, res) => {
 
       const updatedApplication = await application.save();
 
-      // Create notification for the student
-      await Notification.create({
-        recipient: application.student._id,
-        title: `Application Update: ${application.job.title}`,
-        message: `Your application status for ${application.job.title} at ${application.job.company} has been updated to "${status}". Feedback: ${feedback || 'None'}`,
-      });
+      // Safe check for job and student references
+      const jobTitle = application.job ? application.job.title : 'Software Position';
+      const jobCompany = application.job ? application.job.company : 'Company';
+      const studentId = application.student ? (application.student._id || application.student) : null;
+
+      if (studentId) {
+        // Create notification for the student
+        await Notification.create({
+          recipient: studentId,
+          title: `Application Update: ${jobTitle}`,
+          message: `Your application status for ${jobTitle} at ${jobCompany} has been updated to "${status}". Feedback: ${feedback || 'None'}`,
+        }).catch((err) => console.error('Notification error:', err));
+      }
 
       res.json(updatedApplication);
     } else {
       res.status(404).json({ message: 'Application not found' });
     }
   } catch (error) {
+    console.error('updateApplicationStatus error:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -160,12 +168,16 @@ export const respondToOffer = async (req, res) => {
     application.offerStatus = offerStatus;
     const updatedApplication = await application.save();
 
-    // Create notification for the admin who posted the job
-    await Notification.create({
-      recipient: application.job.postedBy,
-      title: `Offer Status Update: ${application.job.title}`,
-      message: `${req.user.name} has ${offerStatus.toLowerCase()} the job offer for the position of ${application.job.title}.`,
-    });
+    const jobTitle = application.job ? application.job.title : 'Software Position';
+    const postedBy = application.job?.postedBy || null;
+
+    if (postedBy) {
+      await Notification.create({
+        recipient: postedBy,
+        title: `Offer Status Update: ${jobTitle}`,
+        message: `${req.user.name} has ${offerStatus.toLowerCase()} the job offer for the position of ${jobTitle}.`,
+      }).catch((err) => console.error('Notification error:', err));
+    }
 
     res.json(updatedApplication);
   } catch (error) {

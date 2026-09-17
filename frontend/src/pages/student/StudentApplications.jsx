@@ -134,10 +134,10 @@ const StudentApplications = () => {
             <div key={app._id} className="glass-card" style={styles.card}>
               <div style={styles.cardHeader}>
                 <div>
-                  <h3 style={styles.jobTitle}>{app.job.title}</h3>
+                  <h3 style={styles.jobTitle}>{app.job?.title || 'Applied Position'}</h3>
                   <div style={styles.companyRow}>
                     <Building size={14} />
-                    <span>{app.job.company}</span>
+                    <span>{app.job?.company || 'Company'}</span>
                   </div>
                 </div>
                 <span className={`badge badge-${app.status.toLowerCase()}`}>{app.status}</span>
@@ -146,11 +146,11 @@ const StudentApplications = () => {
               <div style={styles.detailsRow}>
                 <div style={styles.detailItem}>
                   <MapPin size={14} />
-                  <span>{app.job.location}</span>
+                  <span>{app.job?.location || 'Remote'}</span>
                 </div>
                 <div style={styles.detailItem}>
                   <Briefcase size={14} />
-                  <span>{app.job.jobType}</span>
+                  <span>{app.job?.jobType || 'Full-time'}</span>
                 </div>
                 <div style={styles.detailItem}>
                   <Clock size={14} />

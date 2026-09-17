@@ -703,8 +703,8 @@ function twoSum(nums, target) {
               .map((app) => (
                 <div key={app._id} style={styles.offerItem}>
                   <div style={styles.offerInfo}>
-                    <h4 style={styles.offerTitle}>{app.job.title}</h4>
-                    <p style={styles.offerCompany}>{app.job.company} • {app.job.location}</p>
+                    <h4 style={styles.offerTitle}>{app.job?.title || 'Position'}</h4>
+                    <p style={styles.offerCompany}>{app.job?.company || 'Company'} • {app.job?.location || 'Remote'}</p>
                     {app.feedback && <p style={styles.offerFeedback}><strong>Feedback Note:</strong> {app.feedback}</p>}
                     {app.offerLetterUrl && (
                       <a
@@ -770,7 +770,7 @@ function twoSum(nums, target) {
                       {app.status === 'Offered' ? <CheckCircle2 /> : app.status === 'Rejected' ? <AlertCircle /> : <Clock />}
                     </div>
                     <div className="activity-content">
-                      <div className="activity-title">{app.job.title} at {app.job.company}</div>
+                      <div className="activity-title">{app.job?.title || 'Position'} at {app.job?.company || 'Company'}</div>
                       <div className="activity-desc">Status: <strong style={{color: 'var(--text-primary)'}}>{app.status}</strong></div>
                       
                       {/* Mini Pipeline Indicator */}
@@ -783,7 +783,7 @@ function twoSum(nums, target) {
                       </div>
                       
                       <div className="activity-meta">
-                        <span>{app.job.location} • {app.job.jobType}</span>
+                        <span>{app.job?.location || 'Remote'} • {app.job?.jobType || 'Full-time'}</span>
                         <span className="activity-time">{new Date(app.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>

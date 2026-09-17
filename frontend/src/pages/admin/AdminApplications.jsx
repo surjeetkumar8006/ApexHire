@@ -248,8 +248,8 @@ const AdminApplications = () => {
                     >
                       <h4 className="kanban-card-student-name">{app.student?.name}</h4>
                       <div className="kanban-job-box">
-                        <h5 className="kanban-card-job-title">{app.job?.title}</h5>
-                        <p className="kanban-card-job-company">{app.job?.company}</p>
+                        <h5 className="kanban-card-job-title">{app.job?.title || 'Applied Position'}</h5>
+                        <p className="kanban-card-job-company">{app.job?.company || 'Company'}</p>
                       </div>
                       {app.offerStatus && app.status === 'Offered' && (
                         <span className={`badge badge-${app.offerStatus.toLowerCase()}`} style={{ alignSelf: 'flex-start', fontSize: '0.68rem', marginTop: '0.2rem' }}>
@@ -298,8 +298,8 @@ const AdminApplications = () => {
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{app.student?.email}</div>
                   </td>
                   <td style={{ padding: '1rem 1.5rem', fontSize: '0.9rem' }}>
-                    <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{app.job?.title}</div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--accent)' }}>{app.job?.company}</div>
+                    <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{app.job?.title || 'Applied Position'}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--accent)' }}>{app.job?.company || 'Company'}</div>
                   </td>
                   <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     {new Date(app.createdAt).toLocaleDateString()}
