@@ -9,12 +9,18 @@ const interviewSchema = new mongoose.Schema(
     },
     company: {
       type: String,
-      required: true,
+      required: false,
+      default: 'Partner Company',
       trim: true,
     },
     role: {
       type: String,
-      required: true,
+      required: false,
+      default: 'Software Candidate',
+      trim: true,
+    },
+    jobTitle: {
+      type: String,
       trim: true,
     },
     date: {
@@ -31,10 +37,14 @@ const interviewSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['Requested', 'Scheduled', 'Completed'],
+      enum: ['Requested', 'Scheduled', 'Completed', 'Interview Scheduled'],
       default: 'Scheduled',
     },
     link: {
+      type: String,
+      default: '',
+    },
+    meetingLink: {
       type: String,
       default: '',
     },

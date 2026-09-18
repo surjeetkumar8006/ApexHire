@@ -436,6 +436,11 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                                   href={`${BACKEND_URL}${app.resumeUrl}`} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
+                                  onClick={() => {
+                                    if (app.student?._id) {
+                                      fetch(`${API_BASE}/profile/user/${app.student._id}`, { headers: authHeader() }).catch(() => {});
+                                    }
+                                  }}
                                   className="btn btn-xs btn-outline d-flex align-items-center gap-1"
                                 >
                                   Resume <ExternalLink size={12} />
@@ -546,6 +551,11 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                             href={`${BACKEND_URL}${profile.resumeUrl}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
+                            onClick={() => {
+                              if (profile.user?._id) {
+                                fetch(`${API_BASE}/profile/user/${profile.user._id}`, { headers: authHeader() }).catch(() => {});
+                              }
+                            }}
                             className="btn btn-xs btn-primary d-flex align-items-center gap-1"
                             style={{ width: 'fit-content', borderRadius: '14px', padding: '0.3rem 0.75rem' }}
                           >

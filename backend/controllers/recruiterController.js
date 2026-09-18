@@ -36,15 +36,6 @@ export const getRecruiterApplicants = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    // Auto-increment Profile Views for candidates viewed by recruiter
-    const studentUserIds = [...new Set(applications.map(app => app.student?._id).filter(Boolean))];
-    if (studentUserIds.length > 0) {
-      await Profile.updateMany(
-        { user: { $in: studentUserIds } },
-        { $inc: { profileViews: 1 } }
-      );
-    }
-
     res.json(applications);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -84,18 +75,22 @@ export const updateApplicationStatus = async (req, res) => {
 // @route   POST /api/recruiter/interviews
 // @access  Private (Recruiter)
 export const scheduleInterview = async (req, res) => {
-  const { studentId, jobTitle, company, date, time, type } = req.body;
+  const { studentId, jobTitle, role, company, date, time, type } = req.body;
+  const targetRole = role || jobTitle || 'Software Candidate';
   try {
+    const meetingUrl = `https://meet.google.com/apex-${Math.random().toString(36).substring(2, 7)}`;
     const interview = await Interview.create({
       student: studentId,
       recruiter: req.user._id,
-      jobTitle,
-      company,
+      role: targetRole,
+      jobTitle: targetRole,
+      company: company || 'Partner Company',
       date,
       time,
-      type,
+      type: type || 'Technical',
       status: 'Scheduled',
-      meetingLink: `https://meet.google.com/apex-${Math.random().toString(36).substring(2, 7)}`
+      link: meetingUrl,
+      meetingLink: meetingUrl
     });
 
     await Notification.create({
@@ -157,15 +152,6 @@ export const searchResumes = async (req, res) => {
     const profiles = await Profile.find(query)
       .populate('user', 'name email phone avatar')
       .sort({ updatedAt: -1 });
-
-    // Auto-increment Profile Views for candidates surfaced in search
-    const profileIds = profiles.map(p => p._id);
-    if (profileIds.length > 0) {
-      await Profile.updateMany(
-        { _id: { $in: profileIds } },
-        { $inc: { profileViews: 1 } }
-      );
-    }
 
     res.json(profiles);
   } catch (error) {
