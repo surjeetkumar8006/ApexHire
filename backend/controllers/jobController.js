@@ -162,43 +162,57 @@ export const getRecommendedJobs = async (req, res) => {
       const targetKeywords = [...new Set([...reqSkills, ...titleWords])];
 
       // 3. Calculate Overlap
+      const checkMatch = (reqStr) => {
+        const r = String(reqStr).toLowerCase().trim();
+        const mernList = ['mern', 'react', 'node', 'nodejs', 'express', 'mongodb', 'javascript'];
+        const meanList = ['mean', 'angular', 'node', 'nodejs', 'express', 'mongodb'];
+
+        const matchedInSkills = lowerUserSkills.some(uSkill => {
+          if (uSkill.includes(r) || r.includes(uSkill)) return true;
+          if (r.includes('mern') && mernList.some(m => uSkill.includes(m))) return true;
+          if (r.includes('mean') && meanList.some(m => uSkill.includes(m))) return true;
+          return false;
+        });
+
+        if (matchedInSkills) return true;
+        if (resumeText && resumeText.includes(r)) return true;
+        return false;
+      };
+
+      // 3. Calculate Overlap
       const matchingSkills = [];
       const missingSkills = [];
 
-      lowerUserSkills.forEach((uSkill) => {
-        const isMatched = targetKeywords.some(kw => kw.includes(uSkill) || uSkill.includes(kw)) || resumeText.includes(uSkill);
-        if (isMatched) {
-          matchingSkills.push(uSkill);
-        }
-      });
-
       reqSkills.forEach(req => {
-        if (!lowerUserSkills.some(uSkill => uSkill.includes(req) || req.includes(uSkill))) {
+        if (checkMatch(req)) {
+          matchingSkills.push(req);
+        } else {
           missingSkills.push(req);
         }
       });
 
       // 4. Compute Match Percentage dynamically
       let matchPercentage = 0;
-      if (targetKeywords.length > 0) {
-        const overlapCount = targetKeywords.filter(kw => 
-          lowerUserSkills.some(uSkill => uSkill.includes(kw) || kw.includes(uSkill)) || resumeText.includes(kw)
-        ).length;
+      if (reqSkills.length > 0) {
+        const matchedCount = matchingSkills.length;
+        if (matchedCount === 0) {
+          // Zero required skills matched -> Low fit score (max 20%)
+          matchPercentage = lowerUserSkills.length > 0 ? 20 : 10;
+        } else {
+          const ratio = matchedCount / reqSkills.length;
+          const baseScore = Math.round(ratio * 75);
+          const bonus = Math.min(20, Math.round(lowerUserSkills.length * 3));
+          matchPercentage = Math.min(98, baseScore + bonus + 5);
+        }
+      } else if (targetKeywords.length > 0) {
+        const overlapCount = targetKeywords.filter(kw => checkMatch(kw)).length;
         matchPercentage = Math.round((overlapCount / targetKeywords.length) * 100);
-      }
-
-      // If it's an SDE / Tech role and candidate has tech skills, give baseline relevance score
-      if (isSdeRole && lowerUserSkills.length > 0) {
-        const baseSkillBonus = Math.min(65, lowerUserSkills.length * 15);
-        matchPercentage = Math.max(matchPercentage, Math.round(55 + (baseSkillBonus * 0.4)));
-      } else if (lowerUserSkills.length > 0) {
-        matchPercentage = Math.max(matchPercentage, Math.min(75, lowerUserSkills.length * 12));
+        matchPercentage = Math.min(95, Math.max(30, matchPercentage));
       } else {
-        matchPercentage = 35; // New candidate baseline
+        matchPercentage = lowerUserSkills.length > 0 ? 50 : 25;
       }
 
-      // Cap bounded score
-      matchPercentage = Math.min(99, Math.max(25, matchPercentage));
+      matchPercentage = Math.min(99, Math.max(10, matchPercentage));
 
       return {
         ...job.toObject(),

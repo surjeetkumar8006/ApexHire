@@ -86,53 +86,86 @@ const JobBoard = () => {
 
   const getMatchingSkills = (requirements, userSkills, jobTitle = '') => {
     if (!userSkills || userSkills.length === 0) return [];
-    const lowerUserSkills = userSkills.map(s => String(s).toLowerCase());
+    const lowerUserSkills = userSkills.map(s => String(s).toLowerCase().trim());
     
     let reqList = [];
-    if (Array.isArray(requirements)) reqList = requirements;
-    else if (typeof requirements === 'string' && requirements.trim()) reqList = requirements.split(',');
+    if (Array.isArray(requirements)) reqList = requirements.map(r => String(r).toLowerCase().trim()).filter(Boolean);
+    else if (typeof requirements === 'string' && requirements.trim()) reqList = requirements.split(',').map(r => r.toLowerCase().trim()).filter(Boolean);
     
-    const titleWords = (jobTitle || '').toLowerCase().split(/[\s,/-]+/).filter(w => w.length >= 2);
-    const targetKeywords = [...new Set([...reqList.map(r => String(r).toLowerCase().trim()), ...titleWords])];
+    const mernList = ['mern', 'react', 'node', 'nodejs', 'express', 'mongodb', 'javascript'];
+    const meanList = ['mean', 'angular', 'node', 'nodejs', 'express', 'mongodb'];
 
-    return lowerUserSkills.filter(sk => targetKeywords.some(kw => kw.includes(sk) || sk.includes(kw)));
+    return reqList.filter(req => {
+      return lowerUserSkills.some(sk => {
+        if (sk.includes(req) || req.includes(sk)) return true;
+        if (req.includes('mern') && mernList.some(m => sk.includes(m))) return true;
+        if (req.includes('mean') && meanList.some(m => sk.includes(m))) return true;
+        return false;
+      });
+    });
   };
 
   const getMissingSkills = (requirements, userSkills) => {
-    if (!userSkills) return Array.isArray(requirements) ? requirements : [];
-    const lowerUserSkills = userSkills.map(s => String(s).toLowerCase());
-    const reqList = Array.isArray(requirements) ? requirements : (typeof requirements === 'string' ? requirements.split(',') : []);
+    let reqList = [];
+    if (Array.isArray(requirements)) reqList = requirements.map(r => String(r).trim()).filter(Boolean);
+    else if (typeof requirements === 'string' && requirements.trim()) reqList = requirements.split(',').map(r => r.trim()).filter(Boolean);
     
-    return reqList.filter(
-      (req) => !lowerUserSkills.some((sk) => sk.includes(String(req).toLowerCase().trim()) || String(req).toLowerCase().trim().includes(sk))
-    );
+    if (!userSkills || userSkills.length === 0) return reqList;
+
+    const lowerUserSkills = userSkills.map(s => String(s).toLowerCase().trim());
+    const mernList = ['mern', 'react', 'node', 'nodejs', 'express', 'mongodb', 'javascript'];
+    const meanList = ['mean', 'angular', 'node', 'nodejs', 'express', 'mongodb'];
+
+    return reqList.filter(req => {
+      const r = req.toLowerCase();
+      const isMatched = lowerUserSkills.some(sk => {
+        if (sk.includes(r) || r.includes(sk)) return true;
+        if (r.includes('mern') && mernList.some(m => sk.includes(m))) return true;
+        if (r.includes('mean') && meanList.some(m => sk.includes(m))) return true;
+        return false;
+      });
+      return !isMatched;
+    });
   };
 
   const getMatchPercentage = (requirements, userSkills, jobTitle = '', jobMatchPercentage = null) => {
+    let reqList = [];
+    if (Array.isArray(requirements)) reqList = requirements.filter(Boolean);
+    else if (typeof requirements === 'string' && requirements.trim()) reqList = requirements.split(',').filter(Boolean);
+
+    const matching = getMatchingSkills(requirements, userSkills, jobTitle);
+
+    if (reqList.length > 0) {
+      if (matching.length === 0) {
+        // Zero requirements matched -> Low match score (max 20%)
+        return userSkills && userSkills.length > 0 ? 20 : 10;
+      }
+      const matchRatio = matching.length / reqList.length;
+      return Math.min(98, Math.max(30, Math.round(matchRatio * 75 + 15)));
+    }
+
     if (jobMatchPercentage !== null && jobMatchPercentage !== undefined && jobMatchPercentage > 0) {
       return jobMatchPercentage;
     }
-    const matching = getMatchingSkills(requirements, userSkills, jobTitle);
-    const skillCount = userSkills ? userSkills.length : 0;
-    
+
     if (matching.length > 0) {
-      return Math.min(99, Math.max(60, Math.round(55 + (matching.length * 15))));
-    } else if (skillCount > 0) {
-      return Math.min(80, Math.max(45, skillCount * 12));
+      return Math.min(98, Math.max(60, Math.round(55 + (matching.length * 15))));
+    } else if (userSkills && userSkills.length > 0) {
+      return 25;
     }
-    return 35;
+    return 15;
   };
 
   const getMatchColor = (percentage) => {
-    if (percentage >= 75) return '#34d399'; // Emerald
+    if (percentage >= 75) return '#34d399'; // Emerald Green
     if (percentage >= 50) return '#38bdf8'; // Sky Blue
-    return '#f59e0b'; // Amber / Gold
+    return '#ef4444'; // Red for low fit
   };
 
   const getMatchFeedback = (percentage) => {
     if (percentage >= 75) return 'Excellent Profile Fit';
     if (percentage >= 50) return 'Moderate Profile Fit';
-    return 'Good Career Opportunity';
+    return 'Low Profile Fit (Skills Gap)';
   };
 
   useEffect(() => {
@@ -421,7 +454,7 @@ const JobBoard = () => {
                     
                     <div style={styles.matchStats}>
                       <h5 style={styles.matchStatsTitle}>
-                        {getMatchFeedback(getMatchPercentage(selectedJob.requirements, studentProfile.skills))}
+                        {getMatchFeedback(getMatchPercentage(selectedJob.requirements, studentProfile.skills, selectedJob.title, selectedJob.matchPercentage))}
                       </h5>
                       <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                         Matched {getMatchingSkills(selectedJob.requirements, studentProfile.skills).length} of {selectedJob.requirements.length} requirements
