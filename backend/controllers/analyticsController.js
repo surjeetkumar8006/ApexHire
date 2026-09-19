@@ -4,39 +4,53 @@ import Job from '../models/Job.js';
 import User from '../models/User.js';
 import Profile from '../models/Profile.js';
 
-// Helper to parse salary string to LPA
+// Helper to parse salary string to LPA accurately
 const parseSalaryToLPA = (salaryStr) => {
-  if (!salaryStr || typeof salaryStr !== 'string' || salaryStr.toLowerCase() === 'not specified') {
+  if (!salaryStr || typeof salaryStr !== 'string' || salaryStr.toLowerCase().trim() === 'not specified') {
     return null;
   }
   
-  // Clean string (remove symbol, commas, and trim)
+  const lower = salaryStr.toLowerCase().trim();
   const cleanStr = salaryStr.replace(/₹/g, '').replace(/,/g, '').trim();
-  
-  // Check if it is monthly salary e.g. "₹60,000 / Month"
-  if (cleanStr.toLowerCase().includes('/ month') || cleanStr.toLowerCase().includes('/month')) {
-    const match = cleanStr.match(/\d+/);
-    if (match) {
-      const monthly = parseFloat(match[0]);
-      return (monthly * 12) / 100000; // Convert to LPA
+
+  const isMonthly = lower.includes('month') || lower.includes('/mo') || lower.includes('stipend') || lower.includes('/m');
+
+  // Check range e.g. "18L - 24L" or "18 - 24 LPA"
+  const rangeMatch = cleanStr.match(/(\d+(?:\.\d+)?)\s*[a-z]*\s*-\s*(\d+(?:\.\d+)?)\s*[a-z]*/i);
+  if (rangeMatch) {
+    let min = parseFloat(rangeMatch[1]);
+    let max = parseFloat(rangeMatch[2]);
+    if (min > 1000) min = isMonthly ? (min * 12) / 100000 : min / 100000;
+    if (max > 1000) max = isMonthly ? (max * 12) / 100000 : max / 100000;
+    return parseFloat(((min + max) / 2).toFixed(1));
+  }
+
+  // Extract numeric digits
+  const numMatch = cleanStr.match(/(\d+(?:\.\d+)?)/);
+  if (!numMatch) return null;
+
+  let val = parseFloat(numMatch[1]);
+
+  if (isMonthly) {
+    if (val > 100) {
+      // e.g. 25,000 / month -> (25000 * 12) / 100000 = 3.0 LPA
+      return parseFloat(((val * 12) / 100000).toFixed(1));
     }
   }
 
-  // Check if it has a range e.g. "18L - 24L" or "18 - 24 LPA"
-  const rangeMatch = cleanStr.match(/(\d+(?:\.\d+)?)\s*[LLakhs]*\s*-\s*(\d+(?:\.\d+)?)\s*[LLakhs]*/i);
-  if (rangeMatch) {
-    const min = parseFloat(rangeMatch[1]);
-    const max = parseFloat(rangeMatch[2]);
-    return (min + max) / 2;
+  if (val > 100000) {
+    // Annual in Rupees e.g. 1,200,000 -> 12.0 LPA
+    return parseFloat((val / 100000).toFixed(1));
+  } else if (val > 100 && val <= 100000) {
+    // Large raw number without explicit LPA tag e.g. 25000 -> treat as monthly stipend/salary INR
+    if (lower.includes('lpa') || lower.includes('lakh') || lower.includes('l')) {
+      return val;
+    }
+    return parseFloat(((val * 12) / 100000).toFixed(1));
   }
 
-  // Check if single number e.g. "18L" or "18 LPA"
-  const singleMatch = cleanStr.match(/(\d+(?:\.\d+)?)\s*[LLakhs]*/i);
-  if (singleMatch) {
-    return parseFloat(singleMatch[1]);
-  }
-
-  return null;
+  // Value under 100 (e.g. 12, 18, 25, 8.5) -> Direct LPA
+  return val;
 };
 
 // @desc    Get admin dashboard analytics

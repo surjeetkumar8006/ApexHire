@@ -22,6 +22,7 @@ const AdminJobs = () => {
   const [location, setLocation] = useState('');
   const [type, setType] = useState('Full-time');
   const [salary, setSalary] = useState('');
+  const [salaryUnit, setSalaryUnit] = useState('LPA');
   const [requirements, setRequirements] = useState('');
   const [description, setDescription] = useState('');
   const [posting, setPosting] = useState(false);
@@ -57,6 +58,18 @@ const AdminJobs = () => {
     setPosting(true);
 
     try {
+      const rawSalary = (salary || '').trim();
+      let formattedSalary = rawSalary;
+      if (rawSalary) {
+        if (salaryUnit === 'LPA' && !rawSalary.toLowerCase().includes('lpa')) {
+          formattedSalary = `${rawSalary} LPA`;
+        } else if (salaryUnit === 'Stipend' && !rawSalary.toLowerCase().includes('stipend')) {
+          formattedSalary = `₹${rawSalary.replace(/₹/g, '').trim()} Stipend / Month`;
+        } else if (salaryUnit === 'Monthly' && !rawSalary.toLowerCase().includes('month')) {
+          formattedSalary = `₹${rawSalary.replace(/₹/g, '').trim()} / Month`;
+        }
+      }
+
       const res = await fetch(`${API_BASE}/jobs`, {
         method: 'POST',
         headers: {
@@ -68,7 +81,7 @@ const AdminJobs = () => {
           company,
           location,
           type,
-          salary: salary || 'Not Specified',
+          salary: formattedSalary || 'Not Specified',
           requirements,
           description,
         }),
@@ -284,15 +297,28 @@ const AdminJobs = () => {
                 />
               </div>
 
-              <div className="form-group" style={{ flex: 1 }}>
-                <label className="form-label">Salary Range</label>
-                <input
-                  type="text"
-                  placeholder="₹12L - ₹18L PA"
-                  className="form-input"
-                  value={salary}
-                  onChange={(e) => setSalary(e.target.value)}
-                />
+              <div className="form-group" style={{ flex: 1.2 }}>
+                <label className="form-label">Salary / Compensation *</label>
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <input
+                    type="text"
+                    placeholder={salaryUnit === 'LPA' ? 'e.g. 12' : 'e.g. 25,000'}
+                    className="form-input"
+                    style={{ flex: 1 }}
+                    value={salary}
+                    onChange={(e) => setSalary(e.target.value)}
+                  />
+                  <select
+                    value={salaryUnit}
+                    onChange={(e) => setSalaryUnit(e.target.value)}
+                    className="form-select"
+                    style={{ width: '135px' }}
+                  >
+                    <option value="LPA">LPA (Annual)</option>
+                    <option value="Stipend">₹ Stipend/Mo</option>
+                    <option value="Monthly">₹ Salary/Mo</option>
+                  </select>
+                </div>
               </div>
               <div className="form-group" style={{ flex: 0.8 }}>
                 <label className="form-label">Job Type</label>

@@ -136,8 +136,26 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
     }
 
     try {
+      const rawSalary = (newJob.salary || '').trim();
+      const unit = newJob.salaryUnit || 'LPA';
+      let formattedSalary = rawSalary;
+      if (rawSalary) {
+        if (unit === 'LPA' && !rawSalary.toLowerCase().includes('lpa')) {
+          formattedSalary = `${rawSalary} LPA`;
+        } else if (unit === 'Stipend' && !rawSalary.toLowerCase().includes('stipend')) {
+          formattedSalary = `₹${rawSalary.replace(/₹/g, '').trim()} Stipend / Month`;
+        } else if (unit === 'Monthly' && !rawSalary.toLowerCase().includes('month')) {
+          formattedSalary = `₹${rawSalary.replace(/₹/g, '').trim()} / Month`;
+        }
+      }
+
       const jobPayload = {
-        ...newJob,
+        title: newJob.title,
+        company: newJob.company,
+        description: newJob.description,
+        location: newJob.location,
+        type: newJob.type,
+        salary: formattedSalary,
         requirements: newJob.requirements.split(',').map(r => r.trim()).filter(Boolean)
       };
 
@@ -157,7 +175,8 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
           requirements: '',
           location: '',
           type: 'Full-time',
-          salary: ''
+          salary: '',
+          salaryUnit: 'LPA'
         });
         fetchDashboardData();
       } else {
@@ -667,15 +686,27 @@ const RecruiterDashboard = ({ view = 'overview' }) => {
                   />
                 </div>
                 <div className="form-group mb-0">
-                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Salary Bracket</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    placeholder="e.g. 12 LPA"
-                    value={newJob.salary}
-                    onChange={(e) => setNewJob({...newJob, salary: e.target.value})}
-                    style={{ background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 1rem' }}
-                  />
+                  <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Salary / Stipend *</label>
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder={(newJob.salaryUnit || 'LPA') === 'LPA' ? 'e.g. 12' : 'e.g. 25,000'}
+                      value={newJob.salary || ''}
+                      onChange={(e) => setNewJob({...newJob, salary: e.target.value})}
+                      style={{ flex: 1, background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 0.75rem' }}
+                    />
+                    <select
+                      value={newJob.salaryUnit || 'LPA'}
+                      onChange={(e) => setNewJob({...newJob, salaryUnit: e.target.value})}
+                      className="form-input"
+                      style={{ width: '135px', background: 'rgba(8, 11, 20, 0.75)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '12px', padding: '0.75rem 0.4rem', color: '#ffffff', fontSize: '0.8rem' }}
+                    >
+                      <option value="LPA">LPA (Annual)</option>
+                      <option value="Stipend">₹ Stipend/Mo</option>
+                      <option value="Monthly">₹ Salary/Mo</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="form-group mb-0">
                   <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Employment Type</label>
