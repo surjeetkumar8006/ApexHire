@@ -47,7 +47,7 @@ const AdminApplications = () => {
   const fetchStudentProfile = async (studentId) => {
     setProfileLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/profile/${studentId}`, {
+      const res = await fetch(`${API_BASE}/profile/user/${studentId}`, {
         headers: authHeader(),
       });
       if (res.ok) {

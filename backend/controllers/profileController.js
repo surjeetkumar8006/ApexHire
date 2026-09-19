@@ -113,11 +113,18 @@ export const updateSettings = async (req, res) => {
 // @access  Private (Admin & Recruiter)
 export const getProfileByUserId = async (req, res) => {
   try {
-    const profile = await Profile.findOneAndUpdate(
-      { user: req.params.id },
-      { $inc: { profileViews: 1 } },
-      { new: true }
-    ).populate('user', 'name email role phone avatar');
+    const isSelf = req.user && req.user._id && req.user._id.toString() === req.params.id.toString();
+
+    let profile;
+    if (isSelf) {
+      profile = await Profile.findOne({ user: req.params.id }).populate('user', 'name email role phone avatar');
+    } else {
+      profile = await Profile.findOneAndUpdate(
+        { user: req.params.id },
+        { $inc: { profileViews: 1 } },
+        { new: true }
+      ).populate('user', 'name email role phone avatar');
+    }
 
     if (!profile) {
       return res.status(404).json({ message: 'Profile not found' });

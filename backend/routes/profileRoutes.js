@@ -22,7 +22,7 @@ router.route('/settings').put(protect, updateSettings);
 router.route('/public/:username').get(getPublicProfile); // Public route
 
 router.route('/all').get(protect, admin, getAllProfiles);
-router.route('/user/:id').get(protect, admin, getProfileByUserId);
+router.route('/user/:id').get(protect, getProfileByUserId);
 router.route('/verify/:id').put(protect, admin, toggleVerification);
 
 export default router;

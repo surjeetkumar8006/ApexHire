@@ -62,10 +62,13 @@ const AdminResumeBank = () => {
     }
   };
 
-  const handleViewResume = (resumeUrl) => {
+  const handleViewResume = (resumeUrl, userId = null) => {
     if (!resumeUrl) {
       addToast('Resume file path not found', 'warning');
       return;
+    }
+    if (userId) {
+      fetch(`${API_BASE}/profile/user/${userId}`, { headers: authHeader() }).catch(() => {});
     }
     const baseUrl = API_BASE.replace('/api', '');
     const fullUrl = resumeUrl.startsWith('http') ? resumeUrl : `${baseUrl}${resumeUrl}`;
@@ -375,14 +378,14 @@ const AdminResumeBank = () => {
                         <button 
                           className="btn btn-outline" 
                           style={styles.actionBtn}
-                          onClick={() => handleViewResume(p.resumeUrl)}
+                          onClick={() => handleViewResume(p.resumeUrl, p.user?._id)}
                         >
                           <FileText size={14} /> View
                         </button>
                         <button 
                           className="btn btn-primary" 
                           style={styles.actionBtn}
-                          onClick={() => handleViewResume(p.resumeUrl)}
+                          onClick={() => handleViewResume(p.resumeUrl, p.user?._id)}
                         >
                           <Download size={14} /> DL
                         </button>
