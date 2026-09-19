@@ -357,10 +357,10 @@ const Navbar = ({ onMenuClick }) => {
           <div className="animate-fade-in" style={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeaderBlock}>
               <div>
-                <h3 style={{ color: 'var(--text-primary)', margin: 0, fontWeight: '700', fontSize: '1.1rem' }}>
+                <h3 style={{ color: '#ffffff', margin: 0, fontWeight: '700', fontSize: '1.1rem' }}>
                   Update Profile Picture
                 </h3>
-                <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.78rem', marginTop: '0.2rem' }}>
+                <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.78rem', marginTop: '0.2rem' }}>
                   Upload a photo to personalize your ApexHire candidate & recruiter avatar.
                 </p>
               </div>
@@ -402,31 +402,68 @@ const Navbar = ({ onMenuClick }) => {
               />
 
               <div style={{ textAlign: 'center' }}>
-                <h4 style={{ margin: 0, color: 'var(--text-primary)', fontWeight: '700', fontSize: '1.05rem' }}>
+                <h4 style={{ margin: 0, color: '#ffffff', fontWeight: '700', fontSize: '1.1rem' }}>
                   {user?.name}
                 </h4>
-                <span className="text-muted" style={{ fontSize: '0.8rem' }}>
-                  {user?.email} • <span style={{ color: 'var(--primary)', fontWeight: '600', textTransform: 'capitalize' }}>{user?.role}</span>
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '4px' }}>
+                  <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>{user?.email}</span>
+                  <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>•</span>
+                  <span style={{ 
+                    fontSize: '0.72rem', 
+                    fontWeight: '700', 
+                    padding: '2px 8px', 
+                    borderRadius: '12px', 
+                    background: 'rgba(99, 102, 241, 0.15)', 
+                    color: '#818cf8', 
+                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                    textTransform: 'capitalize' 
+                  }}>
+                    {user?.role}
+                  </span>
+                </div>
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center', width: '100%', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center', width: '100%', marginTop: '0.25rem' }}>
                 <button 
                   type="button" 
-                  className="btn btn-outline" 
-                  style={{ fontSize: '0.82rem', padding: '0.5rem 1rem' }}
+                  style={{
+                    fontSize: '0.84rem',
+                    fontWeight: '600',
+                    padding: '0.55rem 1.2rem',
+                    borderRadius: '12px',
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s ease'
+                  }}
                   onClick={() => document.getElementById('navbar-avatar-upload').click()}
                 >
-                  <Upload size={14} />
+                  <Upload size={14} color="#818cf8" />
                   <span>Select New Photo</span>
                 </button>
 
                 {tempAvatar && (
                   <button 
                     type="button" 
-                    className="btn btn-outline" 
-                    style={{ fontSize: '0.82rem', padding: '0.5rem 1rem', borderColor: 'rgba(239, 68, 68, 0.4)', color: 'var(--danger)' }}
+                    style={{
+                      fontSize: '0.84rem',
+                      fontWeight: '600',
+                      padding: '0.55rem 1.2rem',
+                      borderRadius: '12px',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      color: '#f87171',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s ease'
+                    }}
                     onClick={handleRemoveAvatar}
                     disabled={savingAvatar}
                   >
@@ -436,11 +473,23 @@ const Navbar = ({ onMenuClick }) => {
               </div>
 
               {/* Bottom Buttons */}
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', width: '100%', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', width: '100%', paddingTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', marginTop: '0.5rem' }}>
                 <button 
                   type="button" 
-                  className="btn btn-outline"
-                  style={{ fontSize: '0.82rem' }}
+                  style={{
+                    fontSize: '0.84rem',
+                    fontWeight: '600',
+                    padding: '0.6rem 1.1rem',
+                    borderRadius: '12px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    color: '#cbd5e1',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s ease'
+                  }}
                   onClick={() => {
                     setShowAvatarModal(false);
                     const settingsPath = user?.role === 'admin' ? '/admin/settings' : user?.role === 'recruiter' ? '/recruiter/settings' : '/student/settings';
@@ -453,8 +502,21 @@ const Navbar = ({ onMenuClick }) => {
 
                 <button 
                   type="button" 
-                  className="btn btn-primary"
-                  style={{ fontSize: '0.82rem', padding: '0.5rem 1.25rem' }}
+                  style={{
+                    fontSize: '0.84rem',
+                    fontWeight: '700',
+                    padding: '0.6rem 1.35rem',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                    border: 'none',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
+                    transition: 'all 0.2s ease'
+                  }}
                   onClick={handleSaveAvatar}
                   disabled={savingAvatar}
                 >
@@ -699,41 +761,41 @@ const styles = {
     position: 'fixed',
     top: 0,
     left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(5, 8, 18, 0.85)',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(3, 7, 18, 0.82)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 9999,
-    padding: '1rem',
+    zIndex: 999999,
+    padding: '1.5rem',
   },
   modalContent: {
     width: '100%',
-    maxWidth: '460px',
-    background: 'var(--bg-surface)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '20px',
+    maxWidth: '440px',
+    background: '#0d1322',
+    border: '1px solid rgba(255, 255, 255, 0.14)',
+    borderRadius: '24px',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    boxShadow: 'var(--shadow-lg)',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(99, 102, 241, 0.12)',
   },
   modalHeaderBlock: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    background: 'linear-gradient(135deg, var(--primary-glow) 0%, var(--secondary-glow) 100%)',
-    borderBottom: '1px solid var(--border-color)',
+    background: 'rgba(15, 23, 42, 0.8)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
     padding: '1.25rem 1.5rem',
     position: 'relative',
   },
   modalCloseBtn: {
-    background: 'var(--bg-surface-elevated)',
-    border: '1px solid var(--border-color)',
-    color: 'var(--text-muted)',
+    background: 'rgba(255, 255, 255, 0.06)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
+    color: '#94a3b8',
     cursor: 'pointer',
     padding: '6px',
     borderRadius: '50%',
@@ -741,31 +803,31 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.2s',
-    width: '30px',
-    height: '30px',
+    width: '32px',
+    height: '32px',
   },
   largeAvatarPreview: {
-    width: '110px',
-    height: '110px',
+    width: '105px',
+    height: '105px',
     borderRadius: '50%',
-    background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
     cursor: 'pointer',
-    border: '3px solid var(--border-color)',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+    border: '3px solid rgba(255, 255, 255, 0.2)',
+    boxShadow: '0 0 20px rgba(99, 102, 241, 0.35)',
   },
   previewCameraBadge: {
     position: 'absolute',
-    bottom: '4px',
-    right: '4px',
+    bottom: '2px',
+    right: '2px',
     width: '32px',
     height: '32px',
     borderRadius: '50%',
     background: '#ffffff',
-    border: '2px solid var(--bg-surface)',
+    border: '2px solid #0d1322',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
